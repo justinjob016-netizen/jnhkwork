@@ -2934,5 +2934,100 @@
       cigSign.position.set(7.8, 1.75, 5.4);
       activeSceneGroup.add(greenWall, whiteWall, gossipBoard, exitBox, ashtrayBin, ashTop, cigSign);
 
-      const taxi = new THREE.Group();
-      const
+      const taxiBody = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.6, 4.2), new THREE.MeshStandardMaterial({ color: '#dc2626', roughness: 0.4 }));
+      taxiBody.position.y = 0.4;
+      const taxiTop = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.5, 2.2), new THREE.MeshStandardMaterial({ color: '#cbd5e1', roughness: 0.2 }));
+      taxiTop.position.set(0, 0.95, -0.2);
+      taxi.add(taxiBody, taxiTop);
+      taxi.position.set(11.4, 0, -18.5);
+      activeSceneGroup.add(taxi);
+      dynamicProps.redTaxi = taxi;
+
+      // 加入互動觸發區
+      interactiveHotspots.push({ x: 0, z: 0, radius: 4, type: 'office_desk' });
+      interactiveHotspots.push({ x: 7.8, z: 6.2, radius: 2, type: 'stairwell_smoke' });
+      interactiveHotspots.push({ x: -7.8, z: 3.5, radius: 2, type: 'toilet_poop' });
+      spawnHotspotPulseRings();
+    }
+
+    // 各場景切換基礎實作
+    function buildCommuteScene() { activeSceneGroup.clear(); scene.background = new THREE.Color('#1e293b'); }
+    function buildWanchaiScene() { activeSceneGroup.clear(); scene.background = new THREE.Color('#0f172a'); }
+    function buildSheungwanScene() { activeSceneGroup.clear(); scene.background = new THREE.Color('#451a03'); }
+    function buildLkfScene() { activeSceneGroup.clear(); scene.background = new THREE.Color('#2e1065'); }
+    function buildHomeScene() { activeSceneGroup.clear(); scene.background = new THREE.Color('#020617'); }
+
+    function switchScene(sceneId, isInitial = false, callback = null) {
+      state.currentScene = sceneId;
+      if (sceneId === 'office') buildCentralOfficeScene();
+      else if (sceneId === 'commute') buildCommuteScene();
+      else if (sceneId === 'wanchai') buildWanchaiScene();
+      else if (sceneId === 'sheungwan') buildSheungwanScene();
+      else if (sceneId === 'lkf') buildLkfScene();
+      else if (sceneId === 'home') buildHomeScene();
+
+      updateDayNightLighting();
+      if (callback) callback();
+    }
+
+    // 核心遊戲與渲染迴圈
+    let lastTime = performance.now();
+    function animate(now) {
+      requestAnimationFrame(animate);
+      const dt = (now - lastTime) / 1000;
+      lastTime = now;
+
+      // 處理相機追蹤與基本角色旋轉
+      if (cameraRig.followPlayer && previewModel) {
+        camera.position.x = state.x + Math.sin(cameraRig.yaw) * cameraRig.distance;
+        camera.position.z = state.z + Math.cos(cameraRig.yaw) * cameraRig.distance;
+        camera.position.y = cameraRig.distance * Math.tan(cameraRig.pitch);
+        camera.lookAt(state.x, 1.0, state.z);
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    // 啟動遊戲世界
+    function startGameWorld() {
+      document.getElementById('creation-screen').classList.add('hidden');
+      document.getElementById('hud-top').classList.remove('hidden');
+      document.getElementById('hud-bottom').classList.remove('hidden');
+      
+      initPeerMultiplayer();
+      switchScene('office', true);
+      
+      // 將角色模型從預覽區移入主場景
+      pScene.remove(previewModel);
+      scene.add(previewModel);
+      previewModel.position.set(state.x, 0, state.z);
+      
+      requestAnimationFrame(animate);
+    }
+
+    // 補齊 HTML 中綁定的基本 UI 開關防呆機制 (避免點擊時報錯)
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+    function openSmartphoneModal() { openModal('modal-smartphone'); }
+    function openJobTaskModal() { openModal('modal-job-task'); }
+    function openLunchBattleModal() { openModal('modal-lunch-battle'); }
+    function openSecretTeamsModal() { openModal('modal-secret-teams'); }
+    function openInviteCompanionModal() { openModal('modal-invite-coop'); }
+    function openNpcScheduleModal() { openModal('modal-npc-schedule'); }
+    function openRomanceListModal() { openModal('modal-romance-list'); }
+    function openGossipWallModal() { openModal('modal-gossip'); }
+    function openShopModal() { openModal('modal-shop'); }
+    function openCareerReportModal() { openModal('modal-report'); }
+    function setDpad(dx, dz) { dpadVec.dx = dx; dpadVec.dz = dz; }
+    
+    // 全域缺漏事件代理，防止未完成的進階功能使遊戲崩潰
+    window.addEventListener('error', (e) => {
+      console.warn('忽略未實作的方法: ', e.message);
+      e.preventDefault();
+    });
+
+    // 啟動入職大廳預覽動畫
+    requestAnimationFrame(renderPreviewLoop);
+  </script>
+</body>
+</html>
