@@ -10,41 +10,1431 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body { font-family: 'Noto Sans TC', sans-serif; overflow: hidden; user-select: none; background-color: #050811; }
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+      background-color: #050811;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    .glass-hud { background: rgba(9, 14, 28, 0.90); backdrop-filter: blur(18px); border: 1px solid rgba(255, 255, 255, 0.15); }
-    @keyframes popIn { 0% { opacity: 0; transform: scale(0.92) translateY(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+    .glass-hud {
+      background: rgba(9, 14, 28, 0.90);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.92) translateY(10px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
     .animate-pop { animation: popIn 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-    @keyframes alertPulseBorder { 0%, 100% { box-shadow: 0 0 0 0 rgba(253, 224, 71, 0.8), 0 20px 60px rgba(220, 38, 38, 0.85); } 50% { box-shadow: 0 0 0 10px rgba(253, 224, 71, 0), 0 25px 70px rgba(220, 38, 38, 0.95); } }
+    @keyframes alertPulseBorder {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(253, 224, 71, 0.8), 0 20px 60px rgba(220, 38, 38, 0.85); }
+      50% { box-shadow: 0 0 0 10px rgba(253, 224, 71, 0), 0 25px 70px rgba(220, 38, 38, 0.95); }
+    }
     .alert-glow { animation: alertPulseBorder 1.4s infinite; }
-    @keyframes slapShake { 0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); } 20% { transform: translate(-12px, -4px) rotate(-10deg) scale(0.94); } 45% { transform: translate(11px, 4px) rotate(9deg) scale(0.96); } 70% { transform: translate(-8px, 3px) rotate(-6deg) scale(0.98); } }
+    @keyframes slapShake {
+      0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+      20% { transform: translate(-12px, -4px) rotate(-10deg) scale(0.94); }
+      45% { transform: translate(11px, 4px) rotate(9deg) scale(0.96); }
+      70% { transform: translate(-8px, 3px) rotate(-6deg) scale(0.98); }
+    }
     .animate-slap { animation: slapShake 0.22s ease-out; }
+    @keyframes screenCurse {
+      0%, 100% { transform: translate(0, 0); }
+      25% { transform: translate(-8px, 6px); }
+      50% { transform: translate(8px, -6px); }
+      75% { transform: translate(-6px, -4px); }
+    }
+    .screen-curse-shake { animation: screenCurse 0.35s ease-in-out 2; }
+    @keyframes flameFlicker {
+      0%, 100% { transform: scale(1) rotate(-2deg); }
+      35% { transform: scale(1.08, 1.16) rotate(3deg); }
+      70% { transform: scale(0.94, 1.05) rotate(-3deg); }
+    }
+    .animate-flame { animation: flameFlicker 0.28s infinite ease-in-out; }
     .perspective-1000 { perspective: 1000px; }
+    .card-3d-inner {
+      transition: transform 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transform-style: preserve-3d;
+    }
+    .card-3d-flipped { transform: rotateY(180deg); }
+    .card-3d-face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+    .card-3d-back { transform: rotateY(180deg); }
   </style>
 </head>
 <body id="game-body" class="h-screen w-screen relative text-slate-100">
-  <!-- 請將原本的 HTML UI (如 #creation-screen, #hud-top, #hud-bottom 等模態視窗) 完整貼上至此 -->
+
+  <!-- =========================================================
+  1. 入職登記大廳 (性別選擇 + 伺服器選擇器 + 崗位選擇 + 1:7 角色訂製)
+  ========================================================== -->
+  <div id="creation-screen" class="fixed inset-0 z-50 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-[#050811] to-black flex items-center justify-center p-2.5 sm:p-5 overflow-y-auto">
+    <div class="bg-slate-900/95 backdrop-blur-2xl rounded-3xl max-w-5xl w-full p-4 sm:p-6 shadow-[0_25px_80px_rgba(0,0,0,0.95)] border border-slate-700/80 animate-pop my-auto">
+      
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-800">
+        <div>
+          <div class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-amber-500/15 text-amber-300 text-[11px] font-bold mb-1 border border-amber-400/30">
+            📱💻 跨平台 3D MMO v5.2 · 真人後樓梯煙Break邀約 · 動態膠囊HUD · 3D互動呼吸光圈 · 晝夜光影
+          </div>
+          <h1 class="text-xl sm:text-3xl font-black text-white tracking-tight">
+            香港社畜實錄 <span class="bg-gradient-to-r from-amber-400 via-orange-400 to-red-500 bg-clip-text text-transparent">· 3D線上職場修羅場</span>
+          </h1>
+        </div>
+        <p class="text-[11px] text-slate-400 max-w-xs leading-relaxed">
+          邀線上同事落後樓梯 EXIT 吞雲吐霧講是非、請飲咖啡、蘭桂坊共舞、體驗第一身迫地鐵車廂與日夜光影流轉！
+        </p>
+      </div>
+
+      <!-- STEP A: 選擇公司伺服器 / 大區 -->
+      <div class="mt-3">
+        <div class="flex items-center justify-between mb-1.5">
+          <label class="text-xs font-black text-emerald-300">🌐 第一步：選擇香港商業區伺服器（相同伺服器即時同場）</label>
+          <span id="server-selected-hint" class="text-[11px] font-bold text-slate-400">已選：1服 · 中環 IFC 金融中心</span>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="server-grid">
+          <button type="button" onclick="selectServer('IFC88', '1服 · 中環 IFC 金融中心', this)" class="srv-card active p-2.5 rounded-2xl border-2 border-emerald-400 bg-emerald-950/50 text-left transition">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-black text-white">🇭🇰 1服 · 中環 IFC</span>
+              <span class="px-1.5 py-0.5 rounded bg-red-500/30 text-red-300 text-[9px] font-black border border-red-400/40">🔥 爆滿</span>
+            </div>
+            <div class="text-[10px] text-emerald-300 font-bold mt-1">房號：IFC88 · iBank/外資</div>
+          </button>
+
+          <button type="button" onclick="selectServer('TK99', '2服 · 鰂魚涌太古坊 OT 區', this)" class="srv-card p-2.5 rounded-2xl border border-slate-700 bg-slate-800/70 hover:border-emerald-400/50 text-left transition">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-black text-white">🇭🇰 2服 · 鰂魚涌太古坊</span>
+              <span class="px-1.5 py-0.5 rounded bg-emerald-500/25 text-emerald-300 text-[9px] font-black border border-emerald-400/40">🟢 順暢</span>
+            </div>
+            <div class="text-[10px] text-slate-400 font-bold mt-1">房號：TK99 · 廣告/Media</div>
+          </button>
+
+          <button type="button" onclick="selectServer('KT66', '3服 · 觀塘工廈摸魚區', this)" class="srv-card p-2.5 rounded-2xl border border-slate-700 bg-slate-800/70 hover:border-emerald-400/50 text-left transition">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-black text-white">🇭🇰 3服 · 觀塘工業區</span>
+              <span class="px-1.5 py-0.5 rounded bg-amber-500/25 text-amber-300 text-[9px] font-black border border-amber-400/40">✨ 新服</span>
+            </div>
+            <div class="text-[10px] text-slate-400 font-bold mt-1">房號：KT66 · Startup/IT</div>
+          </button>
+
+          <button type="button" onclick="selectServer('CUSTOM', '🔒 私人自訂公司房號', this)" class="srv-card p-2.5 rounded-2xl border border-slate-700 bg-slate-800/70 hover:border-emerald-400/50 text-left transition">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-black text-white">🔒 私人公司房</span>
+              <span class="px-1.5 py-0.5 rounded bg-sky-500/25 text-sky-300 text-[9px] font-black border border-sky-400/40">自訂</span>
+            </div>
+            <div class="text-[10px] text-slate-400 font-bold mt-1">自行輸入房號約朋友</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP B: 3D 預覽舞台 + 員工檔案 -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4 my-3">
+        <div class="md:col-span-5 bg-gradient-to-b from-slate-800/70 via-slate-900 to-black rounded-2xl p-3 border border-slate-700/80 flex flex-col items-center justify-between relative overflow-hidden">
+          <div class="w-full flex justify-between items-center text-[11px] font-bold text-amber-300 z-10">
+            <span id="preview-gender-tag">👨 男社畜 · 1:7 寫實 3D 分身</span>
+            <button type="button" onclick="rotatePreview()" class="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-600 text-white hover:bg-amber-500 hover:text-slate-950 transition">
+              🔄 旋轉 90°
+            </button>
+          </div>
+          
+          <div id="preview-3d-stage" class="w-full h-40 sm:h-48 flex items-center justify-center"></div>
+          
+          <div class="w-full text-center bg-slate-800/85 rounded-xl py-1.5 px-3 border border-slate-700 z-10">
+            <div id="preview-name-label" class="font-black text-sm text-white">Kelvin 陳</div>
+            <div id="preview-dept-label" class="text-[11px] text-amber-400 font-bold">IT 資訊科技部 · 日薪底薪 HK$520</div>
+          </div>
+        </div>
+
+        <div class="md:col-span-7 space-y-2.5">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs font-bold text-pink-300 mb-1">0. 選擇角色性別（決定身形比例與服飾剪裁）*</label>
+              <div class="grid grid-cols-2 gap-2">
+                <button type="button" id="btn-gender-male" onclick="setGender('male')" class="py-2 px-3 rounded-xl border-2 border-sky-400 bg-sky-500/20 text-white font-black text-xs flex items-center justify-center gap-1.5 transition">
+                  <span>👨</span><span>男社畜 (巴打)</span>
+                </button>
+                <button type="button" id="btn-gender-female" onclick="setGender('female')" class="py-2 px-3 rounded-xl border border-slate-700 bg-slate-800/70 text-slate-300 hover:border-pink-400/60 font-black text-xs flex items-center justify-center gap-1.5 transition">
+                  <span>👩</span><span>女社畜 (絲打)</span>
+                </button>
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1">髮型款式</label>
+              <div class="grid grid-cols-2 gap-2" id="hairstyle-grid">
+                <button type="button" id="btn-hair-0" onclick="setHairStyle(0)" class="py-2 px-2 rounded-xl border-2 border-amber-400 bg-amber-500/15 text-white font-bold text-xs transition">
+                  ✂️ 俐落短髮
+                </button>
+                <button type="button" id="btn-hair-1" onclick="setHairStyle(1)" class="py-2 px-2 rounded-xl border border-slate-700 bg-slate-800/70 text-slate-300 font-bold text-xs transition">
+                  💇‍♀️ 飄逸長髮 / 馬尾
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1">1. 員工花名 *</label>
+              <input id="input-name" type="text" maxlength="12" value="Kelvin 陳" oninput="syncPreviewMeta()" placeholder="例如：中環 Alex"
+                class="w-full text-sm font-bold px-3 py-2 rounded-xl bg-slate-800 text-white border border-slate-600 focus:border-amber-400 focus:outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1">2. 應徵工作崗位（決定任務與日薪）</label>
+              <select id="input-dept" onchange="syncPreviewMeta()"
+                class="w-full text-sm font-bold px-2.5 py-2 rounded-xl bg-slate-800 text-white border border-slate-600 focus:border-amber-400 focus:outline-none">
+                <option value="IT 資訊科技部">💻 IT 工程師 ($520/日)</option>
+                <option value="Marketing 市場部">📣 Marketing 專員 ($480/日)</option>
+                <option value="Sales 營業部">📈 Sales 客戶經理 ($420/日+高佣)</option>
+                <option value="Design 設計部">🎨 Design 設計師 ($460/日)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-emerald-300 mb-1">3. 伺服器房號</label>
+              <input id="input-room" type="text" maxlength="8" value="IFC88" oninput="syncPreviewMeta()" placeholder="例如：IFC88"
+                class="w-full text-sm font-black uppercase tracking-wider px-3 py-2 rounded-xl bg-emerald-950/60 text-emerald-300 border border-emerald-500/50 focus:border-emerald-300 focus:outline-none" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">4. 選擇職場服裝造型</label>
+            <div class="grid grid-cols-4 gap-2" id="outfit-style-grid">
+              <button type="button" onclick="setOutfitStyle(0)" class="style-btn active p-2 rounded-xl border-2 border-amber-400 bg-amber-500/15 text-center transition">
+                <div class="text-base">👔</div>
+                <div class="text-[11px] font-bold text-white mt-0.5">恤衫領帶</div>
+              </button>
+              <button type="button" onclick="setOutfitStyle(1)" class="style-btn p-2 rounded-xl border border-slate-700 bg-slate-800/60 hover:border-amber-400/50 text-center transition">
+                <div class="text-base">🧥</div>
+                <div class="text-[11px] font-bold text-slate-200 mt-0.5">潮爆衛衣</div>
+              </button>
+              <button type="button" onclick="setOutfitStyle(2)" class="style-btn p-2 rounded-xl border border-slate-700 bg-slate-800/60 hover:border-amber-400/50 text-center transition">
+                <div class="text-base">👗</div>
+                <div class="text-[11px] font-bold text-slate-200 mt-0.5">氣質OL套裝</div>
+              </button>
+              <button type="button" onclick="setOutfitStyle(3)" class="style-btn p-2 rounded-xl border border-slate-700 bg-slate-800/60 hover:border-amber-400/50 text-center transition">
+                <div class="text-base">🤵</div>
+                <div class="text-[11px] font-bold text-slate-200 mt-0.5">型格西裝</div>
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1">5. 髮色</label>
+              <div class="flex items-center gap-2" id="hair-palette">
+                <button type="button" onclick="setColor('hair', '#1c1917', this)" class="w-6 h-6 rounded-full bg-[#1c1917] border border-slate-600 ring-2 ring-offset-2 ring-offset-slate-900 ring-amber-400"></button>
+                <button type="button" onclick="setColor('hair', '#4a3222', this)" class="w-6 h-6 rounded-full bg-[#4a3222]"></button>
+                <button type="button" onclick="setColor('hair', '#854d27', this)" class="w-6 h-6 rounded-full bg-[#854d27]"></button>
+                <button type="button" onclick="setColor('hair', '#94a3b8', this)" class="w-6 h-6 rounded-full bg-slate-400"></button>
+                <button type="button" onclick="setColor('hair', '#b91c1c', this)" class="w-6 h-6 rounded-full bg-red-700"></button>
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1">6. 服裝主色</label>
+              <div class="flex items-center gap-2" id="outfit-palette">
+                <button type="button" onclick="setColor('outfit', '#f8fafc', this)" class="w-6 h-6 rounded-full bg-slate-50 ring-2 ring-offset-2 ring-offset-slate-900 ring-amber-400"></button>
+                <button type="button" onclick="setColor('outfit', '#1d4ed8', this)" class="w-6 h-6 rounded-full bg-blue-700"></button>
+                <button type="button" onclick="setColor('outfit', '#1e293b', this)" class="w-6 h-6 rounded-full bg-slate-800 border border-slate-600"></button>
+                <button type="button" onclick="setColor('outfit', '#be185d', this)" class="w-6 h-6 rounded-full bg-pink-700"></button>
+                <button type="button" onclick="setColor('outfit', '#0f766e', this)" class="w-6 h-6 rounded-full bg-teal-700"></button>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">7. 社畜專屬 3D 配件</label>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" onclick="toggleAcc('glasses')" id="btn-acc-glasses" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500 text-slate-950 transition">
+                👓 金絲眼鏡
+              </button>
+              <button type="button" onclick="toggleAcc('darkCircles')" id="btn-acc-darkCircles" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500 text-slate-950 transition">
+                🐼 熬夜黑眼圈
+              </button>
+              <button type="button" onclick="toggleAcc('headphones')" id="btn-acc-headphones" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 border border-slate-600 transition">
+                🎧 降噪耳機
+              </button>
+              <button type="button" onclick="toggleAcc('handbag')" id="btn-acc-handbag" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 border border-slate-600 transition">
+                👜 返工 Tote Bag
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" onclick="startGameWorld()" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-red-600 hover:brightness-110 text-slate-950 font-black text-base sm:text-lg shadow-[0_12px_35px_rgba(245,158,11,0.35)] transition transform active:scale-[0.99]">
+        ✨ 八達通拍卡入閘 · 登入伺服器進入 3D 香港大世界
+      </button>
+    </div>
+  </div>
+
+  <!-- =========================================================
+  2. 主 Three.js WebGL 渲染層 + 3D 浮動標籤層
+  ========================================================== -->
   <div id="webgl-viewport" class="fixed inset-0 w-full h-full cursor-grab active:cursor-grabbing"></div>
   <div id="floating-ui-layer" class="fixed inset-0 pointer-events-none overflow-hidden z-10"></div>
-  
-  <div id="event-banner" class="hidden fixed inset-x-0 top-1/2 -translate-y-1/2 z-[60] flex justify-center pointer-events-none">
-     <div class="pointer-events-auto max-w-md w-full bg-gradient-to-br from-red-800 to-amber-700 text-white p-4 rounded-3xl border-2 border-yellow-300 alert-glow">
-        <h2 id="event-banner-title" class="font-black">突發事件！</h2>
-        <p id="event-banner-desc" class="text-sm">描述</p>
-        <button id="event-banner-btn" class="mt-2 py-2 px-4 rounded bg-yellow-300 text-red-950 font-black" onclick="closeModal('event-banner')">行動</button>
-     </div>
+
+  <!-- =========================================================
+  3. 頂部玻璃 HUD（升級：動態膠囊通知欄，節省手機畫面遮擋）
+  ========================================================== -->
+  <header id="hud-top" class="hidden fixed top-0 left-0 right-0 z-30 p-2 pointer-events-none">
+    <div class="max-w-7xl mx-auto flex flex-col gap-1.5 pointer-events-auto">
+      
+      <div class="glass-hud rounded-2xl p-2 sm:p-2.5 shadow-2xl">
+        <div class="flex items-center justify-between gap-1.5 pb-1.5 border-b border-white/10">
+          <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
+            <button onclick="openCreatorLobby()" title="更換性別/伺服器/崗位/造型" class="shrink-0 w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-base hover:bg-amber-500/30 transition">
+              🪪
+            </button>
+            <div class="min-w-0">
+              <div class="flex flex-wrap items-center gap-1">
+                <span id="hud-player-name" class="font-black text-xs sm:text-sm text-white truncate max-w-[95px] sm:max-w-none">Kelvin 陳</span>
+                <span id="hud-dept-badge" class="text-[10px] px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-400/40 font-black">
+                  💻 IT 工程師
+                </span>
+                <span id="hud-clock-badge" class="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md bg-sky-500/25 text-sky-200 border border-sky-400/40 font-black">
+                  🕘 09:00 返工時段
+                </span>
+                <span id="hud-kpi-badge" class="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md bg-emerald-500/25 text-emerald-200 border border-emerald-400/40 font-black">
+                  📊 今日KPI: 0%
+                </span>
+                <span id="hud-sleep-badge" class="hidden inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md font-black">
+                  ✨ 精神爽利
+                </span>
+                <span id="hud-smoke-buff" class="hidden text-[10px] px-1.5 py-0.5 rounded-md bg-orange-500/30 text-orange-200 border border-orange-400/50 font-black">
+                  🔥 尼古丁靈感
+                </span>
+                <span id="hud-offergod-buff" class="hidden text-[10px] px-1.5 py-0.5 rounded-md bg-gradient-to-r from-amber-400 to-red-600 text-slate-950 font-black">
+                  🧧 靈符護體
+                </span>
+                <button onclick="openOnlinePeersModal()" title="點擊查看同服線上真人同事並即時互動" class="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md bg-emerald-500/30 hover:bg-emerald-500/50 text-emerald-200 border border-emerald-400/60 font-black shadow transition">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                  <span id="hud-room-badge">👥 IFC88 · 1人互動</span>
+                </button>
+              </div>
+              <p class="hidden sm:block text-[10px] text-slate-300 mt-0.5">
+                💡 點擊頂部<strong class="text-emerald-300">「👥 線上人數」</strong>或直接點擊真人玩家綠色名牌，可邀落後樓梯<strong class="text-orange-300">煙Break吹水</strong>、請飲咖啡或蘭桂坊共舞！
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 shrink-0">
+            <div class="px-2 py-1 rounded-lg bg-emerald-950/90 border border-emerald-400/40 text-emerald-300 text-[11px] font-black flex items-center gap-1">
+              <span>💵</span>
+              <span id="hud-money-txt">HK$500</span>
+            </div>
+
+            <button id="btn-smartphone" onclick="openSmartphoneModal()" class="relative px-2.5 py-1 rounded-lg bg-gradient-to-r from-sky-600 to-indigo-600 hover:brightness-110 text-white text-[11px] font-black border border-sky-300/50 shadow flex items-center gap-1">
+              <span>📱</span>
+              <span class="hidden sm:inline">手機</span>
+              <span id="phone-unread-dot" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 ring-2 ring-slate-900 animate-ping"></span>
+            </button>
+
+            <button id="btn-grand-resign" onclick="goToBossForResign()" class="hidden px-2 py-1 rounded-lg bg-gradient-to-r from-yellow-400 via-amber-500 to-red-600 text-slate-950 text-[10px] font-black shadow-lg animate-pulse">
+              ✉️ 去老細房遞信
+            </button>
+
+            <button onclick="toggleMobileMenu()" class="sm:hidden px-2 py-1 rounded-lg bg-amber-500 text-slate-950 text-[11px] font-black">
+              🎛️
+            </button>
+          </div>
+        </div>
+
+        <!-- 升級：統一動態膠囊狀態欄（按優先級單行展示，避免多條橫幅疊加遮擋畫面） -->
+        <div id="dynamic-capsule-bar" class="hidden flex items-center justify-between gap-2 rounded-xl px-2.5 py-1.5 my-1 animate-pop border">
+          <div class="flex items-center gap-1.5 min-w-0">
+            <span id="capsule-icon" class="text-base shrink-0">💘</span>
+            <div class="min-w-0">
+              <div id="capsule-title" class="text-[11px] font-black truncate">動態狀態提示</div>
+              <div id="capsule-sub" class="text-[9px] truncate opacity-90">詳細說明</div>
+            </div>
+          </div>
+          <div id="capsule-actions" class="flex items-center gap-1 shrink-0"></div>
+        </div>
+
+        <!-- 功能按鈕列 -->
+        <div id="hud-toolbar-drawer" class="hidden sm:flex flex-wrap items-center justify-between gap-1.5 py-1.5 border-b border-white/10">
+          <div class="flex flex-wrap items-center gap-1">
+            <button onclick="openOnlinePeersModal()" class="px-2.5 py-1 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 hover:brightness-110 text-slate-950 text-[10px] font-black shadow">
+              👥 真人同事互動
+            </button>
+            <button onclick="openJobTaskModal()" class="px-2.5 py-1 rounded-lg bg-gradient-to-r from-sky-500 to-cyan-500 hover:brightness-110 text-slate-950 text-[10px] font-black shadow">
+              💼 崗位任務 (+KPI)
+            </button>
+            <button onclick="openLunchBattleModal()" class="px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-slate-950 text-[10px] font-black shadow">
+              🍱 12:30 午飯修羅場
+            </button>
+            <button onclick="openSecretTeamsModal()" class="px-2.5 py-1 rounded-lg bg-gradient-to-r from-rose-600 to-pink-600 hover:brightness-110 text-white text-[10px] font-black border border-pink-300/50 shadow">
+              💌 Teams秘密傳情
+            </button>
+            <button onclick="openInviteCompanionModal()" class="px-2 py-1 rounded-lg bg-pink-600/85 hover:bg-pink-500 text-white text-[10px] font-black border border-pink-300/40">
+              🤝 預約放工/活動
+            </button>
+            <button onclick="openNpcScheduleModal()" class="px-2 py-1 rounded-lg bg-teal-600/85 hover:bg-teal-500 text-white text-[10px] font-black border border-teal-300/40">
+              🕒 同事作息
+            </button>
+            <button onclick="triggerHotPotatoBomb(true)" class="px-2 py-1 rounded-lg bg-red-600/85 hover:bg-red-500 text-white text-[10px] font-black border border-red-300/40">🍳 卸膊飛鍋</button>
+            <button onclick="openRomanceListModal()" class="px-2 py-1 rounded-lg bg-pink-700/85 hover:bg-pink-600 text-white text-[10px] font-black border border-pink-300/40">💘 地下情</button>
+            <button onclick="openGossipWallModal()" class="px-2 py-1 rounded-lg bg-purple-600/85 hover:bg-purple-500 text-white text-[10px] font-black border border-purple-300/40">🗣️ 八卦網</button>
+            <button onclick="openShopModal()" class="px-2 py-1 rounded-lg bg-amber-600/85 hover:bg-amber-500 text-white text-[10px] font-black border border-amber-300/40">🛍️ 裝備/置業</button>
+            <button onclick="openCareerReportModal()" class="px-2 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-amber-200 text-[10px] font-black border border-amber-400/30">📊 結算</button>
+          </div>
+          <div class="flex items-center gap-1">
+            <button onclick="setCameraPreset('iso')" id="cam-btn-iso" class="cam-preset-btn px-2 py-1 rounded-lg bg-amber-500 text-slate-950 text-[10px] font-black">📐 等軸</button>
+            <button onclick="setCameraPreset('street')" id="cam-btn-street" class="cam-preset-btn px-2 py-1 rounded-lg bg-white/10 text-slate-200 text-[10px] font-bold border border-white/15">👁️ 近景</button>
+            <button onclick="setCameraPreset('showcase')" id="cam-btn-showcase" class="cam-preset-btn px-2 py-1 rounded-lg bg-white/10 text-slate-200 text-[10px] font-bold border border-white/15">🏛️ 特寫</button>
+            <button onclick="toggleDpad()" class="px-2 py-1 rounded-lg bg-white/10 text-slate-200 text-[10px] font-bold border border-white/15">🕹️ 方向鍵</button>
+          </div>
+        </div>
+
+        <!-- 四大養成數值條 -->
+        <div class="grid grid-cols-4 gap-1 sm:gap-1.5 pt-1.5">
+          <div class="bg-black/35 px-2 py-1 rounded-xl border border-white/10">
+            <div class="flex justify-between text-[9px] sm:text-[10px] mb-0.5">
+              <span class="font-bold text-amber-300">☕ 精神/咖啡</span>
+              <span id="stat-caffeine-txt" class="font-black text-white">80%</span>
+            </div>
+            <div class="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden">
+              <div id="stat-caffeine-bar" class="h-full bg-gradient-to-r from-amber-500 to-yellow-300 rounded-full transition-all duration-300" style="width: 80%"></div>
+            </div>
+          </div>
+
+          <div class="bg-black/35 px-2 py-1 rounded-xl border border-white/10">
+            <div class="flex justify-between text-[9px] sm:text-[10px] mb-0.5">
+              <span class="font-bold text-emerald-300">💇‍♂️ 髮量/理智</span>
+              <span id="stat-hair-txt" class="font-black text-white">85%</span>
+            </div>
+            <div class="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden">
+              <div id="stat-hair-bar" class="h-full bg-gradient-to-r from-emerald-500 to-teal-300 rounded-full transition-all duration-300" style="width: 85%"></div>
+            </div>
+          </div>
+
+          <div class="bg-black/35 px-2 py-1 rounded-xl border border-white/10">
+            <div class="flex justify-between text-[9px] sm:text-[10px] mb-0.5">
+              <span class="font-bold text-pink-300">💘 最高好感</span>
+              <span id="stat-romance-txt" class="font-black text-white">25%</span>
+            </div>
+            <div class="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden">
+              <div id="stat-romance-bar" class="h-full bg-gradient-to-r from-pink-500 to-rose-300 rounded-full transition-all duration-300" style="width: 25%"></div>
+            </div>
+          </div>
+
+          <div class="bg-black/35 px-2 py-1 rounded-xl border border-white/10">
+            <div class="flex justify-between text-[9px] sm:text-[10px] mb-0.5">
+              <span class="font-bold text-sky-300">📈 職級</span>
+              <span id="stat-xp-txt" class="font-black text-white">Lv.1</span>
+            </div>
+            <div class="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden">
+              <div id="stat-xp-bar" class="h-full bg-gradient-to-r from-sky-500 to-cyan-300 rounded-full transition-all duration-300" style="width: 20%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 港鐵 & 巴士六大獨立場景轉場列（附各區在線人數徽章） -->
+      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+        <span class="shrink-0 text-[10px] sm:text-[11px] font-black px-2 py-1 rounded-lg bg-slate-900/90 text-amber-300 border border-amber-400/30">
+          🚇 交通 ($5.5)：
+        </span>
+        <button onclick="switchScene('office')" id="tab-scene-office" class="shrink-0 text-[10px] sm:text-[11px] font-black px-2.5 py-1 rounded-lg bg-sky-600 text-white shadow-md border border-sky-300/60 transition">
+          🏢 1. 中環寫字樓 <span id="scene-cnt-office" class="text-[9px] opacity-85"></span>
+        </button>
+        <button onclick="switchScene('commute')" id="tab-scene-commute" class="shrink-0 text-[10px] sm:text-[11px] font-black px-2.5 py-1 rounded-lg bg-slate-900/85 hover:bg-rose-700 text-slate-200 hover:text-white border border-white/15 transition">
+          🚇 2. 第一身迫地鐵/巴士 <span id="scene-cnt-commute" class="text-[9px] opacity-85"></span>
+        </button>
+        <button onclick="switchScene('wanchai')" id="tab-scene-wanchai" class="shrink-0 text-[10px] sm:text-[11px] font-black px-2.5 py-1 rounded-lg bg-slate-900/85 hover:bg-orange-600 text-slate-200 hover:text-white border border-white/15 transition">
+          🌉 3. 灣仔鵝頸橋打小人 <span id="scene-cnt-wanchai" class="text-[9px] opacity-85"></span>
+        </button>
+        <button onclick="switchScene('sheungwan')" id="tab-scene-sheungwan" class="shrink-0 text-[10px] sm:text-[11px] font-black px-2.5 py-1 rounded-lg bg-slate-900/85 hover:bg-red-700 text-slate-200 hover:text-white border border-white/15 transition">
+          🏮 4. 上環文武廟 <span id="scene-cnt-sheungwan" class="text-[9px] opacity-85"></span>
+        </button>
+        <button onclick="switchScene('lkf')" id="tab-scene-lkf" class="shrink-0 text-[10px] sm:text-[11px] font-black px-2.5 py-1 rounded-lg bg-slate-900/85 hover:bg-purple-700 text-slate-200 hover:text-white border border-white/15 transition">
+          🍸 5. 中環蘭桂坊 <span id="scene-cnt-lkf" class="text-[9px] opacity-85"></span>
+        </button>
+        <button onclick="switchScene('home')" id="tab-scene-home" class="shrink-0 text-[10px] sm:text-[11px] font-black px-2.5 py-1 rounded-lg bg-slate-900/85 hover:bg-teal-700 text-slate-200 hover:text-white border border-white/15 transition">
+          🏠 6. 歸家蝸居 <span id="scene-cnt-home" class="text-[9px] opacity-85"></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================================================
+  4. 全服突發動態事件通知
+  ========================================================== -->
+  <div id="event-banner" class="hidden fixed inset-x-0 top-1/2 -translate-y-1/2 sm:top-48 sm:translate-y-0 z-[60] px-3 pointer-events-none flex justify-center">
+    <div class="pointer-events-auto max-w-md w-full bg-gradient-to-br from-red-800 via-red-700 to-amber-700 text-white p-4 rounded-3xl border-2 border-yellow-300 alert-glow animate-pop">
+      <div class="flex items-start justify-between gap-2 mb-2">
+        <div class="flex items-center gap-2.5">
+          <span id="event-banner-icon" class="text-3xl sm:text-4xl animate-bounce shrink-0">🚨</span>
+          <div>
+            <div class="inline-block px-2 py-0.5 rounded bg-black/40 text-yellow-300 text-[10px] font-black tracking-wider mb-0.5">⚡ 職場突發緊急警報</div>
+            <div id="event-banner-title" class="font-black text-sm sm:text-base text-white leading-tight">突發事件！</div>
+          </div>
+        </div>
+        <button onclick="hideEventBanner()" class="w-7 h-7 rounded-full bg-black/40 text-white/80 hover:text-white text-xs font-black shrink-0">✕</button>
+      </div>
+      <p id="event-banner-desc" class="text-xs sm:text-sm text-amber-100 font-medium leading-relaxed mb-3 bg-black/25 p-2.5 rounded-xl border border-white/10">
+        事件描述
+      </p>
+      <div class="flex gap-2">
+        <button id="event-banner-btn" onclick="resolveActiveEvent()" class="flex-1 py-3 rounded-2xl bg-yellow-300 hover:bg-yellow-200 active:scale-[0.98] text-red-950 font-black text-xs sm:text-sm shadow-lg transition">
+          立即行動！
+        </button>
+        <button id="event-banner-secondary-btn" onclick="ignoreActiveEvent()" class="hidden px-3 py-3 rounded-2xl bg-black/45 hover:bg-black/65 text-slate-200 font-bold text-xs border border-white/20">
+          繼續做其他嘢
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 港鐵轉場過場畫面 -->
+  <div id="mtr-transition-overlay" class="hidden fixed inset-0 z-40 bg-slate-950/95 backdrop-blur-md flex flex-col items-center justify-center text-center p-6 pointer-events-none">
+    <div class="text-4xl mb-2 animate-bounce">🚇</div>
+    <div id="mtr-transition-title" class="text-xl sm:text-2xl font-black text-amber-400 tracking-wider">下一站：金鐘站</div>
+    <div id="mtr-transition-sub" class="text-xs text-slate-400 mt-1">請小心月台空隙 · Mind the Gap</div>
+  </div>
+
+  <!-- 左下角全服事件日誌 & 右下角手機虛擬方向鍵 -->
+  <div id="world-feed" class="hidden fixed bottom-28 left-2.5 sm:left-3 z-20 w-60 sm:w-80 max-h-28 sm:max-h-36 overflow-y-auto no-scrollbar pointer-events-none flex flex-col gap-1"></div>
+
+  <div id="mobile-dpad" class="hidden fixed bottom-28 right-3 z-30 grid grid-cols-3 gap-1 w-28 h-28 sm:w-32 sm:h-32 opacity-90">
+    <div></div>
+    <button onpointerdown="setDpad(0, -1)" onpointerup="setDpad(0, 0)" onpointerleave="setDpad(0, 0)" class="glass-hud active:bg-amber-500 text-white rounded-xl flex items-center justify-center text-sm font-bold">▲</button>
+    <div></div>
+    <button onpointerdown="setDpad(-1, 0)" onpointerup="setDpad(0, 0)" onpointerleave="setDpad(0, 0)" class="glass-hud active:bg-amber-500 text-white rounded-xl flex items-center justify-center text-sm font-bold">◀</button>
+    <div class="bg-slate-950/90 rounded-xl flex items-center justify-center text-[9px] text-amber-400 font-black border border-white/10">行路</div>
+    <button onpointerdown="setDpad(1, 0)" onpointerup="setDpad(0, 0)" onpointerleave="setDpad(0, 0)" class="glass-hud active:bg-amber-500 text-white rounded-xl flex items-center justify-center text-sm font-bold">▶</button>
+    <div></div>
+    <button onpointerdown="setDpad(0, 1)" onpointerup="setDpad(0, 0)" onpointerleave="setDpad(0, 0)" class="glass-hud active:bg-amber-500 text-white rounded-xl flex items-center justify-center text-sm font-bold">▼</button>
+    <div></div>
+  </div>
+
+  <!-- =========================================================
+  5. 底部情境快捷指令列 + 指定對象自由打字對話欄
+  ========================================================== -->
+  <footer id="hud-bottom" class="hidden fixed bottom-0 left-0 right-0 z-30 p-2 pointer-events-none">
+    <div class="max-w-6xl mx-auto glass-hud rounded-2xl p-2 sm:p-2.5 shadow-2xl pointer-events-auto">
+      <div id="context-action-bar" class="flex items-center justify-between gap-1.5 pb-1.5 mb-1.5 border-b border-white/10 overflow-x-auto no-scrollbar"></div>
+
+      <form onsubmit="submitChat(event)" class="flex gap-1.5">
+        <select id="chat-target-select" class="text-[11px] sm:text-xs font-black px-2 py-1.5 rounded-xl bg-slate-800 text-amber-300 border border-white/15 focus:outline-none shrink-0 max-w-[110px] sm:max-w-none">
+          <option value="all">📢 全服廣播</option>
+          <option value="npc_vivienne">💘 同 Vivienne</option>
+          <option value="bot_sales">📈 同 Jason</option>
+          <option value="bot_it">💻 同 IT阿强</option>
+          <option value="bot_hr">📋 同 HR Chloe</option>
+          <option value="npc_boss">👔 同老細</option>
+        </select>
+        <input id="chat-input" type="text" placeholder="💬 打字同全服玩家/同事吹水..."
+          class="flex-1 min-w-0 text-xs sm:text-sm px-3 py-1.5 rounded-xl bg-black/50 text-white placeholder-slate-400 border border-white/15 focus:outline-none focus:border-amber-400" />
+        <button type="submit" class="px-3.5 sm:px-4 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-slate-950 text-xs font-black shrink-0 transition">
+          發送
+        </button>
+      </form>
+    </div>
+  </footer>
+
+  <!-- =========================================================
+  6. 👥 同服線上真人同事花名冊 & 雙向互動大廳 Modal（含煙 Break 邀約）
+  ========================================================== -->
+  <div id="modal-online-peers" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4" onclick="closeModal('modal-online-peers', event)">
+    <div class="bg-slate-900 text-white rounded-3xl max-w-lg w-full p-5 shadow-2xl border-2 border-emerald-400 animate-pop" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-700">
+        <div>
+          <h2 class="font-black text-base text-emerald-300">👥 伺服器【<span id="peers-modal-room">IFC88</span>】線上真人同事</h2>
+          <p class="text-[11px] text-slate-300">隨時邀落後樓梯煙 Break、請飲咖啡、把風掩護或蘭桂坊共舞！</p>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button onclick="copyRoomInvite()" class="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black">
+            📋 複製邀請連結
+          </button>
+          <button onclick="closeModal('modal-online-peers')" class="w-8 h-8 rounded-lg bg-slate-800 font-black">✕</button>
+        </div>
+      </div>
+
+      <div id="online-peers-list" class="my-3 space-y-2 max-h-80 overflow-y-auto"></div>
+    </div>
+  </div>
+
+  <!-- 真人線上玩家七大雙向互動視窗（新增：🔥 邀約去後樓梯煙 Break） -->
+  <div id="modal-peer-action" class="hidden fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-4" onclick="closeModal('modal-peer-action', event)">
+    <div class="bg-slate-900 text-white rounded-3xl max-w-md w-full p-5 shadow-2xl border-2 border-emerald-400 animate-pop text-center" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-700">
+        <h3 id="peer-modal-title" class="font-black text-base text-emerald-300">🌐 真人線上同事</h3>
+        <button onclick="closeModal('modal-peer-action')" class="w-8 h-8 rounded-lg bg-slate-800 font-black">✕</button>
+      </div>
+      <p id="peer-modal-desc" class="text-xs text-slate-300 my-2.5">同一個伺服器房間內嘅真實玩家！對方螢幕會即時彈出互動通知與特效！</p>
+      
+      <div class="grid grid-cols-2 gap-2 text-left">
+        <!-- 新增：後樓梯煙 Break 邀約 -->
+        <button onclick="sendPeerSocialAction('smoke_invite')" class="col-span-2 p-2.5 rounded-xl bg-gradient-to-r from-orange-600/45 to-amber-600/45 hover:from-orange-600/65 hover:to-amber-600/65 border-2 border-orange-400/70 transition flex items-center justify-between">
+          <div>
+            <div class="text-xs font-black text-orange-200">🔥 邀去後樓梯 EXIT 煙 Break 吞雲吐霧！</div>
+            <div class="text-[10px] text-amber-100 mt-0.5">避開老細同 HR 死角！兩人並排點煙吹水講是非，雙方 +20% 理智、+15 XP</div>
+          </div>
+          <span class="px-2 py-1 rounded-lg bg-orange-500 text-slate-950 text-[10px] font-black shrink-0">立即邀約</span>
+        </button>
+
+        <button onclick="sendPeerSocialAction('coffee')" class="p-2.5 rounded-xl bg-amber-600/30 hover:bg-amber-600/50 border border-amber-400/50 transition">
+          <div class="text-xs font-black text-amber-200">☕ 請飲 Starbucks ($35)</div>
+          <div class="text-[10px] text-slate-300 mt-0.5">幫對方回復 +30% 精神與 +10% 髮量</div>
+        </button>
+
+        <button onclick="sendPeerSocialAction('cover')" class="p-2.5 rounded-xl bg-sky-600/30 hover:bg-sky-600/50 border border-sky-400/50 transition">
+          <div class="text-xs font-black text-sky-200">🛡️ 幫手把風掩護摸魚</div>
+          <div class="text-[10px] text-slate-300 mt-0.5">幫對方擋住老細視線，雙方 +20 XP</div>
+        </button>
+
+        <button onclick="sendPeerSocialAction('dance_invite')" class="p-2.5 rounded-xl bg-pink-600/35 hover:bg-pink-600/55 border border-pink-400/50 transition">
+          <div class="text-xs font-black text-pink-200">💃 邀去蘭桂坊舞池共舞</div>
+          <div class="text-[10px] text-slate-300 mt-0.5">邀請對方同場熱舞乾杯</div>
+        </button>
+
+        <button onclick="teleportToTargetPeer()" class="p-2.5 rounded-xl bg-teal-600/35 hover:bg-teal-600/55 border border-teal-400/50 transition">
+          <div class="text-xs font-black text-teal-200">🚀 瞬移去佢身邊會合</div>
+          <div class="text-[10px] text-slate-300 mt-0.5">立即前往對方所在場景與位置</div>
+        </button>
+
+        <button onclick="passBombToTargetPeer()" class="p-2.5 rounded-xl bg-gradient-to-r from-red-600 to-orange-600 hover:brightness-110 text-white transition">
+          <div class="text-xs font-black">🍳 卸膊飛鍋甩俾佢！</div>
+          <div class="text-[10px] text-amber-100 mt-0.5">將地獄級 PPT 炸彈甩俾對方</div>
+        </button>
+
+        <button onclick="goCurseTargetPeer()" class="p-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 transition">
+          <div class="text-xs font-black">👟 去鵝頸橋打佢小人！</div>
+          <div class="text-[10px] text-red-950 font-bold mt-0.5">跨服震動對方螢幕扣理智</div>
+        </button>
+      </div>
+
+      <div class="mt-2.5 flex gap-1.5">
+        <input id="peer-dm-input" type="text" maxlength="40" placeholder="💬 發送私人密語俾呢位玩家..." class="flex-1 text-xs px-3 py-2 rounded-xl bg-slate-800 text-white border border-slate-600 focus:border-emerald-400 focus:outline-none" />
+        <button onclick="sendDirectMessageToPeer()" class="px-3.5 py-2 rounded-xl bg-emerald-500 text-slate-950 text-xs font-black">私聊</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+  7. 🍱 12:30 午飯修羅場 Modal
+  ========================================================== -->
+  <div id="modal-lunch-battle" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4" onclick="closeModal('modal-lunch-battle', event)">
+    <div class="bg-slate-900 text-white rounded-3xl max-w-md w-full p-5 shadow-2xl border-2 border-amber-400 animate-pop text-center" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-2.5 border-b border-slate-700">
+        <div class="text-left">
+          <h2 class="font-black text-base text-amber-300">🍱 12:30 中環午飯修羅場</h2>
+          <p class="text-[11px] text-slate-300">食飽飯下午工作 KPI 效率大增！揀你今日嘅 Lunch 戰術：</p>
+        </div>
+        <button onclick="closeModal('modal-lunch-battle')" class="w-8 h-8 rounded-lg bg-slate-800 font-black">✕</button>
+      </div>
+
+      <div class="my-3 space-y-2.5 text-left">
+        <button onclick="executeLunchChoice('two_dish')" class="w-full p-3 rounded-2xl bg-amber-950/50 hover:bg-amber-900/70 border border-amber-400/50 transition flex items-center justify-between">
+          <div>
+            <div class="text-xs font-black text-amber-200">🥡 橫街排長龍「兩餸飯 (加多隻鹹蛋)」</div>
+            <div class="text-[10px] text-slate-300 mt-0.5">平靚正飽肚！+25% 精神、+10% KPI，但排隊曬太陽微扣 4% 髮量</div>
+          </div>
+          <span class="px-2.5 py-1 rounded-lg bg-amber-400 text-slate-950 text-xs font-black shrink-0">HK$38</span>
+        </button>
+
+        <button onclick="executeLunchChoice('cha_chaan_teng')" class="w-full p-3 rounded-2xl bg-sky-950/50 hover:bg-sky-900/70 border border-sky-400/50 transition flex items-center justify-between">
+          <div>
+            <div class="text-xs font-black text-sky-200">🍛 冰室「沙爹牛肉麵 + 凍檸茶少甜」</div>
+            <div class="text-[10px] text-slate-300 mt-0.5">歎冷氣快靚正！+35% 精神、+15% 髮量，全場同事好感 +5%</div>
+          </div>
+          <span class="px-2.5 py-1 rounded-lg bg-sky-400 text-slate-950 text-xs font-black shrink-0">HK$68</span>
+        </button>
+
+        <button onclick="executeLunchChoice('microwave')" class="w-full p-3 rounded-2xl bg-emerald-950/50 hover:bg-emerald-900/70 border border-emerald-400/50 transition flex items-center justify-between">
+          <div>
+            <div class="text-xs font-black text-emerald-200">🥡 自己帶飯去 Pantry 排微波爐叮飯</div>
+            <div class="text-[10px] text-slate-300 mt-0.5">零消費慳錢王！80% 機率健康回血，20% 機率被同事叮燶或偷食！</div>
+          </div>
+          <span class="px-2.5 py-1 rounded-lg bg-emerald-400 text-slate-950 text-xs font-black shrink-0">免費 $0</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+  8. 💼 崗位工作任務小遊戲 Modal
+  ========================================================== -->
+  <div id="modal-job-task" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4" onclick="closeModal('modal-job-task', event)">
+    <div class="bg-slate-900 text-white rounded-3xl max-w-md w-full p-5 shadow-2xl border-2 border-sky-400 animate-pop text-center" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-2.5 border-b border-slate-700">
+        <div class="text-left">
+          <h2 id="job-task-title" class="font-black text-base text-sky-300">💻 IT 資訊科技部 · 緊急修復 Server</h2>
+          <p id="job-task-sub" class="text-[11px] text-slate-300">完成任務提升今日 KPI 表現分，18:00 派糧有高額花紅！</p>
+        </div>
+        <button onclick="closeModal('modal-job-task')" class="w-8 h-8 rounded-lg bg-slate-800 font-black">✕</button>
+      </div>
+      <div id="job-task-body" class="my-4 p-4 rounded-2xl bg-black/50 border border-sky-500/30 space-y-3 text-left"></div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+  9. 🧾 每日 18:00 電子糧單 (Payslip) 日薪結算 Modal
+  ========================================================== -->
+  <div id="modal-payslip" class="hidden fixed inset-0 bg-black/85 backdrop-blur-md z-[70] flex items-center justify-center p-4" onclick="closeModal('modal-payslip', event)">
+    <div class="bg-stone-50 text-slate-900 rounded-3xl max-w-md w-full p-5 shadow-2xl border-4 border-emerald-600 animate-pop" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-2.5 border-b-2 border-dashed border-stone-300">
+        <div>
+          <div class="text-[10px] font-black text-emerald-700 tracking-widest">HONG KONG OFFICE PAYSLIP · 18:00 自動發放</div>
+          <h2 class="font-black text-lg text-slate-900">🧾 社畜每日電子糧單結算</h2>
+        </div>
+        <span class="px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-xs font-black">已入賬</span>
+      </div>
+      <div id="payslip-details" class="my-3 space-y-2 text-xs font-bold"></div>
+      <button onclick="closeModal('modal-payslip')" class="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-white font-black text-sm shadow-lg">
+        💰 袋袋平安！去金鐘站迫地鐵 / 蘭桂坊赴約！
+      </button>
+    </div>
+  </div>
+
+  <!-- =========================================================
+  10. 💌 辦公室戀愛諜戰 · 公司 Teams 秘密傳情 + 老闆鍵 (Excel)
+  ========================================================== -->
+  <div id="modal-secret-teams" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4" onclick="closeModal('modal-secret-teams', event)">
+    <div id="teams-window-box" class="bg-slate-900 text-white rounded-3xl max-w-md w-full p-5 shadow-2xl border-2 border-pink-500 animate-pop" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-2.5 border-b border-slate-700">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">💌</span>
+          <div>
+            <h2 class="font-black text-sm text-pink-300">公司 Teams 加密私聊（返工偷情模式）</h2>
+            <p class="text-[10px] text-slate-400">⚠️ 一旦聽到老細行近，必須 2 秒內撳「切回 Excel 假裝工作」！</p>
+          </div>
+        </div>
+        <button onclick="closeModal('modal-secret-teams')" class="w-8 h-8 rounded-lg bg-slate-800 font-black">✕</button>
+      </div>
+
+      <div id="teams-boss-alert" class="hidden my-2 p-2.5 rounded-xl bg-red-600 text-white font-black text-xs flex items-center justify-between animate-pulse">
+        <span>🚨 警告！老細 Mr. Chan 行緊埋你個 Mon！</span>
+        <button onclick="switchFakeExcelScreen()" class="px-3 py-1 rounded-lg bg-yellow-300 text-red-950 font-black shadow">
+          📊 切回 Excel！
+        </button>
+      </div>
+
+      <div id="teams-chat-mode" class="space-y-2.5 my-3">
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs font-bold text-slate-300">私聊對象：</span>
+          <select id="teams-target-select" class="text-xs font-black px-2.5 py-1.5 rounded-xl bg-slate-800 text-pink-300 border border-slate-600">
+            <option value="npc_vivienne">💘 Vivienne (Marketing女神)</option>
+            <option value="bot_sales">🕺 Sales Jason (陽光型男)</option>
+            <option value="bot_it">💻 IT部阿强 (純情工程師)</option>
+            <option value="bot_hr">👩‍💼 HR Chloe (知性姐姐)</option>
+          </select>
+          <button type="button" onclick="switchFakeExcelScreen()" class="px-2.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-[10px] font-black">
+            📊 老闆鍵 (Excel)
+          </button>
+        </div>
+
+        <div id="teams-msg-log" class="h-32 overflow-y-auto p-3 rounded-xl bg-black/50 border border-slate-800 text-xs space-y-2">
+          <div class="text-pink-300"><strong>Vivienne：</strong>你喺工位做緊嘢呀？一陣 18:00 放工約喺蘭桂坊 D2 出口等好唔好？🤫</div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-1.5">
+          <button type="button" onclick="sendSecretTeamsMsg('暗號：份 Excel 第 3 行有驚喜，一陣 Pantry 暗角見！☕')" class="p-2 rounded-xl bg-pink-600/30 hover:bg-pink-600/50 border border-pink-400/40 text-pink-200 text-[10px] font-black text-left">
+            🤫 發送加密暗號 (+15%好感)
+          </button>
+          <button type="button" onclick="scheduleDateViaTeams()" class="p-2 rounded-xl bg-rose-600/35 hover:bg-rose-600/55 border border-rose-400/50 text-rose-200 text-[10px] font-black text-left">
+            🍸 預約 18:00 蘭桂坊雙人見 (+18%好感)
+          </button>
+        </div>
+      </div>
+
+      <div id="teams-fake-excel" class="hidden my-3 p-3 rounded-xl bg-emerald-950 border-2 border-emerald-500 text-left space-y-2">
+        <div class="flex items-center justify-between text-xs font-black text-emerald-300">
+          <span>📊 Q4_Budget_Forecast_Final_v9.xlsx</span>
+          <button onclick="resumeSecretTeams()" class="px-2.5 py-1 rounded-lg bg-pink-600 text-white text-[10px]">老細走咗，切返私聊</button>
+        </div>
+        <div class="grid grid-cols-4 gap-1 text-[10px] font-mono text-emerald-100 bg-black/40 p-2 rounded-lg">
+          <div class="bg-emerald-900/60 p-1">Dept</div><div class="bg-emerald-900/60 p-1">Revenue</div><div class="bg-emerald-900/60 p-1">Cost</div><div class="bg-emerald-900/60 p-1">KPI</div>
+          <div class="p-1">HK-IFC</div><div class="p-1">$1,280,000</div><div class="p-1">$420,000</div><div class="p-1">+18.4%</div>
+          <div class="p-1">HK-TK</div><div class="p-1">$890,000</div><div class="p-1">$310,000</div><div class="p-1">+12.1%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+  11. 🕒 NPC 每日作息與放工轉場時間表 Modal
+  ========================================================== -->
+  <div id="modal-npc-schedule" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4" onclick="closeModal('modal-npc-schedule', event)">
+    <div class="bg-slate-900 text-white rounded-3xl max-w-md w-full p-5 shadow-2xl border-2 border-teal-400 animate-pop" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-2.5 border-b border-slate-700">
+        <div>
+          <h2 class="font-black text-base text-teal-300">🕒 同事每日作息與放工行蹤雷達</h2>
+          <p class="text-[11px] text-slate-300">18:00 準時放工轉場！有預約蘭桂坊嘅對象會準時喺舞池等你！</p>
+        </div>
+        <button onclick="closeModal('modal-npc-schedule')" class="w-8 h-8 rounded-lg bg-slate-800 font-black">✕</button>
+      </div>
+      <div id="npc-schedule-list" class="my-3 space-y-2 text-xs"></div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+  12. 🔥 後樓梯 EXIT · 互動 Zippo 打火機點煙小遊戲 Modal
+  ========================================================== -->
+  <div id="modal-lighter" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4" onclick="closeModal('modal-lighter', event)">
+    <div class="bg-gradient-to-b from-slate-900 via-zinc-900 to-black text-white rounded-3xl max-w-md w-full p-5 shadow-2xl border-2 border-orange-500/80 animate-pop text-center" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-2.5 border-b border-slate-700">
+        <div class="text-left">
+          <h2 class="font-black text-base text-orange-300">🔥 後樓梯 EXIT · 打火機點煙減壓</h2>
+          <p class="text-[11px] text-slate-300">掀開金屬蓋、擦打火輪點火，再將香煙移埋去點著！</p>
+        </div>
+        <button onclick="closeModal('modal-lighter')" class="w-8 h-8 rounded-lg bg-slate-800 font-black">✕</button>
+      </div>
+
+      <div class="grid grid-cols-3 gap-1.5 my-3 text-[10px] font-black">
+        <div id="cig-step-1" class="py-1 px-2 rounded-lg bg-orange-600 text-white">1. 掀開火機蓋</div>
+        <div id="cig-step-2" class="py-1 px-2 rounded-lg bg-slate-800 text-slate-400">2. 擦火輪點火</div>
+        <div id="cig-step-3" class="py-1 px-2 rounded-lg bg-slate-800 text-slate-400">3. 點著深吸一口</div>
+      </div>
+
+      <div class="relative my-3 py-5 px-4 rounded-2xl bg-gradient-to-b from-zinc-950 to-slate-900 border border-slate-700 flex flex-col items-center justify-center min-h-[215px] overflow-hidden">
+        <div class="h-14 flex items-end justify-center mb-1">
+          <div id="lighter-flame-visual" class="hidden flex flex-col items-center animate-flame">
+            <div class="w-7 h-11 rounded-full bg-gradient-to-t from-sky-400 via-amber-400 to-orange-500 blur-[1px] shadow-[0_0_25px_#f97316] flex items-end justify-center pb-1">
+              <div class="w-3 h-5 rounded-full bg-white"></div>
+            </div>
+          </div>
+          <div id="lighter-spark-visual" class="hidden text-2xl animate-ping">✨💥</div>
+        </div>
+
+        <div class="relative flex flex-col items-center">
+          <div id="zippo-lid" onclick="toggleZippoLid()" class="w-24 h-10 rounded-t-2xl bg-gradient-to-r from-amber-300 via-yellow-500 to-amber-600 border-2 border-yellow-200 shadow-lg flex items-center justify-center cursor-pointer transition-transform duration-300 origin-bottom-left">
+            <span class="text-[10px] font-black text-slate-950 tracking-wider">HK ZIPPO</span>
+          </div>
+          <div class="w-24 h-8 bg-slate-800 border-x-2 border-slate-500 flex items-center justify-between px-2">
+            <div class="w-8 h-6 rounded-sm bg-slate-400 border border-slate-200 flex items-center justify-center text-[8px] font-black text-slate-900">防風罩</div>
+            <button id="zippo-flint-wheel" type="button" onpointerdown="strikeFlintWheel()" class="w-9 h-7 rounded-full bg-gradient-to-b from-zinc-300 to-zinc-600 border-2 border-amber-300 shadow-md active:scale-90 flex items-center justify-center text-[9px] font-black text-slate-950 cursor-pointer">
+              ⚙️擦火
+            </button>
+          </div>
+          <div class="w-24 h-16 rounded-b-2xl bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 border-2 border-yellow-200 shadow-xl flex flex-col items-center justify-center p-1">
+            <span class="text-[10px] font-black text-slate-950">社畜續命器</span>
+          </div>
+        </div>
+
+        <div id="cigarette-interactive-bar" onclick="lightUpCigarette()" class="mt-3 w-full max-w-xs p-2.5 rounded-xl bg-black/55 border border-orange-400/40 flex items-center justify-between cursor-pointer hover:bg-orange-950/40 transition">
+          <div class="flex items-center gap-2">
+            <div class="flex items-center">
+              <div class="w-7 h-3.5 rounded-l bg-amber-600 border-r border-amber-800"></div>
+              <div class="w-14 h-3.5 bg-slate-100"></div>
+              <div id="cig-ember-tip" class="w-2.5 h-3.5 rounded-r bg-slate-400 transition-colors"></div>
+            </div>
+            <span id="cig-status-label" class="text-xs font-black text-slate-300">未點火（先掀蓋擦火輪）</span>
+          </div>
+          <span id="cig-action-pill" class="px-2 py-1 rounded-lg bg-slate-700 text-[10px] font-black text-slate-300">等待火焰</span>
+        </div>
+      </div>
+
+      <button onclick="quickOneTapLightCig()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 hover:brightness-110 text-white text-xs font-black shadow-lg">
+        🔥 一鍵「叮！」開蓋點煙深吸一口
+      </button>
+    </div>
+  </div>
+
+  <!-- =========================================================
+  13. 🚇 第一身車廂視覺 · 放工迫地鐵 / 過海巴士 / 紅VAN 小巴修羅場 HUD
+  ========================================================== -->
+  <div id="modal-commute-rush" class="hidden fixed inset-0 z-50 flex items-end justify-center p-3 sm:p-5 pointer-events-none">
+    <div class="fixed top-28 inset-x-0 flex justify-center pointer-events-none">
+      <div id="fp-commute-badge" class="px-4 py-1.5 rounded-full bg-rose-950/90 border-2 border-rose-400 text-rose-100 text-xs font-black shadow-2xl backdrop-blur-md">
+        👁️ 第一身車廂視覺 · 港鐵金鐘站沙甸魚車廂
+      </div>
+    </div>
+
+    <div class="pointer-events-auto bg-slate-900/92 backdrop-blur-xl text-white rounded-3xl max-w-lg w-full p-4 shadow-[0_20px_60px_rgba(0,0,0,0.95)] border-2 border-rose-500 animate-pop text-center">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-700/80">
+        <div class="text-left">
+          <h2 id="commute-modal-title" class="font-black text-sm sm:text-base text-rose-300">🚇 第一身迫車修羅場（可拖曳環顧車廂）</h2>
+          <p id="commute-modal-sub" class="text-[10px] text-slate-300">親眼望住車門關上、吊環搖晃同背囊撚頂住前面！</p>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button onclick="toggleCommuteCameraView()" id="btn-toggle-fp-cam" class="px-2.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-[10px] font-black">
+            🔄 切月台外景
+          </button>
+          <button onclick="closeModal('modal-commute-rush')" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 font-black">✕</button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3 gap-1.5 my-2">
+        <button onclick="selectCommuteVehicle('mtr')" id="comm-tab-mtr" class="py-1.5 rounded-xl bg-rose-600 text-white text-[11px] font-black">🚇 港鐵車廂 ($5.5)</button>
+        <button onclick="selectCommuteVehicle('bus')" id="comm-tab-bus" class="py-1.5 rounded-xl bg-slate-800 text-slate-300 text-[11px] font-black">🚌 巴士上層 ($11.5)</button>
+        <button onclick="selectCommuteVehicle('redvan')" id="comm-tab-redvan" class="py-1.5 rounded-xl bg-slate-800 text-slate-300 text-[11px] font-black">🚐 亡命紅VAN ($20)</button>
+      </div>
+
+      <div class="p-3 rounded-2xl bg-black/55 border border-rose-500/40 space-y-2.5">
+        <div class="flex justify-between text-xs font-black">
+          <span id="commute-crowd-label" class="text-amber-300">👥 車廂擠迫度：爆滿 130%</span>
+          <span id="commute-push-pct" class="text-emerald-400">進度：0%</span>
+        </div>
+        <div class="w-full h-3 bg-slate-800 rounded-full overflow-hidden border border-slate-600">
+          <div id="commute-push-bar" class="h-full bg-gradient-to-r from-rose-500 via-amber-400 to-emerald-400 transition-all duration-150" style="width: 0%"></div>
+        </div>
+
+        <div id="commute-status-text" class="text-[11px] sm:text-xs font-bold text-slate-200 py-1.5 px-2.5 rounded-xl bg-slate-800/80 border border-slate-700 leading-relaxed">
+          🚪 「請勿靠近車門！」你正置身車門邊緣，前面有兩個巨型背囊撚頂住，狂撳縮肚逼入去！
+        </div>
+
+        <button id="btn-commute-mash" type="button" onclick="mashCommutePush()" class="w-full py-3 rounded-2xl bg-gradient-to-r from-rose-600 via-red-600 to-orange-500 active:scale-95 text-white font-black text-xs sm:text-sm shadow-[0_10px_30px_rgba(225,29,72,0.5)] transition">
+          💪 狂撳！縮肚收背囊逼入車廂深處！
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+  14. 📱 隨身社畜智能手機
+  ========================================================== -->
+  <div id="modal-smartphone" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-4" onclick="closeModal('modal-smartphone', event)">
+    <div class="bg-slate-950 text-white rounded-[2.2rem] max-w-sm w-full p-4 shadow-[0_20px_70px_rgba(0,0,0,0.95)] border-4 border-slate-700 animate-pop relative overflow-hidden" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between text-[11px] font-bold text-slate-300 px-2 pb-2 border-b border-slate-800">
+        <span id="phone-time-display">09:00</span>
+        <div class="w-20 h-4 bg-black rounded-full border border-slate-800 flex items-center justify-center">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        </div>
+        <span>5G 🔋92%</span>
+      </div>
+
+      <div class="grid grid-cols-4 gap-1 my-2.5 bg-slate-900 p-1 rounded-2xl border border-slate-800">
+        <button onclick="switchPhoneApp('hko')" id="phone-tab-hko" class="py-1.5 rounded-xl bg-sky-600 text-white text-[10px] font-black transition">🌪️ 天文台</button>
+        <button onclick="switchPhoneApp('mtr')" id="phone-tab-mtr" class="py-1.5 rounded-xl text-slate-300 hover:bg-slate-800 text-[10px] font-black transition">🚇 港鐵通</button>
+        <button onclick="switchPhoneApp('freelance')" id="phone-tab-freelance" class="py-1.5 rounded-xl text-slate-300 hover:bg-slate-800 text-[10px] font-black transition">💼 自由身</button>
+        <button onclick="switchPhoneApp('wallet')" id="phone-tab-wallet" class="py-1.5 rounded-xl text-slate-300 hover:bg-slate-800 text-[10px] font-black transition">🧧 靈符</button>
+      </div>
+
+      <div id="phone-app-hko" class="space-y-2.5 min-h-[240px]">
+        <div class="p-3.5 rounded-2xl bg-gradient-to-br from-sky-900 to-slate-900 border border-sky-500/40">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black text-sky-300">🇭🇰 香港天文台熱帶氣旋警告</span>
+            <span id="hko-signal-badge" class="px-2 py-0.5 rounded-full bg-emerald-500/25 text-emerald-300 text-[10px] font-black border border-emerald-400/40">1號戒備信號</span>
+          </div>
+          <div class="flex items-center gap-3 my-3">
+            <div id="hko-signal-icon" class="text-4xl">🌤️</div>
+            <div>
+              <div id="hko-headline" class="text-sm font-black text-white">天色晴朗，如常返工</div>
+              <div id="hko-subtext" class="text-[11px] text-slate-300 mt-0.5 leading-snug">熱帶氣旋距離香港 600 公里，暫時無得提早放工。</div>
+            </div>
+          </div>
+          <div id="hko-countdown-box" class="hidden p-2 rounded-xl bg-red-950/80 border border-red-400/50 text-center">
+            <div class="text-[11px] font-black text-yellow-300">⚠️ 預警：即將改發八號烈風或暴風信號！</div>
+            <div class="text-xs font-bold text-white mt-0.5">極限逃生倒數：<span id="hko-countdown-sec" class="text-red-400 font-black">20</span> 秒</div>
+          </div>
+        </div>
+        <button onclick="simulateTyphoonWarning()" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 text-[11px] font-bold border border-slate-700">
+          📡 刷新天文台最新風暴路徑雷達
+        </button>
+      </div>
+
+      <div id="phone-app-mtr" class="hidden space-y-2.5 min-h-[240px]">
+        <div class="p-3.5 rounded-2xl bg-slate-900 border border-slate-700 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black text-amber-300">🚇 MTR Mobile 車務狀況</span>
+            <span id="mtr-status-pill" class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-black">全線服務正常</span>
+          </div>
+          <div id="mtr-alert-card" class="p-3 rounded-xl bg-black/40 border border-slate-800 text-xs text-slate-200 leading-relaxed">
+            港島線及荃灣線（金鐘轉車站）列車服務維持正常，放工時段人流極多。
+          </div>
+        </div>
+      </div>
+
+      <div id="phone-app-freelance" class="hidden space-y-2.5 min-h-[240px]">
+        <div id="freelance-locked-view" class="p-4 rounded-2xl bg-slate-900 border border-slate-700 text-center space-y-2">
+          <div class="text-3xl">🔒</div>
+          <div class="text-xs font-black text-amber-300">目前身份：全職受薪社畜</div>
+          <p class="text-[11px] text-slate-300 leading-relaxed">
+            去<strong>上環文武廟</strong>取得 Offer God 靈符並向老細遞信，即可解鎖「無業遊民／自由身模式」！
+          </p>
+        </div>
+
+        <div id="freelance-unlocked-view" class="hidden space-y-2">
+          <div class="p-2.5 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-[11px] text-emerald-200 font-bold">
+            😎 已進入「無業遊民／自由身模式」！無視返工鐘、老細管唔到！
+          </div>
+          <button onclick="doFreelanceGig('ppt')" class="w-full text-left p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 flex items-center justify-between">
+            <div>
+              <div class="text-xs font-black text-white">📊 幫前同事代寫救命 PPT</div>
+              <div class="text-[10px] text-slate-400">遠端秘撈 · 零脫髮風險</div>
+            </div>
+            <span class="px-2 py-1 rounded-lg bg-emerald-500 text-slate-950 font-black text-xs">+HK$180</span>
+          </button>
+          <button onclick="doFreelanceGig('debug')" class="w-full text-left p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 flex items-center justify-between">
+            <div>
+              <div class="text-xs font-black text-white">💻 幫外資公司緊急 Debug</div>
+              <div class="text-[10px] text-slate-400">自由身顧問時薪</div>
+            </div>
+            <span class="px-2 py-1 rounded-lg bg-emerald-500 text-slate-950 font-black text-xs">+HK$260</span>
+          </button>
+          <button onclick="acceptHeadhunterRehire()" class="w-full py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-300 text-[11px] font-black">
+            👔 接受獵頭高薪挖角（重出江湖 Lv.3 起跳）
+          </button>
+        </div>
+      </div>
+
+      <div id="phone-app-wallet" class="hidden space-y-2.5 min-h-[240px]">
+        <div id="phone-wallet-content" class="text-xs text-slate-300">
+          銀包暫時未有過完火嘅許願卡～去「上環文武廟」參拜 Offer God 啦！
+        </div>
+      </div>
+
+      <button onclick="closeModal('modal-smartphone')" class="mt-3 w-full py-2 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-black">
+        收起手機
+      </button>
+    </div>
+  </div>
+
+  <!-- =========================================================
+  15. 邀約組隊共遊 / 預約放工大廳 Modal & 地下情檔案 Modal
+  ========================================================== -->
+  <div id="modal-invite-coop" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4" onclick="closeModal('modal-invite-coop', event)">
+    <div class="bg-slate-900 text-white rounded-3xl max-w-md w-full p-5 shadow-2xl border-2 border-pink-400 animate-pop" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-700">
+        <div>
+          <h3 class="font-black text-base text-pink-300">🤝 邀約同事 / 預約 18:00 放工活動！</h3>
+          <p class="text-[11px] text-slate-300">返工預約蘭桂坊會鎖定 18:00 準時兩人同場赴約共舞！</p>
+        </div>
+        <button onclick="closeModal('modal-invite-coop')" class="w-8 h-8 rounded-lg bg-slate-800 font-black">✕</button>
+      </div>
+
+      <div class="my-3 space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-amber-300 mb-1">1. 選擇你想約邊個（全性別可攻略）：</label>
+          <select id="coop-npc-select" class="w-full text-xs sm:text-sm font-black px-3 py-2.5 rounded-xl bg-slate-800 text-white border border-slate-600 focus:border-pink-400 focus:outline-none">
+            <option value="npc_vivienne">💘 Vivienne (Marketing 女神)</option>
+            <option value="bot_sales">🕺 Sales Jason (陽光型男)</option>
+            <option value="bot_it">💻 IT部阿强 (純情工程師)</option>
+            <option value="bot_hr">👩‍💼 HR Chloe (知性姐姐)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-amber-300 mb-1.5">2. 選擇一齊做咩活動？</label>
+          <div class="space-y-2">
+            <button type="button" onclick="startCoopActivity('lkf')" class="w-full text-left p-2.5 rounded-2xl bg-purple-950/75 hover:bg-purple-900/90 border-2 border-pink-400/70 transition flex items-center gap-3">
+              <span class="text-2xl">🍸</span>
+              <div>
+                <div class="text-xs font-black text-pink-300">約定 18:00 放工落蘭桂坊飲酒 + 雙人舞池共舞</div>
+                <div class="text-[10px] text-amber-200">返工預約後 18:00 準時兩人同場現身舞池！放工時段則即時出發！</div>
+              </div>
+            </button>
+
+            <button type="button" onclick="startCoopActivity('smoke')" class="w-full text-left p-2.5 rounded-2xl bg-emerald-950/60 hover:bg-emerald-900/80 border border-emerald-500/50 transition flex items-center gap-3">
+              <span class="text-2xl">🔥</span>
+              <div>
+                <div class="text-xs font-black text-emerald-300">即刻落後樓梯 EXIT 擦打火機煙 Break</div>
+                <div class="text-[10px] text-slate-300">避開老細視線！兩人並排點煙吹水講公司是非（低警戒）</div>
+              </div>
+            </button>
+
+            <button type="button" onclick="startCoopActivity('commute')" class="w-full text-left p-2.5 rounded-2xl bg-rose-950/60 hover:bg-rose-900/80 border border-rose-500/50 transition flex items-center gap-3">
+              <span class="text-2xl">🚇</span>
+              <div>
+                <div class="text-xs font-black text-rose-300">一齊去金鐘站第一身迫地鐵 / 搭過海巴士</div>
+                <div class="text-[10px] text-slate-300">第一身車廂近距離護花壁咚！好感急升兼一齊返歸！</div>
+              </div>
+            </button>
+
+            <button type="button" onclick="startCoopActivity('home_date')" class="w-full text-left p-2.5 rounded-2xl bg-teal-950/60 hover:bg-teal-900/80 border border-teal-400/50 transition flex items-center gap-3">
+              <span class="text-2xl">🏠</span>
+              <div>
+                <div class="text-xs font-black text-teal-300">帶返屋企 Me Time · 睇 Netflix 煮飯仔（需好感 ≥ 60%）</div>
+                <div class="text-[10px] text-slate-300">私人空間零警戒值！兩人攤喺梳化食外賣傾心事！</div>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 點擊 NPC 自由對話 -->
+  <div id="modal-npc-chat" class="hidden fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-4" onclick="closeModal('modal-npc-chat', event)">
+    <div class="bg-slate-900 text-slate-100 rounded-2xl max-w-md w-full p-5 shadow-2xl border-2 border-amber-400/70 animate-pop" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-700">
+        <div class="flex items-center gap-2.5">
+          <span id="npc-chat-avatar" class="text-3xl">💘</span>
+          <div>
+            <h3 id="npc-chat-name" class="font-black text-base text-white">Vivienne</h3>
+            <p id="npc-chat-sub" class="text-[11px] text-amber-300 font-bold">小心老細喺附近「隔牆有耳」！</p>
+          </div>
+        </div>
+        <button onclick="closeModal('modal-npc-chat')" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-black">✕</button>
+      </div>
+
+      <div class="grid grid-cols-3 gap-1.5 my-2.5">
+        <button type="button" onclick="inviteCurrentNpcTo('lkf')" class="py-2 px-1.5 rounded-xl bg-purple-600/40 hover:bg-purple-600/60 border border-pink-400/60 text-pink-200 text-[10px] font-black">
+          🍸 約放工蘭桂坊
+        </button>
+        <button type="button" onclick="inviteCurrentNpcTo('commute')" class="py-2 px-1.5 rounded-xl bg-rose-600/35 hover:bg-rose-600/55 border border-rose-400/50 text-rose-200 text-[10px] font-black">
+          🚇 約放工迫地鐵
+        </button>
+        <button type="button" onclick="gossipWithCurrentNpc()" class="py-2 px-1.5 rounded-xl bg-amber-600/35 hover:bg-amber-600/55 border border-amber-400/50 text-amber-200 text-[10px] font-black">
+          🗣️ 細聲講八卦
+        </button>
+      </div>
+
+      <div id="npc-chat-history" class="my-2 h-36 overflow-y-auto space-y-2 p-3 rounded-xl bg-black/45 border border-slate-800 text-xs"></div>
+      <div id="npc-chat-quick-tags" class="flex flex-wrap gap-1.5 mb-2.5"></div>
+      <form onsubmit="submitDirectNpcChat(event)" class="flex gap-2">
+        <input id="npc-direct-input" type="text" placeholder="打字講情話、傾公事或吹水..."
+          class="flex-1 text-xs sm:text-sm px-3 py-2 rounded-xl bg-slate-800 text-white border border-slate-600 focus:border-amber-400 focus:outline-none" />
+        <button type="submit" class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 text-xs font-black shrink-0">送出</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 全性別地下情檔案 Modal -->
+  <div id="modal-romance-list" class="hidden fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-4" onclick="closeModal('modal-romance-list', event)">
+    <div class="bg-slate-900 text-white rounded-2xl max-w-md w-full p-5 shadow-2xl border-2 border-pink-500 animate-pop" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-700">
+        <div>
+          <h2 class="font-black text-base text-pink-300">💘 辦公室地下情秘密檔案（男女皆可攻略）</h2>
+          <p class="text-[11px] text-slate-400">可預約 18:00 放工落蘭桂坊雙人赴約！好感達 60% 可帶返屋企 Me Time！</p>
+        </div>
+        <button onclick="closeModal('modal-romance-list')" class="w-8 h-8 rounded-lg bg-slate-800 font-black">✕</button>
+      </div>
+      <div id="romance-targets-grid" class="my-3 space-y-2"></div>
+    </div>
+  </div>
+
+  <!-- 地下八卦大字報牆 -->
+  <div id="modal-gossip" class="hidden fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-4" onclick="closeModal('modal-gossip', event)">
+    <div class="bg-slate-900 text-white rounded-2xl max-w-md w-full p-5 shadow-2xl border-2 border-purple-500 animate-pop" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-700">
+        <div>
+          <h2 class="font-black text-base text-purple-300">🗣️ 後樓梯 EXIT · 同事地下八卦情報網</h2>
+          <p class="text-[11px] text-slate-400">社畜守則：八卦只可同事間私下分享，千祈唔好俾老細聽到！</p>
+        </div>
+        <button onclick="closeModal('modal-gossip')" class="w-8 h-8 rounded-lg bg-slate-800 font-black">✕</button>
+      </div>
+      <div id="gossip-wall-list" class="my-3 space-y-2 max-h-56 overflow-y-auto"></div>
+      <form onsubmit="postNewGossip(event)" class="flex gap-2">
+        <input id="gossip-input" type="text" maxlength="45" placeholder="匿名爆料（例如：邊個成日偷飲維他奶？）"
+          class="flex-1 text-xs px-3 py-2 rounded-xl bg-slate-800 text-white border border-slate-600 focus:border-purple-400 focus:outline-none" />
+        <button type="submit" class="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-black shrink-0">貼大字報</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 裝備與置業店 -->
+  <div id="modal-shop" class="hidden fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-4" onclick="closeModal('modal-shop', event)">
+    <div class="bg-stone-50 text-slate-900 rounded-2xl max-w-md w-full p-5 shadow-2xl border-2 border-amber-500 animate-pop" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-2 border-b border-stone-200">
+        <div>
+          <h2 class="font-black text-base text-slate-900">🛍️ 中環職場神裝 & 蝸居升級店</h2>
+          <p class="text-[11px] text-emerald-700 font-black">現有存款：<span id="shop-money-label">HK$500</span></p>
+        </div>
+        <button onclick="closeModal('modal-shop')" class="w-8 h-8 rounded-lg bg-stone-200 font-black">✕</button>
+      </div>
+      <div class="space-y-2.5 my-3">
+        <button onclick="buyGear('chair', 300)" class="w-full text-left p-3 rounded-xl bg-white hover:bg-amber-50 border border-stone-200 flex items-center justify-between transition">
+          <div><div class="text-xs font-black text-slate-900">🪑 Herman Miller 人體工學椅</div><div class="text-[11px] text-slate-500">雙螢幕搬磚減半扣髮量</div></div>
+          <span class="px-2.5 py-1 rounded-lg bg-amber-500 text-slate-950 font-black text-xs">HK$300</span>
+        </button>
+        <button onclick="buyGear('watch', 600)" class="w-full text-left p-3 rounded-xl bg-white hover:bg-amber-50 border border-stone-200 flex items-center justify-between transition">
+          <div><div class="text-xs font-black text-slate-900">⌚ 勞力士綠水鬼腕錶</div><div class="text-[11px] text-slate-500">地下情好感提升 +50%</div></div>
+          <span class="px-2.5 py-1 rounded-lg bg-amber-500 text-slate-950 font-black text-xs">HK$600</span>
+        </button>
+        <button onclick="buyGear('home_upgrade', 880)" class="w-full text-left p-3 rounded-xl bg-white hover:bg-teal-50 border border-teal-300 flex items-center justify-between transition">
+          <div><div class="text-xs font-black text-teal-900">🏙️ 升級「太古城海景兩房」</div><div class="text-[11px] text-slate-500">睡眠回復精神 +20%，即使輕微夜瞓都唔扣精神！</div></div>
+          <span class="px-2.5 py-1 rounded-lg bg-teal-600 text-white font-black text-xs">HK$880</span>
+        </button>
+        <button onclick="buyGear('tonic', 150)" class="w-full text-left p-3 rounded-xl bg-white hover:bg-emerald-50 border border-stone-200 flex items-center justify-between transition">
+          <div><div class="text-xs font-black text-slate-900">🧴 日本防脫髮生髮精華</div><div class="text-[11px] text-slate-500">立即回復 +35% 髮量與理智</div></div>
+          <span class="px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-black text-xs">HK$150</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 霸氣遞信 -->
+  <div id="modal-resign" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4" onclick="closeModal('modal-resign', event)">
+    <div class="bg-gradient-to-b from-amber-50 to-white text-slate-900 rounded-2xl max-w-md w-full p-5 shadow-2xl border-4 border-amber-500 animate-pop text-center" onclick="event.stopPropagation()">
+      <div class="text-3xl mb-1">✉️🔥</div>
+      <h2 class="font-black text-lg text-red-900">手持 Offer God 靈符 · 當面向老細遞信！</h2>
+      <p class="text-xs text-slate-600 mt-1">Mr. Chan 睇完你封辭職信面色大變：「冷靜啲！我加你 HK$1,500 人工留低幫手啦！」</p>
+      <div class="p-3 my-3 rounded-xl bg-white border border-amber-300 text-left text-xs space-y-1">
+        <div class="font-black text-slate-800">致：董事總經理 Mr. Chan</div>
+        <div>本人 <strong id="resign-player-name">Kelvin 陳</strong> 正式通知辭去現有職務，今日即刻清假走人！</div>
+      </div>
+      <div class="grid grid-cols-2 gap-2.5">
+        <button onclick="executeResignationChoice('counter')" class="py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow-md">
+          💰 接受 Counter-Offer<br><span class="text-[10px]">(+HK$1,500 & 升職繼續打工)</span>
+        </button>
+        <button onclick="executeResignationChoice('quit')" class="py-2.5 px-3 rounded-xl bg-gradient-to-r from-red-700 to-red-600 hover:brightness-110 text-white font-black text-xs shadow-md">
+          😎 瀟灑講「我唔撈喇！」<br><span class="text-[10px]">(解鎖無業遊民／自由身模式)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 上環文武廟 Modal -->
+  <div id="modal-offergod" class="hidden fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto" onclick="closeModal('modal-offergod', event)">
+    <div class="bg-gradient-to-b from-stone-50 via-amber-50 to-red-50 text-slate-900 rounded-2xl max-w-lg w-full p-5 shadow-2xl border-2 border-amber-500 animate-pop my-auto" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-2.5 border-b border-amber-200">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">🏮</span>
+          <div>
+            <h2 class="font-black text-base text-red-900">上環文武廟 · 香火祈福與靈籤問事</h2>
+            <p class="text-[11px] text-amber-800 font-bold">可祈求 Offer God 靈符，或付費 HK$88 填生辰八字問卦！</p>
+          </div>
+        </div>
+        <button onclick="closeModal('modal-offergod')" class="w-8 h-8 rounded-lg bg-amber-200/70 text-amber-900 font-black">✕</button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 my-3">
+        <button onclick="switchTempleTab('card')" id="temple-tab-card" class="py-2 rounded-xl bg-red-700 text-white text-xs font-black shadow">
+          🧧 1. 拜 Offer God 過火靈符
+        </button>
+        <button onclick="switchTempleTab('divine')" id="temple-tab-divine" class="py-2 rounded-xl bg-amber-200/80 text-amber-950 text-xs font-black">
+          🎋 2. 誠心問卦解籤 (HK$88)
+        </button>
+      </div>
+
+      <div id="temple-panel-card">
+        <div class="grid grid-cols-3 gap-1.5 mb-2 text-center text-[11px] font-black">
+          <div id="og-step-pill-1" class="py-1 px-2 rounded-lg bg-red-700 text-white">1. 向神明稟告</div>
+          <div id="og-step-pill-2" class="py-1 px-2 rounded-lg bg-amber-200/60 text-amber-900">2. 順時針過火3圈</div>
+          <div id="og-step-pill-3" class="py-1 px-2 rounded-lg bg-amber-200/60 text-amber-900">3. 收入銀包</div>
+        </div>
+
+        <div class="flex flex-col items-center my-2">
+          <div class="perspective-1000 w-44 h-52 cursor-pointer" onclick="flipOfferCard()">
+            <div id="offer-card-inner" class="card-3d-inner relative w-full h-full">
+              <div class="card-3d-face absolute inset-0 rounded-2xl bg-gradient-to-b from-red-700 via-red-800 to-amber-900 p-3 border-4 border-amber-400 shadow-xl flex flex-col items-center justify-between text-white">
+                <div class="w-full flex justify-between items-center text-[10px] font-black text-amber-200">
+                  <span>上環文武廟</span>
+                  <span id="og-card-status" class="px-2 py-0.5 rounded bg-black/40">未過火</span>
+                </div>
+                <svg width="84" height="90" viewBox="0 0 120 130">
+                  <circle cx="60" cy="54" r="42" fill="#fde047" opacity="0.25"/>
+                  <rect x="36" y="16" width="48" height="16" rx="5" fill="#7f1d1d" stroke="#fbbf24" stroke-width="2.5"/>
+                  <rect x="14" y="21" width="22" height="6" rx="3" fill="#fbbf24"/>
+                  <rect x="84" y="21" width="22" height="6" rx="3" fill="#fbbf24"/>
+                  <circle cx="60" cy="50" r="22" fill="#f5d0b5"/>
+                  <path d="M48 47 Q52 43 56 47 M64 47 Q68 43 72 47" stroke="#292524" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                  <path d="M54 58 Q60 63 66 58" stroke="#292524" stroke-width="2" fill="none"/>
+                  <path d="M32 74 Q60 68 88 74 L94 114 L26 114 Z" fill="#b91c1c" stroke="#fbbf24" stroke-width="2.5"/>
+                  <rect x="74" y="78" width="30" height="20" rx="4" fill="#fef08a" stroke="#d97706" stroke-width="2"/>
+                  <text x="89" y="91" font-size="8" font-weight="900" fill="#b45309" text-anchor="middle">OFFER</text>
+                </svg>
+                <div class="text-center w-full bg-black/30 rounded-xl py-1 px-2 border border-amber-300/40">
+                  <div class="text-[11px] font-black tracking-widest text-amber-200">OFFER GOD 許願卡</div>
+                  <div id="og-card-wish-text" class="text-[9px] font-bold text-white truncate">祈求：成功攞到 Dream Offer！</div>
+                </div>
+              </div>
+              <div class="card-3d-face card-3d-back absolute inset-0 rounded-2xl bg-gradient-to-br from-amber-600 via-red-700 to-red-900 p-4 border-4 border-yellow-300 shadow-xl flex flex-col items-center justify-between text-amber-100">
+                <div class="text-[10px] font-black tracking-widest text-yellow-200 border-b border-yellow-200/40 pb-1 w-full text-center">文武二帝 · 靈符印璽</div>
+                <div class="my-auto flex flex-col items-center justify-center bg-red-950/55 w-24 h-32 rounded-xl border-2 border-yellow-300">
+                  <div class="text-xl font-black tracking-widest text-yellow-300">豐薪</div>
+                  <div class="text-xl font-black tracking-widest text-yellow-300 mt-1">厚祿</div>
+                </div>
+                <div id="og-card-holder-text" class="text-[10px] font-bold text-yellow-100 text-center">善信：Kelvin 陳</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="og-panel-1" class="space-y-2 bg-white p-3 rounded-xl border border-amber-300">
+          <div class="grid grid-cols-2 gap-2">
+            <input id="og-input-name" type="text" placeholder="善信姓名" class="w-full text-xs font-bold px-2.5 py-1.5 rounded-lg bg-stone-50 border border-stone-300" />
+            <input id="og-input-addr" type="text" value="香港中西區上環" class="w-full text-xs font-bold px-2.5 py-1.5 rounded-lg bg-stone-50 border border-stone-300" />
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <input id="og-input-bazi" type="text" value="丙寅年 吉月吉日 辰時" class="w-full text-xs font-bold px-2.5 py-1.5 rounded-lg bg-stone-50 border border-stone-300" />
+            <select id="og-input-goal" class="w-full text-xs font-bold px-2.5 py-1.5 rounded-lg bg-stone-50 border border-stone-300">
+              <option value="成功攞到 Dream Offer！">🎯 成功攞到 Dream Offer！</option>
+              <option value="順利轉工加薪 30%！">💰 順利跳槽加薪 30%！</option>
+              <option value="今年升職做 Manager！">📈 今年升職加人工！</option>
+            </select>
+          </div>
+          <button type="button" onclick="submitOfferStep1()" class="w-full py-2 rounded-xl bg-gradient-to-r from-red-700 to-amber-600 text-white text-xs font-black shadow-md">🙏 誠心稟告 · 開始過火爐</button>
+        </div>
+
+        <div id="og-panel-2" class="hidden space-y-2 bg-white p-3 rounded-xl border border-amber-300 text-center">
+          <div class="relative mx-auto w-40 h-40 rounded-full bg-gradient-to-b from-amber-50 to-orange-100 border-4 border-dashed border-amber-500 flex items-center justify-center select-none" id="censer-ring-zone">
+            <div class="absolute inset-2 rounded-full border-2 border-amber-400/60 pointer-events-none flex items-start justify-center pt-1">
+              <span class="text-[10px] font-black text-amber-900 bg-white/90 px-2 rounded-full">↻ 順時針 (<span id="og-spin-count">0</span>/3 圈)</span>
+            </div>
+            <div class="w-16 h-16 rounded-full bg-gradient-to-b from-amber-700 to-red-900 border-4 border-yellow-300 flex flex-col items-center justify-center text-white pointer-events-none z-10">
+              <span class="text-lg animate-bounce">🔥</span>
+              <span id="og-charge-pct" class="text-[11px] font-black text-white">0%</span>
+            </div>
+            <div id="left-hand-wish-card" class="absolute w-12 h-14 rounded-xl bg-gradient-to-b from-red-700 to-amber-600 border-2 border-yellow-200 shadow-xl flex flex-col items-center justify-center text-white cursor-grab z-20" style="top: 8px; left: 56px;">
+              <span class="text-sm">🤚🧧</span>
+              <span class="text-[7px] font-black text-center leading-tight">順時針<br>繞火爐</span>
+            </div>
+          </div>
+          <button type="button" onclick="boostClockwiseCircle()" class="text-[11px] font-bold text-amber-800 underline">（手機可直接撳呢度輔助順時針繞一圈 ↻）</button>
+        </div>
+
+        <div id="og-panel-3" class="hidden space-y-2 bg-amber-50 p-3 rounded-xl border-2 border-amber-500 text-center">
+          <h3 class="font-black text-sm text-red-900">✨ 香火充電完成！獲得「Offer God 護體」並解鎖去老細房遞信！</h3>
+          <button type="button" onclick="storeCardInWallet()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-red-700 text-white text-xs font-black shadow-lg">👛 將許願卡收入銀包</button>
+        </div>
+      </div>
+
+      <div id="temple-panel-divine" class="hidden space-y-2.5 bg-white p-3.5 rounded-xl border border-amber-300">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[10px] font-black text-amber-900 mb-0.5">1. 出生年月日與時辰 *</label>
+            <input id="divine-birth-input" type="text" value="1997年5月18日 午時" placeholder="例：1996年8月12日 辰時"
+              class="w-full text-xs font-bold px-2.5 py-1.5 rounded-lg bg-stone-50 border border-stone-300" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-black text-amber-900 mb-0.5">2. 所問何事</label>
+            <select id="divine-cat-select" class="w-full text-xs font-bold px-2.5 py-1.5 rounded-lg bg-stone-50 border border-stone-300">
+              <option value="事業跳槽與加薪">💼 事業跳槽與加薪</option>
+              <option value="辦公室地下情姻緣">💘 辦公室地下情姻緣</option>
+              <option value="化解小人與老細針對">👟 化解小人與老細針對</option>
+              <option value="財務自由與偏財運">💰 財務自由與偏財運</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-black text-amber-900 mb-0.5">3. 誠心稟告你想問嘅具體問題 *</label>
+          <input id="divine-question-input" type="text" maxlength="60" placeholder="例如：下個月遞信轉工好唔好？定係留低等升職？"
+            class="w-full text-xs font-bold px-2.5 py-2 rounded-lg bg-stone-50 border border-stone-300 focus:border-red-500 focus:outline-none" />
+        </div>
+
+        <button type="button" onclick="castTempleFortune()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-red-800 via-red-700 to-amber-700 hover:brightness-110 text-yellow-200 text-xs font-black shadow-md">
+          🎋 添香油錢 HK$88 · 搖籤筒誠心求籤問卦
+        </button>
+
+        <div id="divine-result-box" class="hidden p-3 rounded-xl bg-amber-50 border-2 border-red-700/40 text-left space-y-1.5 animate-pop">
+          <div class="flex items-center justify-between">
+            <span id="divine-lot-title" class="text-xs font-black text-red-800">🎋 文武二帝靈籤 · 第十八籤【上上籤】</span>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-red-700 text-white font-black">AI 廟祝解籤</span>
+          </div>
+          <div id="divine-lot-poem" class="text-xs font-black text-amber-950 bg-white/80 p-2 rounded-lg border border-amber-200">
+            「雲開見月照中環，貴人相助莫心煩；順風順水轉新局，豐薪厚祿在眼前。」
+          </div>
+          <p id="divine-lot-explain" class="text-[11px] text-slate-700 leading-relaxed"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 灣仔鵝頸橋底 · 打小人 -->
+  <div id="modal-villain" class="hidden fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-4" onclick="closeModal('modal-villain', event)">
+    <div class="bg-stone-50 text-slate-900 rounded-2xl max-w-md w-full p-5 shadow-2xl border-2 border-orange-500 animate-pop text-center" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-2 border-b border-stone-200">
+        <div class="flex items-center gap-2 text-left">
+          <span class="text-2xl">👵👟</span>
+          <div>
+            <h2 class="font-black text-base text-slate-900">灣仔鵝頸橋 · 跨服打小人 ($50)</h2>
+            <p class="text-[11px] text-orange-700 font-bold">可直接打線上真實玩家，對方螢幕會即時震動！</p>
+          </div>
+        </div>
+        <button onclick="closeModal('modal-villain')" class="w-8 h-8 rounded-lg bg-stone-200 font-black">✕</button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 my-3 text-left">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-700 mb-1">選擇線上玩家或自訂</label>
+          <select id="villain-online-select" onchange="syncVillainTargetSelect()" class="w-full text-xs font-black px-2.5 py-2 rounded-xl bg-white border border-stone-300 text-red-700 mb-1">
+            <option value="刻薄老細 Mr. Chan">👔 刻薄老細 Mr. Chan</option>
+          </select>
+          <input id="villain-target-input" type="text" value="刻薄老細 Mr. Chan" maxlength="14" class="w-full text-xs font-black px-3 py-1.5 rounded-xl bg-stone-100 border border-stone-300 text-red-700" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-700 mb-1">選擇拍打武器</label>
+          <select id="villain-weapon-select" class="w-full text-xs font-black px-2.5 py-2 rounded-xl bg-white border border-stone-300">
+            <option value="👟">👟 殘舊人字拖</option>
+            <option value="⌨️">⌨️ 機械青軸鍵盤</option>
+            <option value="☕">☕ 滾燙 Double 齋啡</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="villain-hit-stage" onclick="hitVillainEffigy()" class="relative my-3 py-5 px-4 rounded-2xl bg-gradient-to-b from-stone-800 to-stone-950 border-2 border-amber-500 cursor-pointer select-none overflow-hidden shadow-inner">
+        <div class="text-[11px] font-bold text-amber-300 mb-2" id="villain-chant-display">👇 狂撳下面隻紙小人，用鞋底狠狠拍打佢！</div>
+        <div id="villain-paper-effigy" class="mx-auto w-24 h-28 bg-[#fef08a] text-slate-900 rounded-xl border-2 border-dashed border-red-600 flex flex-col items-center justify-center shadow-lg">
+          <div class="text-3xl">👿</div>
+          <div id="villain-effigy-label" class="text-xs font-black text-red-700 mt-1 px-1 truncate max-w-full">刻薄老細</div>
+          <div class="text-[9px] text-slate-600 font-bold">小人紙紮</div>
+        </div>
+        <div class="mt-3 max-w-xs mx-auto">
+          <div class="flex justify-between text-[10px] font-bold text-orange-300 mb-1">
+            <span>🔥 怨氣消除度</span>
+            <span id="villain-hit-txt">0 / 10 下</span>
+          </div>
+          <div class="w-full h-2.5 bg-stone-700 rounded-full overflow-hidden">
+            <div id="villain-hit-bar" class="h-full bg-gradient-to-r from-orange-500 to-yellow-400 transition-all duration-150" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 中環蘭桂坊猜枚 -->
+  <div id="modal-lkf" class="hidden fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-4" onclick="closeModal('modal-lkf', event)">
+    <div class="bg-slate-900 text-white rounded-2xl max-w-md w-full p-5 shadow-2xl border-2 border-purple-500 animate-pop text-center" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-700">
+        <div class="text-left">
+          <h2 class="font-black text-base text-purple-300">🍸 蘭桂坊 Happy Hour · 十五二十猜枚</h2>
+          <p class="text-[11px] text-slate-400">猜贏贏 HK$120 籌碼！猜輸飲大杯觸發醉酒搖晃！</p>
+        </div>
+        <button onclick="closeModal('modal-lkf')" class="w-8 h-8 rounded-lg bg-slate-800 font-black">✕</button>
+      </div>
+      <div class="my-4 p-4 rounded-2xl bg-black/50 border border-purple-400/30 space-y-2">
+        <div id="lkf-opponent-label" class="text-xs font-bold text-amber-300">酒桌對手：Sales Jason & 客戶大老闆</div>
+        <div id="lkf-result-box" class="text-sm font-black text-white py-2">揀好你出幾多隻手指同喊嘅總數！</div>
+      </div>
+      <div class="grid grid-cols-3 gap-2">
+        <button onclick="playFifteenTwenty(0, 5)" class="p-2.5 rounded-xl bg-purple-700 hover:bg-purple-600 text-xs font-black">✊✊ 零・五！</button>
+        <button onclick="playFifteenTwenty(5, 10)" class="p-2.5 rounded-xl bg-purple-700 hover:bg-purple-600 text-xs font-black">✋✊ 五・十！</button>
+        <button onclick="playFifteenTwenty(10, 15)" class="p-2.5 rounded-xl bg-purple-700 hover:bg-purple-600 text-xs font-black">✋✋ 十五・二十！</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 年度結算 -->
+  <div id="modal-report" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4" onclick="closeModal('modal-report', event)">
+    <div class="bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-amber-400 animate-pop text-center" onclick="event.stopPropagation()">
+      <div class="inline-block px-3 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[11px] font-black border border-amber-400/40 mb-2">
+        🏆 香港社畜年度職場評估報告
+      </div>
+      <h2 id="report-title" class="text-2xl font-black text-amber-400">職場生存者</h2>
+      <p id="report-subtitle" class="text-xs text-slate-300 mt-1">Kelvin 陳 · IT 資訊科技部</p>
+      <div id="report-stats-grid" class="grid grid-cols-2 gap-2.5 my-4 text-left text-xs"></div>
+      <p id="report-comment" class="text-xs text-amber-200 bg-white/5 p-3 rounded-xl border border-white/10 leading-relaxed mb-4"></p>
+      <button onclick="closeModal('modal-report')" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black text-xs">
+        繼續喺 3D 香港大世界奮鬥！
+      </button>
+    </div>
   </div>
 
   <script>
     // =========================================================================
-    // 1. 全域狀態 (已整合新增機制：日期、遲到、宿醉、KPI歷史)
+    // 1. 全域狀態、性別訂製、伺服器選擇器、四大崗位日薪與 KPI 制度
     // =========================================================================
+    const playerId = 'hk_mmo_' + Math.random().toString(36).slice(2, 8);
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialServer = (urlParams.get('server') || urlParams.get('room') || 'IFC88').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8) || 'IFC88';
+
+    const DEPT_CONFIG = {
+      'IT 資訊科技部': { short: '💻 IT 工程師', basePay: 520, bonusMult: 1.2 },
+      'Marketing 市場部': { short: '📣 Marketing 專員', basePay: 480, bonusMult: 1.3 },
+      'Sales 營業部': { short: '📈 Sales 客戶經理', basePay: 420, bonusMult: 1.8 },
+      'Design 設計部': { short: '🎨 Design 設計師', basePay: 460, bonusMult: 1.25 }
+    };
+
+    const SCENE_LABELS = {
+      office: '🏢 中環寫字樓',
+      commute: '🚇 金鐘迫地鐵/巴士',
+      wanchai: '🌉 灣仔鵝頸橋',
+      sheungwan: '🏮 上環文武廟',
+      lkf: '🍸 中環蘭桂坊',
+      home: '🏠 歸家蝸居'
+    };
+
     const state = {
       gender: 'male',
       hairStyle: 0,
       serverLabel: '1服 · 中環 IFC 金融中心',
-      roomCode: 'IFC88',
+      roomCode: initialServer,
       currentScene: 'office',
       name: 'Kelvin 陳',
       dept: 'IT 資訊科技部',
@@ -54,348 +1444,1495 @@
       accessories: { glasses: true, darkCircles: true, headphones: false, handbag: false },
       x: 0, z: 2.5, targetX: null, targetZ: null, rotY: 0,
       walkPhase: 0, isMoving: false, isSmoking: false, isLitCig: false, isPooping: false,
-      isDancing: false, punishTimer: 0, drunkTimer: 0,
+      isDancing: false,
+      punishTimer: 0,
+      drunkTimer: 0,
       speech: '09:00 返工鐘響！點擊頂部綠色人數可邀線上同事煙Break、請飲咖啡或蘭桂坊共舞！',
-      speechTimer: 8.5, emote: '', emoteTimer: 0,
+      speechTimer: 8.5,
+      emote: '', emoteTimer: 0,
       caffeine: 80, hair: 85, xp: 20, level: 1, money: 500,
-      dailyKpi: 0, dailyPenalty: 0, dailyPoopCount: 0,
-      payslipPaidToday: false, lunchEatenToday: false,
-      affection: { npc_vivienne: 25, bot_sales: 20, bot_it: 20, bot_hr: 15 },
-      secrecyAlert: 0, factions: { bootlick: 30, slack: 50, gossip: 40 },
+      dailyKpi: 0,
+      dailyPenalty: 0,
+      dailyPoopCount: 0,
+      payslipPaidToday: false,
+      lunchEatenToday: false,
+      affection: {
+        npc_vivienne: 25,
+        bot_sales: 20,
+        bot_it: 20,
+        bot_hr: 15
+      },
+      secrecyAlert: 0,
+      factions: { bootlick: 30, slack: 50, gossip: 40 },
       gear: { chair: false, watch: false, homeUpgrade: false },
       hasOfferCard: false, savedCard: null,
-      employmentMode: 'employed', resignedStatus: null,
-      clockMinutes: 540, dismissalNotifiedToday: false,
-      sleepDebuff: 'normal', sleepAlertNotified: false,
-      typhoonSignal: 1, typhoonCountdown: 0, mtrFault: false, companion: null, pendingDate: null,
-      
-      // ===== 新增核心機制狀態 =====
-      day: 1,            // 星期一至五 (1=一, 5=五)
-      dayCount: 1,       // 總生存日數
-      kpiHistory: [],    // 記錄每週 KPI
-      pipWarnings: 0,    // 警告信數量
-      hangover: false,   // 宿醉狀態
-      isLate: false      // 遲到狀態
+      employmentMode: 'employed',
+      resignedStatus: null,
+      clockMinutes: 540, // 09:00
+      dismissalNotifiedToday: false,
+      sleepDebuff: 'normal',
+      sleepAlertNotified: false,
+      typhoonSignal: 1,
+      typhoonCountdown: 0,
+      mtrFault: false,
+      companion: null,
+      pendingDate: null
     };
 
-    function triggerSfx(type) { console.log('SFX triggered:', type); }
-    function addFeedLog(msg) { console.log('Feed:', msg); }
-    function showEventBanner(icon, title, desc, btnText, action) {
-        const banner = document.getElementById('event-banner');
-        if(banner) {
-            banner.classList.remove('hidden');
-            document.getElementById('event-banner-title').textContent = icon + ' ' + title;
-            document.getElementById('event-banner-desc').textContent = desc;
-            document.getElementById('event-banner-btn').textContent = btnText;
-        }
-    }
-    function closeModal(id) { 
-        const el = document.getElementById(id);
-        if(el) el.classList.add('hidden'); 
-    }
-    function showEmote(emoji, msg) { console.log('Emote:', emoji, msg); }
+    document.getElementById('input-room').value = initialServer;
 
-    // =========================================================================
-    // 2. 新增與修正的核心遊戲機制 API
-    // =========================================================================
-
-    // 🐛 修復煙 Break Bug
-    function stopSmoking() {
-      state.isSmoking = false;
-      state.isLitCig = false;
-      const buff = document.getElementById('hud-smoke-buff');
-      if (buff) buff.classList.add('hidden');
-      if (typeof previewModel !== 'undefined' && previewModel?.userData?.cigarette) {
-          previewModel.userData.cigarette.visible = false;
-      }
+    function triggerHaptic(ms = 35) {
+      try { if (navigator.vibrate) navigator.vibrate(ms); } catch (_) {}
     }
 
-    // 擴充轉場函數，確保重置狀態
-    const originalSwitchScene = window.switchScene || function(s){ console.log('Scene changed to:', s); };
-    window.switchScene = function(sceneId, bypass, callback) {
-      stopSmoking(); // 轉場前強制熄煙
-      originalSwitchScene(sceneId, bypass, callback);
-    };
-
-    // 📅 日期推進、找卡數與 Appraisal 季結算
-    window.endOfDayRoutine = function() {
-      state.kpiHistory.push(state.dailyKpi || 0);
-      
-      if (state.day === 5) {
-        const rentAndBills = 3500;
-        state.money -= rentAndBills;
-        if (state.money < 0) {
-          showEventBanner('💸', '破產警告！', '交唔出卡數同租金，今晚要瞓麥記，聽朝精神減半！', '慘烈接受', 'bankruptcy');
-          state.sleepDebuff = 'homeless';
-        } else {
-          addFeedLog(`💸 星期五找卡數及交租，扣除 HK$${rentAndBills}`);
-        }
-        
-        const avgKpi = state.kpiHistory.reduce((a, b) => a + b, 0) / 5;
-        if (avgKpi >= 70) {
-          addFeedLog('🎉 Appraisal 達標！升職加薪！');
-          state.level += 1;
-          state.money += 500; // 獎金
-        } else if (avgKpi < 40) {
-          state.pipWarnings += 1;
-          showEventBanner('🚨', 'PIP 改善計劃警告！', '你呢個禮拜成日去煙Break同偷情，KPI太低！', '死死地氣簽名', 'pip');
-          if (state.pipWarnings >= 2) {
-             addFeedLog('💥 你被正式解僱！進入自由身模式！');
-             state.employmentMode = 'freelance';
-          }
-        }
-        
-        state.kpiHistory = [];
-        state.day = 1; // 循環回星期一
+    function setGender(g) {
+      state.gender = g;
+      const btnM = document.getElementById('btn-gender-male');
+      const btnF = document.getElementById('btn-gender-female');
+      if (g === 'male') {
+        btnM.className = 'py-2 px-3 rounded-xl border-2 border-sky-400 bg-sky-500/20 text-white font-black text-xs flex items-center justify-center gap-1.5 transition';
+        btnF.className = 'py-2 px-3 rounded-xl border border-slate-700 bg-slate-800/70 text-slate-300 hover:border-pink-400/60 font-black text-xs flex items-center justify-center gap-1.5 transition';
+        document.getElementById('preview-gender-tag').textContent = '👨 男社畜 · 1:7 寫實 3D 分身';
+        if (document.getElementById('input-name').value === 'Chloe 林') document.getElementById('input-name').value = 'Kelvin 陳';
+        setHairStyle(0, false);
+        if (state.outfitStyle === 2) setOutfitStyle(0);
       } else {
-        state.day += 1;
+        btnF.className = 'py-2 px-3 rounded-xl border-2 border-pink-400 bg-pink-500/20 text-white font-black text-xs flex items-center justify-center gap-1.5 transition';
+        btnM.className = 'py-2 px-3 rounded-xl border border-slate-700 bg-slate-800/70 text-slate-300 hover:border-sky-400/60 font-black text-xs flex items-center justify-center gap-1.5 transition';
+        document.getElementById('preview-gender-tag').textContent = '👩 女社畜 · 1:7 寫實 3D 分身';
+        if (document.getElementById('input-name').value === 'Kelvin 陳') document.getElementById('input-name').value = 'Chloe 林';
+        setHairStyle(1, false);
+        if (state.outfitStyle === 0) setOutfitStyle(2);
       }
-      state.dayCount += 1;
-      state.dailyKpi = 0; // 重置每日 KPI
+      syncPreviewMeta();
+      rebuildPreview();
+    }
+
+    function setHairStyle(hs, doRebuild = true) {
+      state.hairStyle = hs;
+      document.getElementById('btn-hair-0').className = hs === 0
+        ? 'py-2 px-2 rounded-xl border-2 border-amber-400 bg-amber-500/15 text-white font-bold text-xs transition'
+        : 'py-2 px-2 rounded-xl border border-slate-700 bg-slate-800/70 text-slate-300 font-bold text-xs transition';
+      document.getElementById('btn-hair-1').className = hs === 1
+        ? 'py-2 px-2 rounded-xl border-2 border-amber-400 bg-amber-500/15 text-white font-bold text-xs transition'
+        : 'py-2 px-2 rounded-xl border border-slate-700 bg-slate-800/70 text-slate-300 font-bold text-xs transition';
+      if (doRebuild) rebuildPreview();
+    }
+
+    function selectServer(code, label, el) {
+      document.querySelectorAll('.srv-card').forEach(c => {
+        c.className = 'srv-card p-2.5 rounded-2xl border border-slate-700 bg-slate-800/70 hover:border-emerald-400/50 text-left transition';
+      });
+      if (el) el.className = 'srv-card active p-2.5 rounded-2xl border-2 border-emerald-400 bg-emerald-950/50 text-left transition';
+      state.serverLabel = label;
+      document.getElementById('server-selected-hint').textContent = `已選：${label}`;
+      const roomInput = document.getElementById('input-room');
+      if (code === 'CUSTOM') { roomInput.value = ''; roomInput.focus(); }
+      else { roomInput.value = code; }
+      syncPreviewMeta();
+    }
+
+    function toggleMobileMenu() {
+      const drawer = document.getElementById('hud-toolbar-drawer');
+      drawer.classList.toggle('hidden');
+      drawer.classList.toggle('flex');
+    }
+
+    const cameraRig = {
+      yaw: Math.PI / 4, pitch: 0.62, distance: 17.5,
+      targetX: 0, targetY: 1.0, targetZ: 2.5, followPlayer: true,
+      fpMode: null,
+      fpRiding: false,
+      fpRideTimer: 0
     };
 
-    // 🤢 宿醉系統
-    window.checkHangover = function() {
-      if (state.hangover) {
-        state.caffeine = Math.max(0, state.caffeine - 30);
-        document.getElementById('game-body').classList.add('animate-slap');
-        setTimeout(() => document.getElementById('game-body').classList.remove('animate-slap'), 1000);
-        showEventBanner('🤢', '嚴重宿醉', '尋晚蘭桂坊飲大咗，精神消耗速度加倍，快啲去買杯 $35 Starbucks 續命！', '頂硬上', 'close');
-        state.hangover = false; // 提示後解除，但精神已扣減
+    const keysDown = {};
+    const dpadVec = { dx: 0, dz: 0 };
+    let activeDirectChatNpcId = 'npc_vivienne';
+    let selectedTargetPeerId = null;
+    let latestNewPeerId = null;
+    let latestNewPeerName = '';
+    let newPeerWelcomeExpire = 0;
+
+    const worldShared = {
+      gossips: [
+        { id: 'g1', text: '聽講下個月老細 Mr. Chan 打算用 AI 取代一半寫 PPT 嘅人！', likes: 5, author: '匿名IT狗' },
+        { id: 'g2', text: '邊個成日喺 Pantry 偷飲我盒檸檬茶？已落咗雙倍瀉藥！', likes: 8, author: '匿名苦主' }
+      ],
+      taxiActive: false,
+      taxiSeatsLeft: 2,
+      bombHolderId: null,
+      bombHolderName: '',
+      bombTimer: 0,
+      bossPatrolActive: false,
+      bossPatrolTimer: 0,
+      bossPatrolWaypointIdx: 0
+    };
+
+    const bossPatrolWaypoints = [
+      { x: 3.0, z: -2.0 },
+      { x: -2.5, z: -2.0 },
+      { x: -6.5, z: -5.5 },
+      { x: -2.5, z: 1.5 },
+      { x: 4.5, z: 3.5 },
+      { x: 7.5, z: -7.5 }
+    ];
+
+    const masterNpcs = {
+      npc_vivienne: {
+        id: 'npc_vivienne', gender: 'female', hairStyle: 1, homeScene: 'office', currentScene: 'office',
+        scheduleDesc: '09:00-18:00 中環寫字樓 · 18:00-22:30 蘭桂坊 Happy Hour',
+        name: 'Vivienne (Marketing女神)', dept: 'Marketing 市場部', role: 'romance',
+        outfitStyle: 2, hairColor: '#4a3222', outfitColor: '#be185d',
+        accessories: { glasses: false, darkCircles: false, headphones: false, handbag: true },
+        x: -7.5, z: -7.2, targetX: -7.5, targetZ: -7.2, rotY: 0.6, walkPhase: 0, isMoving: false, isSmoking: false,
+        speech: '用工位 Teams 秘密傳情約我 18:00 放工落蘭桂坊舞池見啦！💘', speechTimer: 999, emote: '💘', emoteTimer: 999
+      },
+      npc_boss: {
+        id: 'npc_boss', gender: 'male', hairStyle: 0, homeScene: 'office', currentScene: 'office',
+        scheduleDesc: '09:00-20:30 坐鎮老細玻璃房巡房 · 20:30 搭專車離開',
+        name: '老細 Mr. Chan', dept: '董事總經理', role: 'boss',
+        outfitStyle: 3, hairColor: '#94a3b8', outfitColor: '#1e293b',
+        accessories: { glasses: true, darkCircles: false, headphones: false, handbag: false },
+        x: 7.5, z: -7.5, targetX: 7.5, targetZ: -7.5, rotY: -0.7, walkPhase: 0, isMoving: false, isSmoking: false,
+        speech: '今日 KPI 表現會直接決定你 18:00 份電子糧單有幾多錢！', speechTimer: 999, emote: '👔', emoteTimer: 999
+      },
+      bot_it: {
+        id: 'bot_it', gender: 'male', hairStyle: 0, homeScene: 'office', currentScene: 'office',
+        scheduleDesc: '09:00-18:00 寫字樓 · 18:00 準時閃人去金鐘站迫地鐵',
+        name: 'IT部阿强', dept: 'IT 資訊科技部', role: 'colleague',
+        outfitStyle: 1, hairColor: '#1c1917', outfitColor: '#1d4ed8',
+        accessories: { glasses: true, darkCircles: true, headphones: true, handbag: false },
+        x: -2.2, z: -1.5, targetX: 2.0, targetZ: 1.5, rotY: 0, walkPhase: 0, isMoving: true, isSmoking: false,
+        speech: '一夠 18:00 我就會準時執背囊衝去金鐘站迫地鐵，一秒都唔會 OT！💻', speechTimer: 8, emote: '', emoteTimer: 0
+      },
+      bot_hr: {
+        id: 'bot_hr', gender: 'female', hairStyle: 1, homeScene: 'office', currentScene: 'office',
+        scheduleDesc: '09:00-18:00 寫字樓抓戀愛 · 18:00 準時放工去金鐘站',
+        name: 'HR Chloe', dept: 'HR 人力資源部', role: 'colleague',
+        outfitStyle: 2, hairColor: '#854d27', outfitColor: '#0f766e',
+        accessories: { glasses: false, darkCircles: false, headphones: false, handbag: false },
+        x: 3.5, z: 3.5, targetX: -3.5, targetZ: 4.0, rotY: -1.2, walkPhase: 0, isMoving: true, isSmoking: false,
+        speech: '18:00 準時派發今日電子糧單！邊個帶薪拉屎太多次會扣 KPI 㗎！📋', speechTimer: 8, emote: '📋', emoteTimer: 8
+      },
+      bot_sales: {
+        id: 'bot_sales', gender: 'male', hairStyle: 0, homeScene: 'office', currentScene: 'office',
+        scheduleDesc: '09:00-18:30 寫字樓 · 18:30 轉場去蘭桂坊陪客猜枚',
+        name: 'Sales Jason', dept: 'Sales 營業部', role: 'colleague',
+        outfitStyle: 0, hairColor: '#1c1917', outfitColor: '#334155',
+        accessories: { glasses: false, darkCircles: true, headphones: true, handbag: false },
+        x: 7.8, z: 5.5, targetX: 8.2, targetZ: 6.8, rotY: -1.5, walkPhase: 0, isMoving: false, isSmoking: false,
+        speech: '放工一齊落蘭桂坊飲返杯？我今晚約咗大客猜枚！🔥', speechTimer: 8, emote: '🚬', emoteTimer: 8
+      },
+      npc_grandma: {
+        id: 'npc_grandma', gender: 'female', hairStyle: 0, homeScene: 'wanchai', currentScene: 'wanchai',
+        scheduleDesc: '全日駐守灣仔鵝頸橋底打小人',
+        name: '鵝頸橋打小人婆婆', dept: '堅拿道天橋底專員', role: 'grandma',
+        outfitStyle: 2, hairColor: '#cbd5e1', outfitColor: '#334155',
+        accessories: { glasses: true, darkCircles: false, headphones: false, handbag: false },
+        x: -1.8, z: -1.5, targetX: -1.8, targetZ: -1.5, rotY: 0.4, walkPhase: 0, isMoving: false, isSmoking: false,
+        speech: '邊個衰老細或線上同事蝦你？埋嚟坐紅膠凳，婆婆幫你打到佢腳軟！👟', speechTimer: 999, emote: '👟', emoteTimer: 999
+      },
+      npc_keeper: {
+        id: 'npc_keeper', gender: 'male', hairStyle: 0, homeScene: 'sheungwan', currentScene: 'sheungwan',
+        scheduleDesc: '全日駐守上環荷李活道文武廟',
+        name: '文武廟廟祝伯伯', dept: '上環荷李活道古蹟', role: 'keeper',
+        outfitStyle: 0, hairColor: '#e2e8f0', outfitColor: '#7f1d1d',
+        accessories: { glasses: true, darkCircles: false, headphones: false, handbag: false },
+        x: -2.6, z: -1.8, targetX: -2.6, targetZ: -1.8, rotY: 0.5, walkPhase: 0, isMoving: false, isSmoking: false,
+        speech: '求 Offer God 靈符過火3圈，或者添 HK$88 香油錢填時辰八字問卦！🏮', speechTimer: 999, emote: '🏮', emoteTimer: 999
+      },
+      npc_bartender: {
+        id: 'npc_bartender', gender: 'male', hairStyle: 0, homeScene: 'lkf', currentScene: 'lkf',
+        scheduleDesc: '全日駐守中環蘭桂坊酒吧吧台',
+        name: 'LKF 調酒師 Leo', dept: '中環蘭桂坊酒吧', role: 'bartender',
+        outfitStyle: 3, hairColor: '#854d27', outfitColor: '#1e1b4b',
+        accessories: { glasses: false, darkCircles: false, headphones: false, handbag: false },
+        x: 0, z: -5.2, targetX: 0, targetZ: -5.2, rotY: 0, walkPhase: 0, isMoving: false, isSmoking: false,
+        speech: '雷射燈開著晒啦！快啲落舞池跳舞或者玩十五二十猜枚！🍸', speechTimer: 999, emote: '🕺', emoteTimer: 999
+      },
+      npc_station_staff: {
+        id: 'npc_station_staff', gender: 'male', hairStyle: 0, homeScene: 'commute', currentScene: 'commute',
+        scheduleDesc: '全日駐守金鐘站月台指揮人潮',
+        name: '金鐘站月台助理', dept: '港鐵黃衫軍指揮員', role: 'colleague',
+        outfitStyle: 0, hairColor: '#1c1917', outfitColor: '#facc15',
+        accessories: { glasses: false, darkCircles: false, headphones: false, handbag: false },
+        x: -2.8, z: -2.5, targetX: -2.8, targetZ: -2.5, rotY: 0.4, walkPhase: 0, isMoving: false, isSmoking: false,
+        speech: '「請勿靠近車門！往荃灣／紅磡方向嘅乘客請縮肚迫入車廂中段！」📢', speechTimer: 999, emote: '📢', emoteTimer: 999
       }
     };
 
-    // 🚇 迫地鐵連鎖反應 (遲到機制)
-    window.commuteGameEnd = function(success) {
-      if (!success) {
-        state.isLate = true;
-        addFeedLog('⏰ 上唔到車！你今日遲到咗 15 分鐘！');
-      }
-      window.switchScene('office');
-      
-      if (state.isLate) {
-        state.secrecyAlert = 50; // 老細警戒值起步極高
-        showEmote('👔', '老細 Mr. Chan 啤住你：「又遲到？今日盯實你！」');
-        state.isLate = false;
-      }
-    };
+    const remotePlayers = new Map();
+    const syncChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('hk_3d_mmo_v13') : null;
 
-    // 🚌 第一身車廂視覺與營業時間
-    window.applyVehicleVisuals = function(type) {
-      const container = document.getElementById('modal-commute-rush');
-      const badge = document.getElementById('fp-commute-badge');
-      if (!container || !badge) return;
-      if (type === 'mtr') {
-        badge.textContent = '🚇 港鐵車廂 · 沙甸魚視覺';
-        container.style.backgroundColor = 'rgba(15, 23, 42, 0.95)';
-      } else if (type === 'bus') {
-        badge.textContent = '🚌 九巴上層 · 搖晃視覺';
-        container.style.backgroundColor = 'rgba(69, 26, 3, 0.95)';
-      } else if (type === 'redvan') {
-        badge.textContent = '🚐 亡命紅 VAN · 推背視覺';
-        container.style.backgroundColor = 'rgba(69, 10, 10, 0.95)';
-      }
-    };
-    
-    const originalSelectCommuteVehicle = window.selectCommuteVehicle || function(){};
-    window.selectCommuteVehicle = function(type) {
-      // 在此可加入 checkTransportAvailability() 的時間檢查邏輯
-      applyVehicleVisuals(type);
-      originalSelectCommuteVehicle(type);
-    };
-
-    // ✉️ 終局機制 (Endgame)
-    window.executeResignationChoice = function(choice) {
-      if (choice === 'quit') {
-        closeModal('modal-resign');
-        triggerSfx('bell'); 
-        
-        const repTitle = document.getElementById('report-title');
-        const repSub = document.getElementById('report-subtitle');
-        const repComment = document.getElementById('report-comment');
-        
-        if (repTitle) repTitle.textContent = '🎉 逃出生天：辭職成功！';
-        if (repSub) repSub.textContent = `經歷咗 ${state.dayCount || 1} 日嘅折磨，你終於重獲自由！`;
-        if (repComment) repComment.textContent = '你霸氣將辭職信掟喺老細枱面，轉身離開 IFC。從此解鎖「自由身/老闆模式」，中環再困你唔住！';
-        
-        const reportModal = document.getElementById('modal-report');
-        if (reportModal) reportModal.classList.remove('hidden');
-        
-        state.employmentMode = 'freelance'; // 永久切換模式
-      } else if (choice === 'counter') {
-        state.money += 1500;
-        closeModal('modal-resign');
-        showEventBanner('💰', '接受 Counter-Offer', '老細加薪挽留，你選擇繼續留喺地獄...', '繼續返工', 'close');
-      }
-    };
-
-    // 模擬遊戲時間推進
-    setInterval(() => {
-        // 每日 09:00 檢查宿醉
-        if (state.clockMinutes === 540) window.checkHangover();
-        
-        // 每日 23:59 結算
-        if (state.clockMinutes >= 1439) {
-            window.endOfDayRoutine();
-            state.clockMinutes = 540; // 重置為翌日 09:00
-        }
-    }, 60000);
-// =========================================================================
-    // 🌟 全新擴充機制：找卡數、宿醉、遲到、Endgame
     // =========================================================================
-    
-    // 1. 擴充全域狀態
-    Object.assign(state, {
-      day: 1,            // 星期一至五 (1=一, 5=五)
-      dayCount: 1,       // 總生存日數
-      kpiHistory: [],    // 記錄每週 KPI
-      pipWarnings: 0,    // 警告信數量
-      hangover: false,   // 宿醉狀態
-      isLate: false      // 遲到狀態
+    // 2. Web Audio API 地道音效引擎
+    // =========================================================================
+    let audioContext = null;
+    function triggerSfx(type) {
+      try {
+        if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const t = audioContext.currentTime;
+        if (type === 'zippo_open') {
+          const osc = audioContext.createOscillator();
+          const gain = audioContext.createGain();
+          osc.connect(gain); gain.connect(audioContext.destination);
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(2400, t);
+          osc.frequency.exponentialRampToValueAtTime(3200, t + 0.08);
+          gain.gain.setValueAtTime(0.22, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.14);
+          osc.start(t); osc.stop(t + 0.14);
+        } else if (type === 'zippo_spark') {
+          const osc = audioContext.createOscillator();
+          const gain = audioContext.createGain();
+          osc.connect(gain); gain.connect(audioContext.destination);
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(1600, t);
+          osc.frequency.exponentialRampToValueAtTime(420, t + 0.09);
+          gain.gain.setValueAtTime(0.26, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.10);
+          osc.start(t); osc.stop(t + 0.10);
+        } else if (type === 'tram') {
+          [0, 0.24].forEach(offset => {
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            osc.connect(gain); gain.connect(audioContext.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1180, t + offset);
+            osc.frequency.exponentialRampToValueAtTime(880, t + offset + 0.18);
+            gain.gain.setValueAtTime(0.18, t + offset);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + offset + 0.20);
+            osc.start(t + offset); osc.stop(t + offset + 0.20);
+          });
+        } else if (type === 'mtr_door') {
+          for (let i = 0; i < 4; i++) {
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            osc.connect(gain); gain.connect(audioContext.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1040, t + i * 0.14);
+            gain.gain.setValueAtTime(0.18, t + i * 0.14);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + i * 0.14 + 0.09);
+            osc.start(t + i * 0.14); osc.stop(t + i * 0.14 + 0.09);
+          }
+        } else if (type === 'slap') {
+          const osc = audioContext.createOscillator();
+          const gain = audioContext.createGain();
+          osc.connect(gain); gain.connect(audioContext.destination);
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(240, t);
+          osc.frequency.exponentialRampToValueAtTime(55, t + 0.13);
+          gain.gain.setValueAtTime(0.45, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.14);
+          osc.start(t); osc.stop(t + 0.14);
+        } else if (type === 'bell') {
+          const osc = audioContext.createOscillator();
+          const gain = audioContext.createGain();
+          osc.connect(gain); gain.connect(audioContext.destination);
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(660, t);
+          osc.frequency.exponentialRampToValueAtTime(990, t + 0.28);
+          gain.gain.setValueAtTime(0.22, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.30);
+          osc.start(t); osc.stop(t + 0.30);
+        } else if (type === 'alarm') {
+          const osc = audioContext.createOscillator();
+          const gain = audioContext.createGain();
+          osc.connect(gain); gain.connect(audioContext.destination);
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(520, t);
+          osc.frequency.setValueAtTime(740, t + 0.15);
+          gain.gain.setValueAtTime(0.22, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.35);
+          osc.start(t); osc.stop(t + 0.35);
+        } else if (type === 'clink') {
+          const osc = audioContext.createOscillator();
+          const gain = audioContext.createGain();
+          osc.connect(gain); gain.connect(audioContext.destination);
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(1450, t);
+          osc.frequency.exponentialRampToValueAtTime(1950, t + 0.15);
+          gain.gain.setValueAtTime(0.25, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+          osc.start(t); osc.stop(t + 0.18);
+        }
+      } catch (_) {}
+    }
+
+    // =========================================================================
+    // 3. PeerJS 跨網絡房間連線 & 雙向真人玩家互動系統（含煙 Break 邀約）
+    // =========================================================================
+    let peerInstance = null;
+    const peerConnections = new Map();
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && document.getElementById('creation-screen').classList.contains('hidden')) {
+        broadcastPlayerSync();
+      }
     });
 
-    // 2. 修復煙 Break Bug：轉場前強制熄煙
-    function stopSmoking() {
-      state.isSmoking = false;
-      state.isLitCig = false;
-      const buff = document.getElementById('hud-smoke-buff');
-      if (buff) buff.classList.add('hidden');
-      if (typeof previewModel !== 'undefined' && previewModel?.userData?.cigarette) {
-          previewModel.userData.cigarette.visible = false;
+    function initPeerMultiplayer() {
+      if (typeof Peer === 'undefined') return;
+      peerConnections.clear();
+      const room = (state.roomCode || 'IFC88').toUpperCase().replace(/[^A-Z0-9]/g, '') || 'IFC88';
+      state.roomCode = room;
+      const hostPeerId = `hk_office_srv52_${room}_host`;
+
+      const peerConfig = {
+        config: {
+          iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' }
+          ]
+        }
+      };
+
+      try {
+        if (peerInstance) { try { peerInstance.destroy(); } catch (_) {} }
+        peerInstance = new Peer(hostPeerId, peerConfig);
+
+        peerInstance.on('open', () => {
+          addFeedLog(`🌐 已登入伺服器【${room}】(主機節點)，跨裝置即時同場！`);
+          updateOnlineCountUI();
+        });
+
+        peerInstance.on('connection', (conn) => setupPeerConnection(conn, true));
+
+        peerInstance.on('error', (err) => {
+          if (err.type === 'unavailable-id') {
+            try { peerInstance.destroy(); } catch (_) {}
+            peerInstance = new Peer(peerConfig);
+            peerInstance.on('open', () => {
+              const conn = peerInstance.connect(hostPeerId, { reliable: true });
+              setupPeerConnection(conn, false);
+              addFeedLog(`🌐 已成功連線登入伺服器【${room}】！`);
+            });
+          }
+        });
+      } catch (_) {}
+    }
+
+    function setupPeerConnection(conn, amIHost) {
+      conn.on('open', () => {
+        peerConnections.set(conn.peer, conn);
+        broadcastNetworkPacket({ type: 'SYNC_PLAYER', senderId: playerId, payload: buildPlayerPacket() });
+        if (amIHost) {
+          try {
+            conn.send({
+              type: 'SYNC_WORLD_STATE',
+              senderId: playerId,
+              worldShared: {
+                gossips: worldShared.gossips,
+                taxiActive: worldShared.taxiActive,
+                taxiSeatsLeft: worldShared.taxiSeatsLeft,
+                bombHolderId: worldShared.bombHolderId,
+                bombHolderName: worldShared.bombHolderName
+              }
+            });
+          } catch (_) {}
+        }
+        updateOnlineCountUI();
+      });
+
+      conn.on('data', (data) => handleNetworkPacket(data, conn));
+
+      conn.on('close', () => {
+        peerConnections.delete(conn.peer);
+        updateOnlineCountUI();
+        if (conn.peer.endsWith('_host')) {
+          setTimeout(() => initPeerMultiplayer(), 1000 + Math.random() * 1200);
+        }
+      });
+    }
+
+    function broadcastNetworkPacket(packet) {
+      if (syncChannel) syncChannel.postMessage(packet);
+      peerConnections.forEach(conn => {
+        if (conn.open) {
+          try { conn.send(packet); } catch (_) {}
+        }
+      });
+    }
+
+    if (syncChannel) {
+      syncChannel.onmessage = (ev) => handleNetworkPacket(ev.data, null);
+    }
+
+    function handleNetworkPacket(pkt, fromConn) {
+      if (!pkt || !pkt.type) return;
+      if (pkt.senderId === playerId) return;
+
+      if (fromConn && peerInstance && peerInstance.id && peerInstance.id.endsWith('_host')) {
+        peerConnections.forEach((c, pid) => {
+          if (pid !== fromConn.peer && c.open) {
+            try { c.send(pkt); } catch (_) {}
+          }
+        });
+      }
+
+      if (pkt.type === 'SYNC_WORLD_STATE' && pkt.worldShared) {
+        worldShared.gossips = pkt.worldShared.gossips || worldShared.gossips;
+        worldShared.taxiActive = !!pkt.worldShared.taxiActive;
+        worldShared.taxiSeatsLeft = pkt.worldShared.taxiSeatsLeft || 0;
+        worldShared.bombHolderId = pkt.worldShared.bombHolderId || null;
+        worldShared.bombHolderName = pkt.worldShared.bombHolderName || '';
+      } else if (pkt.type === 'SYNC_PLAYER') {
+        const p = pkt.payload;
+        if (!p || p.id === playerId) return;
+        const isNew = !remotePlayers.has(p.id);
+        remotePlayers.set(p.id, {
+          ...p, isRemote: true, role: 'peer', walkPhase: 0, lastSeen: Date.now(),
+          speechTimer: p.speech ? 5 : 0, emoteTimer: p.emote ? 5 : 0
+        });
+        if (isNew) {
+          const gIcon = p.gender === 'female' ? '👩' : '👨';
+          addFeedLog(`🪪 ${gIcon} 新同事【${p.name}】(${p.dept}) 拍卡進入了本伺服器！`);
+          latestNewPeerId = p.id;
+          latestNewPeerName = p.name;
+          newPeerWelcomeExpire = 14;
+          updateDynamicCapsuleHUD();
+          triggerSfx('bell');
+        }
+        updateOnlineCountUI();
+        if (!document.getElementById('modal-online-peers').classList.contains('hidden')) {
+          renderOnlinePeersList();
+        }
+      } else if (pkt.type === 'PEER_SOCIAL_INTERACT') {
+        if (pkt.targetId !== playerId) return;
+        triggerSfx('bell');
+        triggerHaptic(50);
+
+        if (pkt.action === 'welcome_bonus') {
+          state.money += 50;
+          gainXP(15);
+          refreshStatsUI();
+          showEmote('🧧', `收到【${pkt.fromName}】派發嘅入職迎新利是 +HK$50！`);
+          addFeedLog(`🧧 【全服迎新】${pkt.fromName} 派咗封 HK$50 迎新利是俾你！`);
+        } else if (pkt.action === 'smoke_invite') {
+          selectedTargetPeerId = pkt.senderId;
+          triggerSfx('zippo_open');
+          showEventBanner(
+            '🔥',
+            `【${pkt.fromName}】邀你落後樓梯 EXIT 煙 Break！`,
+            '避開老細同 HR 死角！過去後樓梯並排點煙吹水講是非，雙方即時回復 +20% 理智、+15 XP！',
+            '🔥 接受煙 Break 邀約！',
+            'accept_peer_smoke',
+            true
+          );
+        } else if (pkt.action === 'smoke_accepted') {
+          state.hair = Math.min(100, state.hair + 20);
+          gainXP(15);
+          refreshStatsUI();
+          for (let i = 0; i < 8; i++) spawnParticle(state.x + 0.18, 1.5, state.z + 0.18, '#f8fafc');
+          showEmote('🚬', `【${pkt.fromName}】過咗嚟後樓梯一齊點煙吹水啦！理智 +20%！`);
+          addFeedLog(`🔥 ${pkt.fromName} 接受咗你嘅煙 Break 邀約，兩人喺後樓梯 EXIT 吞雲吐霧講是非！`);
+        } else if (pkt.action === 'coffee') {
+          state.caffeine = Math.min(100, state.caffeine + 30);
+          state.hair = Math.min(100, state.hair + 10);
+          refreshStatsUI();
+          showEmote('☕', `收到【${pkt.fromName}】請飲 Starbucks！精神 +30%、髮量 +10%！`);
+          addFeedLog(`☕ 【同事暖心】${pkt.fromName} 隔空請你飲咗杯 Starbucks 特濃咖啡！`);
+        } else if (pkt.action === 'cover') {
+          state.secrecyAlert = 0;
+          gainXP(20);
+          refreshStatsUI();
+          showEmote('🛡️', `【${pkt.fromName}】幫你把風擋住老細視線！警戒清零 +20 XP！`);
+          addFeedLog(`🛡️ 【職場戰友】${pkt.fromName} 幫你把風掩護摸魚，警戒值全消！`);
+        } else if (pkt.action === 'dance_invite') {
+          selectedTargetPeerId = pkt.senderId;
+          showEventBanner(
+            '💃',
+            `【${pkt.fromName}】邀請你去蘭桂坊舞池共舞！`,
+            '點擊立即傳送去中環蘭桂坊雷射舞池，與線上同事同步熱舞乾杯！',
+            '🍸 接受邀請前往蘭桂坊！',
+            'accept_peer_dance',
+            true
+          );
+        } else if (pkt.action === 'dm') {
+          showEmote('💬', `[私聊] ${pkt.fromName}：${pkt.text}`);
+          addFeedLog(`💌 【真人私聊】${pkt.fromName} 對你說：「${pkt.text}」`);
+        }
+      } else if (pkt.type === 'PASS_BOMB') {
+        worldShared.bombHolderId = pkt.toId;
+        worldShared.bombHolderName = pkt.toName;
+        worldShared.bombTimer = pkt.timer || 18;
+        addFeedLog(`🍳 【卸膊警報】${pkt.fromName} 將地獄級 PPT 炸彈甩咗俾【${pkt.toName}】！`);
+        if (pkt.toId === playerId) {
+          triggerSfx('alarm');
+          triggerHaptic(80);
+          showEventBanner('🍳', '你中咗「卸膊飛鍋」！', `${pkt.fromName} 將地獄級 PPT 甩咗俾你！快啲按下面「搵人卸膊」甩走佢！`, '🍳 立即搵人卸膊！', 'pass_bomb');
+        }
+      } else if (pkt.type === 'CURSE_PLAYER') {
+        addFeedLog(`👟 【鵝頸橋詛咒】${pkt.fromName} 喺灣仔鵝頸橋用鞋底狠狠打緊【${pkt.targetName}】個小人！`);
+        if (pkt.targetId === playerId) {
+          if (state.hasOfferCard) {
+            triggerSfx('bell');
+            showEmote('🧧', 'Offer God 護體！成功反彈鵝頸橋打小人詛咒！');
+          } else {
+            triggerSfx('slap');
+            triggerHaptic(120);
+            document.getElementById('game-body').classList.add('screen-curse-shake');
+            setTimeout(() => document.getElementById('game-body').classList.remove('screen-curse-shake'), 800);
+            state.hair = Math.max(5, state.hair - 12);
+            refreshStatsUI();
+            selectedTargetPeerId = pkt.senderId;
+            showEventBanner(
+              '👟',
+              `警告！${pkt.fromName} 正在鵝頸橋打你小人！`,
+              '你嘅螢幕受到怨氣震動（理智 -12%）！要唔要即刻去鵝頸橋反打佢小人？',
+              '👟 去鵝頸橋反打佢小人！',
+              'counter_curse_peer',
+              true
+            );
+          }
+        }
+      } else if (pkt.type === 'NEW_GOSSIP') {
+        worldShared.gossips.unshift(pkt.gossip);
+        addFeedLog(`🗣️ 【後樓梯地下大字報】「${pkt.gossip.text}」`);
+      } else if (pkt.type === 'TAXI_START') {
+        startRedTaxiEvent(false);
+      } else if (pkt.type === 'TAXI_CLAIM') {
+        worldShared.taxiSeatsLeft = Math.max(0, worldShared.taxiSeatsLeft - 1);
+        addFeedLog(`🚕 ${pkt.winnerName} 搶到紅色的士座位，免車費準時閃人！`);
+      } else if (pkt.type === 'GLOBAL_CHAT') {
+        addFeedLog(`💬 [${pkt.sceneLabel}] ${pkt.name}：${pkt.text}`);
       }
     }
 
-    // 覆寫原本嘅 switchScene 來加入熄煙邏輯
-    const originalSwitchScene = window.switchScene;
-    window.switchScene = function(sceneId, bypass, callback) {
-      stopSmoking(); 
-      if(originalSwitchScene) originalSwitchScene(sceneId, bypass, callback);
+    function updateOnlineCountUI() {
+      const total = remotePlayers.size + 1;
+      document.getElementById('hud-room-badge').textContent = `👥 ${state.roomCode} · ${total}人互動`;
+
+      // 同步更新各場景轉場按鈕上的線上人數分布
+      const counts = { office: 0, commute: 0, wanchai: 0, sheungwan: 0, lkf: 0, home: 0 };
+      counts[state.currentScene] = (counts[state.currentScene] || 0) + 1;
+      remotePlayers.forEach(rp => {
+        if (counts[rp.currentScene] !== undefined) counts[rp.currentScene]++;
+      });
+      Object.entries(counts).forEach(([k, c]) => {
+        const span = document.getElementById(`scene-cnt-${k}`);
+        if (span) span.textContent = c > 0 ? `(${c}人)` : '';
+      });
+    }
+
+    function openOnlinePeersModal() {
+      document.getElementById('peers-modal-room').textContent = state.roomCode;
+      renderOnlinePeersList();
+      document.getElementById('modal-online-peers').classList.remove('hidden');
+    }
+
+    function renderOnlinePeersList() {
+      const box = document.getElementById('online-peers-list');
+      const peers = Array.from(remotePlayers.values());
+      if (peers.length === 0) {
+        box.innerHTML = `
+          <div class="p-4 rounded-2xl bg-slate-800/80 border border-slate-700 text-center space-y-2">
+            <div class="text-2xl">🏢</div>
+            <div class="text-xs font-black text-amber-300">暫時未有其他真人玩家登入房號【${state.roomCode}】</div>
+            <p class="text-[11px] text-slate-400 leading-relaxed">
+              撳右上角「📋 複製邀請連結」傳俾朋友，或者開多一個瀏覽器分頁登入同一個房號【${state.roomCode}】，即可一齊落後樓梯煙 Break、請飲咖啡或蘭桂坊共舞！
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      box.innerHTML = peers.map(rp => {
+        const gIcon = rp.gender === 'female' ? '👩' : '👨';
+        const scLabel = SCENE_LABELS[rp.currentScene] || rp.currentScene;
+        return `
+          <div class="p-3 rounded-2xl bg-slate-800 border border-emerald-500/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <div class="text-xs font-black text-white flex items-center gap-1.5">
+                <span>${gIcon} ${rp.name}</span>
+                <span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px]">${rp.dept}</span>
+              </div>
+              <div class="text-[10px] text-amber-300 font-bold mt-0.5">📍 目前位置：${scLabel}</div>
+            </div>
+            <div class="flex flex-wrap gap-1 shrink-0">
+              <button onclick="closeModal('modal-online-peers'); selectedTargetPeerId='${rp.id}'; sendPeerSocialAction('smoke_invite')" class="px-2 py-1.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-[10px] font-black shadow">
+                🔥 邀煙Break
+              </button>
+              <button onclick="closeModal('modal-online-peers'); openPeerInteractionModalById('${rp.id}')" class="px-2.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-[10px] font-black shadow">
+                🤝 更多互動
+              </button>
+              <button onclick="closeModal('modal-online-peers'); selectedTargetPeerId='${rp.id}'; teleportToTargetPeer()" class="px-2 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-[10px] font-black">
+                🚀 會合
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openPeerInteractionModalById(pid) {
+      const rp = remotePlayers.get(pid);
+      if (rp) openPeerInteractionModal(rp);
+    }
+
+    function sendWelcomeBonusToNewPeer() {
+      newPeerWelcomeExpire = 0;
+      updateDynamicCapsuleHUD();
+      if (!latestNewPeerId) return;
+      gainXP(15);
+      refreshStatsUI();
+      showEmote('🧧', `向新同事【${latestNewPeerName}】派發迎新利是！`);
+      addFeedLog(`🧧 你向新入職嘅【${latestNewPeerName}】派發咗迎新利是 (+15 XP)！`);
+      broadcastNetworkPacket({
+        type: 'PEER_SOCIAL_INTERACT',
+        senderId: playerId,
+        fromName: state.name,
+        targetId: latestNewPeerId,
+        action: 'welcome_bonus'
+      });
+    }
+
+    function sendPeerSocialAction(actionType) {
+      closeModal('modal-peer-action');
+      const rp = remotePlayers.get(selectedTargetPeerId);
+      if (!rp) { addFeedLog('⚠️ 該玩家已離線'); return; }
+
+      if (actionType === 'smoke_invite') {
+        const goStairwellSmoke = () => {
+          state.x = 7.6; state.z = 5.6;
+          state.targetX = null; state.targetZ = null;
+          state.isLitCig = true;
+          smokeBuffTimer = 35;
+          document.getElementById('hud-smoke-buff').classList.remove('hidden');
+          triggerSfx('zippo_open');
+          for (let i = 0; i < 8; i++) spawnParticle(state.x + 0.18, 1.5, state.z + 0.18, '#f8fafc');
+          showEmote('🔥', `「叮！」你已到達後樓梯 EXIT 點煙，正等【${rp.name}】過嚟一齊吞雲吐霧講是非！`);
+          addFeedLog(`🔥 你向【${rp.name}】發出後樓梯 EXIT 煙 Break 邀約！`);
+        };
+        if (state.currentScene !== 'office') switchScene('office', false, goStairwellSmoke);
+        else goStairwellSmoke();
+      } else if (actionType === 'coffee') {
+        if (state.money < 35) { addFeedLog('⚠️ 餘額不足 HK$35 請飲 Starbucks！'); return; }
+        state.money -= 35;
+        gainXP(15);
+        refreshStatsUI();
+        showEmote('☕', `隔空請咗【${rp.name}】飲杯 Starbucks！`);
+        addFeedLog(`☕ 你花費 HK$35 請【${rp.name}】飲咖啡，對方精神大振！`);
+      } else if (actionType === 'cover') {
+        gainXP(20);
+        refreshStatsUI();
+        showEmote('🛡️', `你幫【${rp.name}】把風擋住老細視線！`);
+        addFeedLog(`🛡️ 你幫【${rp.name}】把風掩護摸魚，獲得戰友情 +20 XP！`);
+      } else if (actionType === 'dance_invite') {
+        showEmote('💃', `已向【${rp.name}】發出蘭桂坊舞池共舞邀請！`);
+        addFeedLog(`💃 你邀請【${rp.name}】前往中環蘭桂坊舞池共舞！`);
+        if (state.currentScene !== 'lkf') switchScene('lkf');
+      }
+
+      broadcastNetworkPacket({
+        type: 'PEER_SOCIAL_INTERACT',
+        senderId: playerId,
+        fromName: state.name,
+        targetId: rp.id,
+        action: actionType
+      });
+    }
+
+    function sendDirectMessageToPeer() {
+      const input = document.getElementById('peer-dm-input');
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+      const rp = remotePlayers.get(selectedTargetPeerId);
+      if (!rp) return;
+      closeModal('modal-peer-action');
+      sayBubble(`（私聊 ${rp.name}）${text}`);
+      addFeedLog(`💌 你私聊【${rp.name}】：${text}`);
+      broadcastNetworkPacket({
+        type: 'PEER_SOCIAL_INTERACT',
+        senderId: playerId,
+        fromName: state.name,
+        targetId: rp.id,
+        action: 'dm',
+        text
+      });
+    }
+
+    function teleportToTargetPeer() {
+      closeModal('modal-peer-action');
+      const rp = remotePlayers.get(selectedTargetPeerId);
+      if (!rp) return;
+      const moveNextTo = () => {
+        state.x = Math.max(-9, Math.min(9, rp.x + 1.1));
+        state.z = Math.max(-9, Math.min(9, rp.z + 0.3));
+        state.targetX = null; state.targetZ = null;
+        showEmote('👋', `「Yo ${rp.name}！我特登過嚟搵你一齊玩呀！」`);
+      };
+      if (state.currentScene !== rp.currentScene) {
+        switchScene(rp.currentScene, false, moveNextTo);
+      } else {
+        moveNextTo();
+      }
+    }
+
+    function copyRoomInvite() {
+      const baseUrl = window.location.href.split('?')[0];
+      const shareUrl = `${baseUrl}?server=${state.roomCode}`;
+      const text = `快啲用手機或電腦打開連結加入《香港社畜實錄 3D MMO》（伺服器：${state.roomCode}）：${shareUrl}`;
+      if (navigator.clipboard) navigator.clipboard.writeText(text).catch(() => {});
+      addFeedLog(`📋 已複製伺服器【${state.roomCode}】專屬邀請連結！`);
+    }
+
+    // =========================================================================
+    // 4. Stylized 1:7 寫實比例 3D 數位藝術角色工廠（支援男／女獨立造型與長短髮）
+    // =========================================================================
+    function createStylizedHuman3D(cfg) {
+      const root = new THREE.Group();
+      const skinMat = new THREE.MeshStandardMaterial({ color: '#f3cbb0', roughness: 0.48, metalness: 0.03 });
+      const hairMat = new THREE.MeshStandardMaterial({ color: cfg.hairColor || '#1c1917', roughness: 0.62, metalness: 0.08 });
+      const outfitMat = new THREE.MeshStandardMaterial({ color: cfg.outfitColor || '#f8fafc', roughness: 0.42, metalness: 0.08 });
+      const trouserMat = new THREE.MeshStandardMaterial({ color: '#1e293b', roughness: 0.55 });
+      const shoeMat = new THREE.MeshStandardMaterial({ color: '#0f172a', roughness: 0.25, metalness: 0.25 });
+      const whiteMat = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.38 });
+      const goldMat = new THREE.MeshStandardMaterial({ color: '#fbbf24', roughness: 0.2, metalness: 0.85 });
+
+      const isFemale = cfg.gender === 'female';
+      const isOL = cfg.outfitStyle === 2 || (isFemale && cfg.outfitStyle === 0);
+      const isHoodie = cfg.outfitStyle === 1;
+      const isSuit = cfg.outfitStyle === 3;
+      const hasLongHair = cfg.hairStyle === 1 || (cfg.hairStyle === undefined && isFemale);
+
+      const polkaTex = makeCanvasTex((ctx, w, h) => {
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = '#ef4444';
+        [[24, 24], [88, 24], [56, 64], [24, 104], [88, 104]].forEach(([cx, cy]) => {
+          ctx.beginPath(); ctx.arc(cx, cy, 13, 0, Math.PI * 2); ctx.fill();
+        });
+      }, 128, 128);
+      const boxersMat = new THREE.MeshStandardMaterial({ map: polkaTex, roughness: 0.55 });
+      const droppedClothMat = isOL
+        ? new THREE.MeshStandardMaterial({ color: new THREE.Color(cfg.outfitColor).multiplyScalar(0.62), roughness: 0.55 })
+        : trouserMat;
+
+      const shadowDisc = new THREE.Mesh(
+        new THREE.CircleGeometry(0.4, 24),
+        new THREE.MeshBasicMaterial({ color: 0x020617, transparent: true, opacity: 0.38 })
+      );
+      shadowDisc.rotation.x = -Math.PI / 2;
+      shadowDisc.position.y = 0.02;
+      root.add(shadowDisc);
+
+      const hipPivot = new THREE.Group();
+      hipPivot.position.y = 0.88;
+      root.add(hipPivot);
+
+      const boxersMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.228, 0.235, 0.24, 16), boxersMat);
+      boxersMesh.position.y = -0.06;
+      boxersMesh.visible = false;
+      hipPivot.add(boxersMesh);
+
+      const legPantsMeshes = [];
+      const ankleBunchMeshes = [];
+
+      function buildLeg(offsetX) {
+        const legGroup = new THREE.Group();
+        legGroup.position.set(offsetX, 0, 0);
+
+        const thighR = isFemale ? 0.088 : 0.098;
+        const thighSkin = new THREE.Mesh(new THREE.CylinderGeometry(thighR, thighR - 0.012, 0.40, 14), skinMat);
+        thighSkin.position.y = -0.20;
+        thighSkin.castShadow = true;
+        legGroup.add(thighSkin);
+
+        if (!isOL) {
+          const thighPant = new THREE.Mesh(new THREE.CylinderGeometry(thighR + 0.008, thighR - 0.004, 0.40, 14), trouserMat);
+          thighPant.position.y = -0.20;
+          thighPant.castShadow = true;
+          legGroup.add(thighPant);
+          legPantsMeshes.push(thighPant);
+        }
+
+        const kneePivot = new THREE.Group();
+        kneePivot.position.set(0, -0.40, 0);
+        legGroup.add(kneePivot);
+
+        const shinSkin = new THREE.Mesh(new THREE.CylinderGeometry(0.078, 0.066, 0.38, 14), skinMat);
+        shinSkin.position.y = -0.19;
+        shinSkin.castShadow = true;
+        kneePivot.add(shinSkin);
+
+        if (!isOL) {
+          const shinPant = new THREE.Mesh(new THREE.CylinderGeometry(0.086, 0.076, 0.38, 14), trouserMat);
+          shinPant.position.y = -0.19;
+          shinPant.castShadow = true;
+          kneePivot.add(shinPant);
+          legPantsMeshes.push(shinPant);
+        }
+
+        const ankleBunch = new THREE.Mesh(new THREE.TorusGeometry(0.115, 0.045, 10, 18), droppedClothMat);
+        ankleBunch.rotation.x = Math.PI / 2;
+        ankleBunch.position.set(0, -0.34, 0.01);
+        ankleBunch.visible = false;
+        kneePivot.add(ankleBunch);
+        ankleBunchMeshes.push(ankleBunch);
+
+        const shoe = new THREE.Mesh(
+          new THREE.BoxGeometry(isFemale ? 0.15 : 0.18, 0.10, 0.31),
+          isHoodie ? whiteMat : (isFemale && isOL ? new THREE.MeshStandardMaterial({ color: '#831843', roughness: 0.25 }) : shoeMat)
+        );
+        shoe.position.set(0, -0.42, 0.05);
+        shoe.castShadow = true;
+        kneePivot.add(shoe);
+
+        return { legGroup, kneePivot };
+      }
+
+      const legSpread = isFemale ? 0.115 : 0.13;
+      const leftLegObj = buildLeg(-legSpread);
+      const rightLegObj = buildLeg(legSpread);
+      const leftLeg = leftLegObj.legGroup;
+      const rightLeg = rightLegObj.legGroup;
+      hipPivot.add(leftLeg, rightLeg);
+
+      let skirtMesh = null;
+      let beltMesh = null;
+      if (isOL) {
+        skirtMesh = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.21, 0.27, 0.36, 16),
+          droppedClothMat
+        );
+        skirtMesh.position.y = -0.14; skirtMesh.castShadow = true;
+        hipPivot.add(skirtMesh);
+      } else {
+        beltMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.235, 0.235, 0.055, 16), shoeMat);
+        beltMesh.position.y = 0.02;
+        hipPivot.add(beltMesh);
+      }
+
+      const torsoRadius = isFemale ? 0.21 : 0.258;
+      const torso = new THREE.Mesh(new THREE.CylinderGeometry(torsoRadius, isFemale ? 0.195 : 0.22, 0.68, 18), outfitMat);
+      torso.position.y = 0.36; torso.scale.set(isFemale ? 1.04 : 1.14, 1, 0.75); torso.castShadow = true;
+      hipPivot.add(torso);
+
+      if (!isHoodie) {
+        const collar = new THREE.Mesh(new THREE.ConeGeometry(0.095, 0.24, 4), whiteMat);
+        collar.rotation.x = Math.PI; collar.rotation.y = Math.PI / 4; collar.position.set(0, 0.56, 0.155);
+        hipPivot.add(collar);
+        if (!isFemale && (cfg.outfitStyle === 0 || isSuit)) {
+          const tie = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.35, 0.025),
+            new THREE.MeshStandardMaterial({ color: isSuit ? '#1d4ed8' : '#dc2626', roughness: 0.35 }));
+          tie.position.set(0, 0.44, 0.185);
+          hipPivot.add(tie);
+        } else if (isFemale) {
+          const ribbon = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.045, 0.03),
+            new THREE.MeshStandardMaterial({ color: '#ec4899', roughness: 0.35 }));
+          ribbon.position.set(0, 0.54, 0.165);
+          hipPivot.add(ribbon);
+        }
+      } else {
+        const hood = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.055, 10, 20), outfitMat);
+        hood.rotation.x = Math.PI / 2.3; hood.position.set(0, 0.68, -0.04);
+        hipPivot.add(hood);
+      }
+
+      function buildArm(offsetX) {
+        const armGroup = new THREE.Group();
+        armGroup.position.set(offsetX, 0.64, 0);
+        const sleeveR = isFemale ? 0.062 : 0.072;
+        const sleeve = new THREE.Mesh(new THREE.CylinderGeometry(sleeveR, sleeveR - 0.01, 0.56, 12), outfitMat);
+        sleeve.position.y = -0.28; sleeve.castShadow = true;
+        const hand = new THREE.Mesh(new THREE.SphereGeometry(isFemale ? 0.058 : 0.068, 12, 12), skinMat);
+        hand.position.y = -0.58;
+        armGroup.add(sleeve, hand);
+        return armGroup;
+      }
+
+      const leftArm = buildArm(-(torsoRadius + 0.068));
+      const rightArm = buildArm(torsoRadius + 0.068);
+      hipPivot.add(leftArm, rightArm);
+
+      if (cfg.accessories?.handbag) {
+        const bagGroup = new THREE.Group();
+        const bagBody = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.24, 0.28), new THREE.MeshStandardMaterial({ color: '#92400e', roughness: 0.35 }));
+        const bagHandle = new THREE.Mesh(new THREE.TorusGeometry(0.08, 0.012, 8, 16, Math.PI), goldMat);
+        bagHandle.rotation.y = Math.PI / 2;
+        bagHandle.position.y = 0.12;
+        bagGroup.add(bagBody, bagHandle);
+        bagGroup.position.set(-0.04, -0.66, 0.04);
+        leftArm.add(bagGroup);
+      }
+
+      const coffeeCup = new THREE.Mesh(new THREE.CylinderGeometry(0.052, 0.04, 0.13, 12),
+        new THREE.MeshStandardMaterial({ color: '#e7e5e4', roughness: 0.35 }));
+      coffeeCup.position.set(0, -0.61, 0.07);
+      rightArm.add(coffeeCup);
+
+      const phoneProp = new THREE.Group();
+      const phoneBody = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.016, 0.20), shoeMat);
+      const phoneScreen = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.095, 0.18),
+        new THREE.MeshBasicMaterial({ color: '#38bdf8' })
+      );
+      phoneScreen.rotation.x = -Math.PI / 2;
+      phoneScreen.position.y = 0.009;
+      phoneProp.add(phoneBody, phoneScreen);
+      phoneProp.position.set(-0.14, -0.58, 0.14);
+      phoneProp.rotation.x = -0.35;
+      phoneProp.visible = false;
+      rightArm.add(phoneProp);
+
+      const cocktailGlass = new THREE.Group();
+      const glassCup = new THREE.Mesh(new THREE.ConeGeometry(0.075, 0.11, 14, 1, true),
+        new THREE.MeshStandardMaterial({ color: '#f472b6', emissive: '#ec4899', emissiveIntensity: 0.65, side: THREE.DoubleSide }));
+      glassCup.rotation.x = Math.PI;
+      const glassStem = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.08, 8), whiteMat);
+      glassStem.position.y = -0.07;
+      cocktailGlass.add(glassCup, glassStem);
+      cocktailGlass.position.set(0, -0.58, 0.09);
+      cocktailGlass.visible = false;
+      rightArm.add(cocktailGlass);
+
+      const cigarette = new THREE.Group();
+      const cigStick = new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.011, 0.13, 8), whiteMat);
+      cigStick.rotation.x = Math.PI / 2;
+      const cigEmberMat = new THREE.MeshStandardMaterial({ color: '#f97316', emissive: '#ff4500', emissiveIntensity: 2.5 });
+      const cigEmber = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.024, 8), cigEmberMat);
+      cigEmber.rotation.x = Math.PI / 2; cigEmber.position.z = 0.07;
+      cigarette.add(cigStick, cigEmber);
+      cigarette.position.set(0, -0.58, 0.07);
+      cigarette.visible = false;
+      rightArm.add(cigarette);
+
+      const headPivot = new THREE.Group();
+      headPivot.position.y = 0.72;
+      hipPivot.add(headPivot);
+
+      const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.085, 0.13, 12), skinMat);
+      neck.position.y = 0.05;
+      const cranium = new THREE.Mesh(new THREE.SphereGeometry(0.225, 24, 24), skinMat);
+      cranium.scale.set(isFemale ? 0.91 : 0.95, 1.07, 0.98); cranium.position.y = 0.29; cranium.castShadow = true;
+      const hairCap = new THREE.Mesh(new THREE.SphereGeometry(0.236, 22, 18, 0, Math.PI * 2, 0, Math.PI * 0.58), hairMat);
+      hairCap.position.y = 0.31; hairCap.rotation.x = -0.18;
+      headPivot.add(neck, cranium, hairCap);
+
+      if (hasLongHair) {
+        const longHair = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.52, 0.20), hairMat);
+        longHair.position.set(0, 0.08, -0.13);
+        const sideLockL = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.34, 0.08), hairMat);
+        sideLockL.position.set(-0.20, 0.16, 0.06);
+        const sideLockR = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.34, 0.08), hairMat);
+        sideLockR.position.set(0.20, 0.16, 0.06);
+        headPivot.add(longHair, sideLockL, sideLockR);
+      } else {
+        const fringe = new THREE.Mesh(new THREE.BoxGeometry(0.30, 0.08, 0.13), hairMat);
+        fringe.position.set(0.02, 0.45, 0.18); fringe.rotation.z = -0.12;
+        headPivot.add(fringe);
+      }
+
+      const eyeMat = new THREE.MeshStandardMaterial({ color: '#0f172a', roughness: 0.15 });
+      const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.024, 10, 10), eyeMat);
+      eyeL.position.set(-0.08, 0.29, 0.212);
+      const eyeR = new THREE.Mesh(new THREE.SphereGeometry(0.024, 10, 10), eyeMat);
+      eyeR.position.set(0.08, 0.29, 0.212);
+      headPivot.add(eyeL, eyeR);
+
+      if (isFemale) {
+        const blushMat = new THREE.MeshBasicMaterial({ color: '#fb7185', transparent: true, opacity: 0.45 });
+        const blushL = new THREE.Mesh(new THREE.CircleGeometry(0.032, 12), blushMat);
+        blushL.position.set(-0.12, 0.245, 0.205); blushL.rotation.y = -0.35;
+        const blushR = new THREE.Mesh(new THREE.CircleGeometry(0.032, 12), blushMat);
+        blushR.position.set(0.12, 0.245, 0.205); blushR.rotation.y = 0.35;
+        headPivot.add(blushL, blushR);
+      }
+
+      if (cfg.accessories?.darkCircles) {
+        const dcMat = new THREE.MeshBasicMaterial({ color: '#475569', transparent: true, opacity: 0.45 });
+        const dcL = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.02, 0.02), dcMat);
+        dcL.position.set(-0.08, 0.256, 0.216);
+        const dcR = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.02, 0.02), dcMat);
+        dcR.position.set(0.08, 0.256, 0.216);
+        headPivot.add(dcL, dcR);
+      }
+
+      if (cfg.accessories?.glasses) {
+        const gL = new THREE.Mesh(new THREE.TorusGeometry(0.052, 0.007, 8, 20), goldMat);
+        gL.position.set(-0.08, 0.29, 0.226);
+        const gR = new THREE.Mesh(new THREE.TorusGeometry(0.052, 0.007, 8, 20), goldMat);
+        gR.position.set(0.08, 0.29, 0.226);
+        const gBridge = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.007, 0.007), goldMat);
+        gBridge.position.set(0, 0.295, 0.228);
+        headPivot.add(gL, gR, gBridge);
+      }
+
+      if (cfg.accessories?.headphones) {
+        const band = new THREE.Mesh(new THREE.TorusGeometry(0.245, 0.018, 8, 24, Math.PI), shoeMat);
+        band.position.y = 0.30;
+        const cupL = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.065, 0.04, 14), shoeMat);
+        cupL.rotation.z = Math.PI / 2; cupL.position.set(-0.24, 0.29, 0);
+        const cupR = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.065, 0.04, 14), shoeMat);
+        cupR.rotation.z = Math.PI / 2; cupR.position.set(0.24, 0.29, 0);
+        headPivot.add(band, cupL, cupR);
+      }
+
+      root.userData = {
+        hipPivot, headPivot,
+        leftLeg, rightLeg,
+        leftKnee: leftLegObj.kneePivot, rightKnee: rightLegObj.kneePivot,
+        leftArm, rightArm,
+        coffeeCup, cocktailGlass, cigarette, cigEmberMat, phoneProp,
+        boxersMesh, skirtMesh, beltMesh, legPantsMeshes, ankleBunchMeshes
+      };
+      return root;
+    }
+
+    // =========================================================================
+    // 5. 入職登記大廳 Three.js 預覽舞台
+    // =========================================================================
+    const previewStage = document.getElementById('preview-3d-stage');
+    const pScene = new THREE.Scene();
+    const pCamera = new THREE.PerspectiveCamera(36, 1, 0.1, 40);
+    pCamera.position.set(0, 1.38, 3.4);
+    pCamera.lookAt(0, 0.96, 0);
+
+    const pRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    pRenderer.setSize(180, 180);
+    pRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    pRenderer.outputEncoding = THREE.sRGBEncoding;
+    pRenderer.toneMapping = THREE.ACESFilmicToneMapping;
+    previewStage.appendChild(pRenderer.domElement);
+
+    pScene.add(new THREE.AmbientLight(0xffffff, 0.85));
+    const pKey = new THREE.DirectionalLight(0xfffbeb, 1.25);
+    pKey.position.set(3, 5, 4);
+    pScene.add(pKey);
+    const pRim = new THREE.PointLight(0xf59e0b, 1.5, 8);
+    pRim.position.set(-2.5, 2.2, -2);
+    pScene.add(pRim);
+
+    const discBase = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.82, 0.92, 0.12, 32),
+      new THREE.MeshStandardMaterial({ color: '#1e293b', roughness: 0.25, metalness: 0.65 })
+    );
+    discBase.position.y = -0.06;
+    pScene.add(discBase);
+
+    let previewModel = createStylizedHuman3D(state);
+    pScene.add(previewModel);
+    let previewTargetRot = 0.35;
+
+    function rebuildPreview() {
+      pScene.remove(previewModel);
+      previewModel = createStylizedHuman3D(state);
+      previewModel.rotation.y = previewTargetRot;
+      pScene.add(previewModel);
+    }
+
+    function setOutfitStyle(idx) {
+      state.outfitStyle = idx;
+      document.querySelectorAll('.style-btn').forEach((btn, i) => {
+        btn.className = (i === idx)
+          ? 'style-btn active p-2 rounded-xl border-2 border-amber-400 bg-amber-500/15 text-center transition'
+          : 'style-btn p-2 rounded-xl border border-slate-700 bg-slate-800/60 hover:border-amber-400/50 text-center transition';
+      });
+      state.outfitColor = ['#f8fafc', '#1d4ed8', '#be185d', '#1e293b'][idx];
+      rebuildPreview();
+    }
+
+    function setColor(part, hex, el) {
+      if (part === 'hair') {
+        state.hairColor = hex;
+        document.querySelectorAll('#hair-palette button').forEach(b => b.classList.remove('ring-2', 'ring-offset-2', 'ring-offset-slate-900', 'ring-amber-400'));
+      } else {
+        state.outfitColor = hex;
+        document.querySelectorAll('#outfit-palette button').forEach(b => b.classList.remove('ring-2', 'ring-offset-2', 'ring-offset-slate-900', 'ring-amber-400'));
+      }
+      if (el) el.classList.add('ring-2', 'ring-offset-2', 'ring-offset-slate-900', 'ring-amber-400');
+      rebuildPreview();
+    }
+
+    function toggleAcc(key) {
+      state.accessories[key] = !state.accessories[key];
+      const btn = document.getElementById(`btn-acc-${key}`);
+      btn.className = state.accessories[key]
+        ? 'px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500 text-slate-950 transition'
+        : 'px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 border border-slate-600 transition';
+      rebuildPreview();
+    }
+
+    function rotatePreview() { previewTargetRot += Math.PI / 2; }
+
+    function syncPreviewMeta() {
+      const defaultName = state.gender === 'female' ? 'Chloe 林' : 'Kelvin 陳';
+      state.name = document.getElementById('input-name').value.trim() || defaultName;
+      state.dept = document.getElementById('input-dept').value;
+      state.roomCode = (document.getElementById('input-room').value.trim() || 'IFC88').toUpperCase();
+      const dInfo = DEPT_CONFIG[state.dept] || DEPT_CONFIG['IT 資訊科技部'];
+      document.getElementById('preview-name-label').textContent = state.name;
+      document.getElementById('preview-dept-label').textContent = `${dInfo.short} · 日薪底薪 HK$${dInfo.basePay}`;
+    }
+
+    function renderPreviewLoop(now) {
+      if (!document.getElementById('creation-screen').classList.contains('hidden')) {
+        const t = now * 0.0025;
+        previewModel.rotation.y += (previewTargetRot - previewModel.rotation.y) * 0.12;
+        const ud = previewModel.userData;
+        ud.hipPivot.position.y = 0.88 + Math.sin(t * 1.4) * 0.015;
+        ud.headPivot.rotation.y = Math.sin(t * 0.9) * 0.12;
+        ud.leftArm.rotation.x = Math.sin(t * 1.2) * 0.06;
+        ud.rightArm.rotation.x = -0.24 + Math.cos(t * 1.2) * 0.05;
+        pRenderer.render(pScene, pCamera);
+      }
+      requestAnimationFrame(renderPreviewLoop);
+    }
+
+    // =========================================================================
+    // 6. 主 Three.js 3D 渲染引擎 & 程式化 PBR 材質工廠（含互動呼吸光圈）
+    // =========================================================================
+    const viewport = document.getElementById('webgl-viewport');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color('#090e1a');
+    scene.fog = new THREE.FogExp2('#090e1a', 0.010);
+
+    const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 220);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.20;
+    viewport.appendChild(renderer.domElement);
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    const hemiLight = new THREE.HemisphereLight(0xf1f5f9, 0x1e293b, 0.92);
+    scene.add(hemiLight);
+
+    const sunLight = new THREE.DirectionalLight(0xfffbeb, 1.08);
+    sunLight.position.set(16, 28, 14);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.width = 1024;
+    sunLight.shadow.mapSize.height = 1024;
+    sunLight.shadow.camera.near = 2;
+    sunLight.shadow.camera.far = 75;
+    sunLight.shadow.camera.left = -20;
+    sunLight.shadow.camera.right = 20;
+    sunLight.shadow.camera.top = 20;
+    sunLight.shadow.camera.bottom = -20;
+    sunLight.shadow.bias = -0.0005;
+    scene.add(sunLight);
+
+    const activeSceneGroup = new THREE.Group();
+    scene.add(activeSceneGroup);
+
+    const interactiveHotspots = [];
+    const dynamicProps = {
+      spirals: [], censerOrb: null, candleFlames: [],
+      trams: [], starFerry: null, neonSigns: [], redTaxi: null,
+      laserBeams: [], danceFloorTiles: [],
+      commuteCrowd: [], mtrDoorL: null, mtrDoorR: null, redMinibus: null,
+      mtrHandrails: [], tunnelSpeedStreaks: [],
+      hotspotRings: []
     };
 
-    // 3. 每日 23:59 結算：日期推進、找卡數與 Appraisal 季結算
-    window.endOfDayRoutine = function() {
-      state.kpiHistory.push(state.dailyKpi || 0);
-      
-      if (state.day === 5) {
-        const rentAndBills = 3500;
-        state.money -= rentAndBills;
-        if (state.money < 0) {
-          showEventBanner('💸', '破產警告！', '交唔出卡數同租金，今晚要瞓麥記，聽朝精神減半！', '慘烈接受', 'bankruptcy');
-          state.sleepDebuff = 'homeless';
-        } else {
-          // 假設你有 addFeedLog 函數
-          if(typeof addFeedLog === 'function') addFeedLog(`💸 星期五找卡數及交租，扣除 HK$${rentAndBills}`);
+    function spawnHotspotPulseRings() {
+      interactiveHotspots.forEach((spot, idx) => {
+        const yOff = (state.currentScene === 'sheungwan' && spot.z < 2.2) ? 0.59 :
+                     ((state.currentScene === 'wanchai' && Math.abs(spot.x) < 4.5) ? 0.19 : 0.07);
+        const ringMat = new THREE.MeshBasicMaterial({
+          color: spot.color || '#38bdf8',
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.55
+        });
+        const ring = new THREE.Mesh(new THREE.RingGeometry(0.45, 0.62, 32), ringMat);
+        ring.rotation.x = -Math.PI / 2;
+        ring.position.set(spot.x, yOff, spot.z);
+        activeSceneGroup.add(ring);
+        dynamicProps.hotspotRings.push({ mesh: ring, mat: ringMat, phase: idx * 1.1 });
+      });
+    }
+
+    function makeCanvasTex(drawFn, w = 512, h = 128, repeatX = 1, repeatY = 1) {
+      const cv = document.createElement('canvas');
+      cv.width = w; cv.height = h;
+      const ctx = cv.getContext('2d');
+      drawFn(ctx, w, h);
+      const tex = new THREE.CanvasTexture(cv);
+      tex.encoding = THREE.sRGBEncoding;
+      if (repeatX > 1 || repeatY > 1) {
+        tex.wrapS = THREE.RepeatWrapping;
+        tex.wrapT = THREE.RepeatWrapping;
+        tex.repeat.set(repeatX, repeatY);
+      }
+      return tex;
+    }
+
+    function makeSimpleLabelTex(text, bg, fg, border = null, w = 512, h = 128) {
+      return makeCanvasTex((ctx) => {
+        ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+        if (border) {
+          ctx.strokeStyle = border; ctx.lineWidth = 10; ctx.strokeRect(5, 5, w - 10, h - 10);
         }
-        
-        const avgKpi = state.kpiHistory.reduce((a, b) => a + b, 0) / 5;
-        if (avgKpi >= 70) {
-          if(typeof addFeedLog === 'function') addFeedLog('🎉 Appraisal 達標！升職加薪！');
-          state.level += 1;
-          state.money += 500; // 獎金
-        } else if (avgKpi < 40) {
-          state.pipWarnings += 1;
-          showEventBanner('🚨', 'PIP 改善計劃警告！', '你呢個禮拜成日去煙Break同偷情，KPI太低！', '死死地氣簽名', 'pip');
-          if (state.pipWarnings >= 2) {
-             if(typeof addFeedLog === 'function') addFeedLog('💥 你被正式解僱！進入自由身模式！');
-             state.employmentMode = 'freelance';
+        ctx.fillStyle = fg;
+        ctx.font = '900 36px "Noto Sans TC", sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(text, w / 2, h / 2);
+      }, w, h);
+    }
+
+    function makeHKStreetSignTex(zhText, enText) {
+      return makeCanvasTex((ctx, w, h) => {
+        ctx.fillStyle = '#f8fafc'; ctx.fillRect(0, 0, w, h);
+        ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 12; ctx.strokeRect(6, 6, w - 12, h - 12);
+        ctx.fillStyle = '#0f172a';
+        ctx.font = '900 48px "Noto Sans TC", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(zhText, w / 2, 66);
+        ctx.font = '700 25px sans-serif';
+        ctx.fillText(enText, w / 2, 112);
+      }, 512, 144);
+    }
+
+    function getProceduralCarpetMat() {
+      const tex = makeCanvasTex((ctx, w, h) => {
+        ctx.fillStyle = '#1e293b'; ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = '#273549';
+        for (let y = 0; y < h; y += 16) {
+          for (let x = 0; x < w; x += 16) {
+            if ((x + y) % 32 === 0) ctx.fillRect(x, y, 14, 14);
           }
         }
-        
-        state.kpiHistory = [];
-        state.day = 1; // 循環回星期一
-      } else {
-        state.day += 1;
-      }
-      state.dayCount += 1;
-      state.dailyKpi = 0; // 重置每日 KPI
-    };
+        ctx.strokeStyle = 'rgba(148,163,184,0.14)'; ctx.lineWidth = 2;
+        ctx.strokeRect(1, 1, w - 2, h - 2);
+      }, 128, 128, 12, 12);
+      return new THREE.MeshStandardMaterial({ map: tex, bumpMap: tex, bumpScale: 0.015, roughness: 0.78 });
+    }
 
-    // 4. 每日 09:00 檢查：宿醉系統
-    window.checkHangover = function() {
-      if (state.hangover) {
-        state.caffeine = Math.max(0, state.caffeine - 30);
-        document.getElementById('game-body').classList.add('animate-slap');
-        setTimeout(() => document.getElementById('game-body').classList.remove('animate-slap'), 1000);
-        showEventBanner('🤢', '嚴重宿醉', '尋晚蘭桂坊飲大咗，精神消耗速度加倍，快啲去買杯 $35 Starbucks 續命！', '頂硬上', 'close');
-        state.hangover = false; // 提示後解除，但精神已扣減
-      }
-    };
-
-    // 5. 迫地鐵連鎖反應 (遲到機制)
-    // 覆寫原本的 commuteGameEnd
-    window.commuteGameEnd = function(success) {
-      if (!success) {
-        state.isLate = true;
-        if(typeof addFeedLog === 'function') addFeedLog('⏰ 上唔到車！你今日遲到咗 15 分鐘！');
-      }
-      window.switchScene('office');
-      
-      if (state.isLate) {
-        state.secrecyAlert = 50; // 老細警戒值起步極高
-        if(typeof showEmote === 'function') showEmote('👔', '老細 Mr. Chan 啤住你：「又遲到？今日盯實你！」');
-        state.isLate = false;
-      }
-    };
-
-    // 6. 交通工具視覺與營業時間
-    window.applyVehicleVisuals = function(type) {
-      const container = document.getElementById('modal-commute-rush');
-      const badge = document.getElementById('fp-commute-badge');
-      if (!container || !badge) return;
-      if (type === 'mtr') {
-        badge.textContent = '🚇 港鐵車廂 · 沙甸魚視覺';
-        container.style.backgroundColor = 'rgba(15, 23, 42, 0.95)';
-      } else if (type === 'bus') {
-        badge.textContent = '🚌 九巴上層 · 搖晃視覺';
-        container.style.backgroundColor = 'rgba(69, 26, 3, 0.95)';
-      } else if (type === 'redvan') {
-        badge.textContent = '🚐 亡命紅 VAN · 推背視覺';
-        container.style.backgroundColor = 'rgba(69, 10, 10, 0.95)';
-      }
-    };
-    
-    const originalSelectCommuteVehicle = window.selectCommuteVehicle;
-    window.selectCommuteVehicle = function(type) {
-      applyVehicleVisuals(type);
-      if(originalSelectCommuteVehicle) originalSelectCommuteVehicle(type);
-    };
-
-    // 7. 終局機制 (Endgame) 覆寫遞信邏輯
-    window.executeResignationChoice = function(choice) {
-      if (choice === 'quit') {
-        closeModal('modal-resign');
-        if(typeof triggerSfx === 'function') triggerSfx('bell'); 
-        
-        const repTitle = document.getElementById('report-title');
-        const repSub = document.getElementById('report-subtitle');
-        const repComment = document.getElementById('report-comment');
-        
-        if (repTitle) repTitle.textContent = '🎉 逃出生天：辭職成功！';
-        if (repSub) repSub.textContent = `經歷咗 ${state.dayCount || 1} 日嘅折磨，你終於重獲自由！`;
-        if (repComment) repComment.textContent = '你霸氣將辭職信掟喺老細枱面，轉身離開 IFC。從此解鎖「自由身/老闆模式」，中環再困你唔住！';
-        
-        const reportModal = document.getElementById('modal-report');
-        if (reportModal) reportModal.classList.remove('hidden');
-        
-        state.employmentMode = 'freelance'; // 永久切換模式
-      } else if (choice === 'counter') {
-        state.money += 1500;
-        closeModal('modal-resign');
-        showEventBanner('💰', '接受 Counter-Offer', '老細加薪挽留，你選擇繼續留喺地獄...', '繼續返工', 'close');
-      }
-    };
-
-    // 8. 綁定遊戲時間推進 (模擬時鐘)
-    setInterval(() => {
-        // 假設原本遊戲有 state.clockMinutes 負責記錄時間 (以分鐘計，540 = 09:00)
-        if (state.clockMinutes === 540) window.checkHangover();
-        
-        if (state.clockMinutes >= 1439) { // 23:59
-            window.endOfDayRoutine();
-            state.clockMinutes = 540; // 重置為翌日 09:00
+    function getProceduralAsphaltMat() {
+      const tex = makeCanvasTex((ctx, w, h) => {
+        ctx.fillStyle = '#222226'; ctx.fillRect(0, 0, w, h);
+        for (let i = 0; i < 1800; i++) {
+          ctx.fillStyle = Math.random() > 0.5 ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.22)';
+          ctx.fillRect(Math.random() * w, Math.random() * h, 2, 2);
         }
-    }, 60000); // 這裡設定現實 1 分鐘檢查一次，可依你遊戲的時鐘速度調整
+      }, 128, 128, 14, 14);
+      return new THREE.MeshStandardMaterial({ map: tex, bumpMap: tex, bumpScale: 0.025, roughness: 0.88 });
+    }
 
-  </script>
-</body>
-</html>
+    function getProceduralGraniteMat() {
+      const tex = makeCanvasTex((ctx, w, h) => {
+        ctx.fillStyle = '#9ca3af'; ctx.fillRect(0, 0, w, h);
+        ctx.strokeStyle = '#4b5563'; ctx.lineWidth = 4;
+        ctx.strokeRect(2, 2, w - 4, h - 4);
+        for (let i = 0; i < 900; i++) {
+          ctx.fillStyle = Math.random() > 0.5 ? 'rgba(255,255,255,0.12)' : 'rgba(31,41,55,0.18)';
+          ctx.fillRect(Math.random() * w, Math.random() * h, 3, 3);
+        }
+      }, 128, 128, 10, 10);
+      return new THREE.MeshStandardMaterial({ map: tex, bumpMap: tex, bumpScale: 0.03, roughness: 0.72 });
+    }
+
+    function resetDynamicProps() {
+      dynamicProps.spirals = []; dynamicProps.censerOrb = null; dynamicProps.candleFlames = [];
+      dynamicProps.trams = []; dynamicProps.neonSigns = []; dynamicProps.starFerry = null; dynamicProps.redTaxi = null;
+      dynamicProps.laserBeams = []; dynamicProps.danceFloorTiles = [];
+      dynamicProps.commuteCrowd = []; dynamicProps.mtrDoorL = null; dynamicProps.mtrDoorR = null; dynamicProps.redMinibus = null;
+      dynamicProps.mtrHandrails = []; dynamicProps.tunnelSpeedStreaks = [];
+      dynamicProps.hotspotRings = [];
+    }
+
+    // 晝夜動態光影系統（根據遊戲時間平滑調節環境光與太陽色溫）
+    function updateDayNightLighting() {
+      const h = Math.floor(state.clockMinutes / 60) % 24;
+      if (state.currentScene === 'lkf') {
+        hemiLight.color.setHex(0xc084fc);
+        hemiLight.intensity = 0.75;
+        sunLight.intensity = 0.55;
+        return;
+      }
+      if (h >= 7 && h < 16) {
+        // 日間清亮辦公光
+        hemiLight.color.setHex(0xf1f5f9);
+        hemiLight.intensity = 0.96;
+        sunLight.color.setHex(0xfffbeb);
+        sunLight.intensity = 1.12;
+      } else if (h >= 16 && h < 19) {
+        // 黃昏 Magic Hour 落日橙金
+        hemiLight.color.setHex(0xfed7aa);
+        hemiLight.intensity = 0.88;
+        sunLight.color.setHex(0xfb923c);
+        sunLight.intensity = 1.05;
+      } else {
+        // 深夜霓虹冷藍
+        hemiLight.color.setHex(0x93c5fd);
+        hemiLight.intensity = 0.68;
+        sunLight.color.setHex(0x60a5fa);
+        sunLight.intensity = 0.65;
+      }
+    }
+
+    // =========================================================================
+    // 7. 六大獨立 3D 場景建構函數
+    // =========================================================================
+    function buildCentralOfficeScene() {
+      scene.background = new THREE.Color('#091120');
+      scene.fog = new THREE.FogExp2('#091120', 0.0085);
+      interactiveHotspots.length = 0;
+      resetDynamicProps();
+
+      const woodMat = new THREE.MeshStandardMaterial({ color: '#78350f', roughness: 0.42 });
+      const marbleMat = new THREE.MeshStandardMaterial({ color: '#f8fafc', roughness: 0.16, metalness: 0.12 });
+      const steelMat = new THREE.MeshStandardMaterial({ color: '#cbd5e1', roughness: 0.25, metalness: 0.85 });
+      const darkMetalMat = new THREE.MeshStandardMaterial({ color: '#1e293b', roughness: 0.35, metalness: 0.65 });
+      const mullionMat = new THREE.MeshStandardMaterial({ color: '#334155', roughness: 0.28, metalness: 0.85 });
+
+      const floor = new THREE.Mesh(new THREE.BoxGeometry(24, 0.7, 24), getProceduralCarpetMat());
+      floor.position.y = -0.35; floor.receiveShadow = true;
+      activeSceneGroup.add(floor);
+
+      [[-4.2, -4.2], [4.2, -4.2], [-4.2, 4.2], [4.2, 4.2]].forEach(([px, pz]) => {
+        const col = new THREE.Mesh(new THREE.BoxGeometry(0.65, 3.8, 0.65), mullionMat);
+        col.position.set(px, 1.9, pz); col.castShadow = true;
+        activeSceneGroup.add(col);
+      });
+
+      for (let x = -12; x <= 12; x += 3) {
+        const mullionN = new THREE.Mesh(new THREE.BoxGeometry(0.14, 3.8, 0.22), mullionMat);
+        mullionN.position.set(x, 1.9, -11.9);
+        activeSceneGroup.add(mullionN);
+      }
+      const curtainGlassN = new THREE.Mesh(
+        new THREE.PlaneGeometry(24, 3.7),
+        new THREE.MeshPhysicalMaterial({ color: '#bae6fd', transparent: true, opacity: 0.16, roughness: 0.05 })
+      );
+      curtainGlassN.position.set(0, 1.85, -11.9);
+      activeSceneGroup.add(curtainGlassN);
+
+      const harbour = new THREE.Mesh(
+        new THREE.PlaneGeometry(140, 80),
+        new THREE.MeshStandardMaterial({ color: '#061529', roughness: 0.16, metalness: 0.88 })
+      );
+      harbour.rotation.x = -Math.PI / 2; harbour.position.set(0, -4.5, -45);
+      activeSceneGroup.add(harbour);
+
+      [
+        { x: -24, z: -28, w: 5.5, h: 26, d: 5.5, col: '#1e293b', glow: '#38bdf8' },
+        { x: -15, z: -32, w: 6.0, h: 34, d: 6.0, col: '#0f172a', glow: '#fbbf24' },
+        { x: -5, z: -27, w: 5.0, h: 22, d: 5.0, col: '#1e293b', glow: '#38bdf8' },
+        { x: 6, z: -34, w: 7.0, h: 38, d: 7.0, col: '#0f172a', glow: '#f472b6' },
+        { x: 17, z: -29, w: 5.5, h: 28, d: 5.5, col: '#1e293b', glow: '#34d399' }
+      ].forEach(b => {
+        const tower = new THREE.Mesh(new THREE.BoxGeometry(b.w, b.h, b.d), new THREE.MeshStandardMaterial({ color: b.col, roughness: 0.25, metalness: 0.75 }));
+        tower.position.set(b.x, b.h / 2 - 4.5, b.z);
+        const strip = new THREE.Mesh(new THREE.BoxGeometry(b.w + 0.12, 0.35, b.d + 0.12), new THREE.MeshBasicMaterial({ color: b.glow }));
+        strip.position.set(b.x, b.h - 6.0, b.z);
+        activeSceneGroup.add(tower, strip);
+      });
+
+      const ferry = new THREE.Group();
+      const hull = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.55, 1.35), new THREE.MeshStandardMaterial({ color: '#15803d', roughness: 0.35 }));
+      const upperDeck = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.52, 1.15), new THREE.MeshStandardMaterial({ color: '#f8fafc', roughness: 0.35 }));
+      upperDeck.position.y = 0.52;
+      const funnel = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 0.55, 12), new THREE.MeshStandardMaterial({ color: '#facc15' }));
+      funnel.position.y = 0.95;
+      ferry.add(hull, upperDeck, funnel);
+      ferry.position.set(-22, -4.1, -18.5);
+      activeSceneGroup.add(ferry);
+      dynamicProps.starFerry = ferry;
+
+      function addFloorZone(x, z, w, d, col, title, bg, fg) {
+        const pad = new THREE.Mesh(new THREE.BoxGeometry(w, 0.06, d), new THREE.MeshStandardMaterial({ color: col, roughness: 0.6 }));
+        pad.position.set(x, 0.03, z); pad.receiveShadow = true;
+        activeSceneGroup.add(pad);
+        const tex = makeSimpleLabelTex(title, bg, fg, fg, 512, 96);
+        const sign = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 0.78), new THREE.MeshBasicMaterial({ map: tex, transparent: true }));
+        sign.rotation.x = -Math.PI / 2; sign.position.set(x, 0.07, z + d / 2 - 0.6);
+        activeSceneGroup.add(sign);
+      }
+
+      addFloorZone(-7.5, -7.5, 8.2, 8.2, '#3f2738', '☕ PANTRY 茶水間（飲齋啡 / 叮飯）', '#831843', '#fbcfe8');
+      addFloorZone(0, 0.2, 8.8, 10.2, '#1e293b', '💻 雙螢幕工位（點擊做崗位KPI任務）', '#0c4a6e', '#bae6fd');
+      addFloorZone(7.5, -7.5, 8.2, 8.2, '#451a03', '👔 老細玻璃房（遞信 / 申請升職）', '#78350f', '#fde68a');
+      addFloorZone(7.8, 6.2, 7.6, 8.5, '#143326', '🔥 後樓梯 EXIT 煙Break（點擊打火機點煙）', '#064e3b', '#6ee7b7');
+      addFloorZone(-7.8, 5.2, 6.8, 5.6, '#1e1b4b', '🚽 帶薪拉屎 VIP 格（點擊馬桶除褲拉屎）', '#312e81', '#c7d2fe');
+
+      const frostedGlassMat = new THREE.MeshPhysicalMaterial({ color: '#c7d2fe', transparent: true, opacity: 0.32, roughness: 0.25 });
+      const wcBackWall = new THREE.Mesh(new THREE.BoxGeometry(3.6, 2.3, 0.14), marbleMat); wcBackWall.position.set(-7.8, 1.15, 2.6);
+      const wcSideGlassL = new THREE.Mesh(new THREE.BoxGeometry(0.10, 2.15, 2.8), frostedGlassMat); wcSideGlassL.position.set(-9.55, 1.08, 4.0);
+      const wcSideGlassR = new THREE.Mesh(new THREE.BoxGeometry(0.10, 2.15, 2.8), frostedGlassMat); wcSideGlassR.position.set(-6.05, 1.08, 4.0);
+      const wcSignTex = makeSimpleLabelTex('🚽 帶薪拉屎 VIP 馬桶（點擊坐低）', '#4338ca', '#ffffff', '#a5b4fc', 320, 80);
+      const wcSign = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.46, 0.12), new THREE.MeshBasicMaterial({ map: wcSignTex })); wcSign.position.set(-7.8, 2.55, 2.6);
+      activeSceneGroup.add(wcBackWall, wcSideGlassL, wcSideGlassR, wcSign);
+
+      const porcelainMat = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.12, metalness: 0.08 });
+      const toiletGroup = new THREE.Group();
+      toiletGroup.position.set(-7.8, 0.06, 3.45);
+      const toiletPedestal = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.28, 0.42, 20), porcelainMat); toiletPedestal.position.set(0, 0.21, 0.08);
+      const toiletBowl = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.25, 0.24, 24), porcelainMat); toiletBowl.scale.set(0.92, 1, 1.18); toiletBowl.position.set(0, 0.42, 0.14);
+      const toiletRim = new THREE.Mesh(new THREE.TorusGeometry(0.26, 0.045, 12, 24), porcelainMat); toiletRim.rotation.x = Math.PI / 2; toiletRim.scale.set(0.92, 1.18, 1); toiletRim.position.set(0, 0.54, 0.14);
+      const bowlWater = new THREE.Mesh(new THREE.CircleGeometry(0.22, 20), new THREE.MeshStandardMaterial({ color: '#0284c7', roughness: 0.08, metalness: 0.3 })); bowlWater.rotation.x = -Math.PI / 2; bowlWater.position.set(0, 0.49, 0.14);
+      const flushTank = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.52, 0.24), porcelainMat); flushTank.position.set(0, 0.76, -0.22);
+      const tankLid = new THREE.Mesh(new THREE.BoxGeometry(0.60, 0.06, 0.28), porcelainMat); tankLid.position.set(0, 1.04, -0.22);
+      toiletGroup.add(toiletPedestal, toiletBowl, toiletRim, bowlWater, flushTank, tankLid);
+      activeSceneGroup.add(toiletGroup);
+
+      const counter = new THREE.Mesh(new THREE.BoxGeometry(4.6, 1.0, 1.15), woodMat); counter.position.set(-7.8, 0.5, -10.5);
+      const counterTop = new THREE.Mesh(new THREE.BoxGeometry(4.7, 0.08, 1.25), marbleMat); counterTop.position.set(-7.8, 1.04, -10.5);
+      const espresso = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.8, 0.8), steelMat); espresso.position.set(-9.0, 1.48, -10.5);
+      const fridge = new THREE.Mesh(new THREE.BoxGeometry(1.3, 2.5, 1.1), darkMetalMat); fridge.position.set(-4.5, 1.25, -10.5);
+      activeSceneGroup.add(counter, counterTop, espresso, fridge);
+
+      const monTex = makeCanvasTex((ctx) => {
+        ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, 256, 160);
+        ctx.fillStyle = '#38bdf8';
+        for (let i = 0; i < 6; i++) ctx.fillRect(18, 20 + i * 20, 65 + (i % 3) * 40, 8);
+        ctx.fillStyle = '#34d399'; ctx.fillRect(165, 45, 16, 80);
+      }, 256, 160);
+      const screenMat = new THREE.MeshStandardMaterial({ map: monTex, emissiveMap: monTex, emissive: '#38bdf8', emissiveIntensity: 0.85 });
+
+      [[-2.1, -2.4], [2.1, -2.4], [-2.1, 0.9], [2.1, 0.9]].forEach(([dx, dz]) => {
+        const desk = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.09, 1.25), marbleMat);
+        desk.position.set(dx, 0.82, dz); desk.castShadow = true;
+        activeSceneGroup.add(desk);
+        [-0.48, 0.48].forEach((mx, i) => {
+          const mon = new THREE.Group();
+          mon.position.set(dx + mx, 1.2, dz - 0.3);
+          mon.rotation.y = i === 0 ? 0.16 : -0.16;
+          const bezel = new THREE.Mesh(new THREE.BoxGeometry(0.86, 0.52, 0.05), darkMetalMat);
+          const scr = new THREE.Mesh(new THREE.PlaneGeometry(0.80, 0.46), screenMat);
+          scr.position.z = 0.028;
+          mon.add(bezel, scr);
+          activeSceneGroup.add(mon);
+        });
+      });
+
+      const glassWallMat = new THREE.MeshPhysicalMaterial({ color: '#bae6fd', transparent: true, opacity: 0.26, roughness: 0.08 });
+      const gw1 = new THREE.Mesh(new THREE.BoxGeometry(7.6, 3.2, 0.1), glassWallMat); gw1.position.set(7.8, 1.6, -3.5);
+      const gw2 = new THREE.Mesh(new THREE.BoxGeometry(0.1, 3.2, 7.6), glassWallMat); gw2.position.set(3.6, 1.6, -7.8);
+      const bossTable = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.9, 1.35), woodMat); bossTable.position.set(7.8, 0.45, -8.5);
+      activeSceneGroup.add(gw1, gw2, bossTable);
+
+      const greenWall = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1.5, 7.8), new THREE.MeshStandardMaterial({ color: '#15803d', roughness: 0.5 }));
+      greenWall.position.set(11.4, 0.75, 6.2);
+      const whiteWall = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1.6, 7.8), new THREE.MeshStandardMaterial({ color: '#e2e8f0', roughness: 0.6 }));
+      whiteWall.position.set(11.4, 2.3, 6.2);
+      const gossipBoardTex = makeSimpleLabelTex('🗣️ 同事地下八卦牆（點擊吃瓜）', '#581c87', '#f3e8ff', '#c084fc', 512, 128);
+      const gossipBoard = new THREE.Mesh(new THREE.BoxGeometry(0.18, 1.15, 3.4), new THREE.MeshBasicMaterial({ map: gossipBoardTex }));
+      gossipBoard.position.set(11.15, 1.85, 7.5);
+      const exitTex = makeSimpleLabelTex('EXIT 出口', '#16a34a', '#ffffff', '#bbf7d0', 256, 96);
+      const exitBox = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.42, 1.15), new THREE.MeshStandardMaterial({ map: exitTex, emissiveMap: exitTex, emissive: '#22c55e', emissiveIntensity: 1.8 }));
+      exitBox.position.set(11.1, 2.65, 4.2);
+
+      const ashtrayBin = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.26, 0.92, 18), steelMat);
+      ashtrayBin.position.set(7.8, 0.46, 5.4);
+      const ashTop = new THREE.Mesh(new THREE.CylinderGeometry(0.21, 0.21, 0.04, 18), darkMetalMat);
+      ashTop.position.set(7.8, 0.93, 5.4);
+      const cigSignTex = makeSimpleLabelTex('🔥 點擊打火機點煙互動', '#ea580c', '#fff7ed', '#fdba74', 320, 80);
+      const cigSign = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.44, 0.1), new THREE.MeshBasicMaterial({ map: cigSignTex }));
+      cigSign.position.set(7.8, 1.75, 5.4);
+      activeSceneGroup.add(greenWall, whiteWall, gossipBoard, exitBox, ashtrayBin, ashTop, cigSign);
+
+      const taxi = new THREE.Group();
+      const
