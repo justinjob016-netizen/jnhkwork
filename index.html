@@ -2950,7 +2950,9 @@
       spawnHotspotPulseRings();
     }
 
-    // 各場景切換基礎實作
+    // =========================================================================
+    // 8. 基礎場景切換與渲染機制
+    // =========================================================================
     function buildCommuteScene() { activeSceneGroup.clear(); scene.background = new THREE.Color('#1e293b'); }
     function buildWanchaiScene() { activeSceneGroup.clear(); scene.background = new THREE.Color('#0f172a'); }
     function buildSheungwanScene() { activeSceneGroup.clear(); scene.background = new THREE.Color('#451a03'); }
@@ -2970,14 +2972,13 @@
       if (callback) callback();
     }
 
-    // 核心遊戲與渲染迴圈
     let lastTime = performance.now();
     function animate(now) {
       requestAnimationFrame(animate);
       const dt = (now - lastTime) / 1000;
       lastTime = now;
 
-      // 處理相機追蹤與基本角色旋轉
+      // 簡單的相機跟隨
       if (cameraRig.followPlayer && previewModel) {
         camera.position.x = state.x + Math.sin(cameraRig.yaw) * cameraRig.distance;
         camera.position.z = state.z + Math.cos(cameraRig.yaw) * cameraRig.distance;
@@ -2988,7 +2989,9 @@
       renderer.render(scene, camera);
     }
 
-    // 啟動遊戲世界
+    // =========================================================================
+    // 9. 登入遊戲與防呆 UI 函數 (加入空函數，防止點擊按鈕時報錯卡死)
+    // =========================================================================
     function startGameWorld() {
       document.getElementById('creation-screen').classList.add('hidden');
       document.getElementById('hud-top').classList.remove('hidden');
@@ -2997,7 +3000,7 @@
       initPeerMultiplayer();
       switchScene('office', true);
       
-      // 將角色模型從預覽區移入主場景
+      // 將角色從預覽區移到遊戲世界
       pScene.remove(previewModel);
       scene.add(previewModel);
       previewModel.position.set(state.x, 0, state.z);
@@ -3005,7 +3008,6 @@
       requestAnimationFrame(animate);
     }
 
-    // 補齊 HTML 中綁定的基本 UI 開關防呆機制 (避免點擊時報錯)
     function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
     function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
     function openSmartphoneModal() { openModal('modal-smartphone'); }
@@ -3018,15 +3020,87 @@
     function openGossipWallModal() { openModal('modal-gossip'); }
     function openShopModal() { openModal('modal-shop'); }
     function openCareerReportModal() { openModal('modal-report'); }
+    function openCreatorLobby() { openModal('creation-screen'); }
+    function goToBossForResign() { openModal('modal-resign'); }
+
+    function toggleDpad() { document.getElementById('mobile-dpad').classList.toggle('hidden'); }
+    function setCameraPreset(preset) { console.log("切換視角:", preset); }
+    function triggerHotPotatoBomb() { openModal('modal-peer-action'); }
+    function hideEventBanner() { document.getElementById('event-banner').classList.add('hidden'); }
+    function resolveActiveEvent() { hideEventBanner(); }
+    function ignoreActiveEvent() { hideEventBanner(); }
     function setDpad(dx, dz) { dpadVec.dx = dx; dpadVec.dz = dz; }
     
-    // 全域缺漏事件代理，防止未完成的進階功能使遊戲崩潰
+    function submitChat(e) { e.preventDefault(); }
+    function switchFakeExcelScreen() { 
+      document.getElementById('teams-chat-mode').classList.toggle('hidden'); 
+      document.getElementById('teams-fake-excel').classList.toggle('hidden'); 
+    }
+    function sendSecretTeamsMsg(msg) {}
+    function scheduleDateViaTeams() {}
+    function resumeSecretTeams() { switchFakeExcelScreen(); }
+    function toggleZippoLid() {}
+    function strikeFlintWheel() {}
+    function lightUpCigarette() {}
+    function quickOneTapLightCig() {}
+    function toggleCommuteCameraView() {}
+    function selectCommuteVehicle(v) {}
+    function mashCommutePush() {}
+    function switchPhoneApp(app) { 
+      ['hko', 'mtr', 'freelance', 'wallet'].forEach(a => {
+        const el = document.getElementById('phone-app-' + a);
+        if(el) { el.classList.toggle('hidden', a !== app); }
+      });
+    }
+    function simulateTyphoonWarning() { alert("天文台警報測試：即將改發八號烈風或暴風信號！"); }
+    function doFreelanceGig(type) {}
+    function acceptHeadhunterRehire() {}
+    function startCoopActivity(act) {}
+    function inviteCurrentNpcTo(place) {}
+    function gossipWithCurrentNpc() {}
+    function submitDirectNpcChat(e) { e.preventDefault(); }
+    function postNewGossip(e) { e.preventDefault(); }
+    function buyGear(gear, price) {}
+    function executeResignationChoice(choice) { closeModal('modal-resign'); }
+    function switchTempleTab(tab) {
+       document.getElementById('temple-panel-card').classList.toggle('hidden', tab !== 'card');
+       document.getElementById('temple-panel-divine').classList.toggle('hidden', tab !== 'divine');
+    }
+    function flipOfferCard() { document.getElementById('offer-card-inner').classList.toggle('card-3d-flipped'); }
+    function submitOfferStep1() {}
+    function boostClockwiseCircle() {}
+    function storeCardInWallet() {}
+    function castTempleFortune() {}
+    function syncVillainTargetSelect() {}
+    function hitVillainEffigy() {}
+    function playFifteenTwenty(a, b) {}
+
+    // 系統底層補齊 (避免連線功能報錯)
+    function broadcastPlayerSync() {
+      if (typeof broadcastNetworkPacket !== 'undefined') {
+        broadcastNetworkPacket({ type: 'SYNC_PLAYER', senderId: playerId, payload: buildPlayerPacket() });
+      }
+    }
+    function buildPlayerPacket() {
+      return { id: playerId, name: state.name, gender: state.gender, dept: state.dept, currentScene: state.currentScene, x: state.x, z: state.z };
+    }
+    function updateDynamicCapsuleHUD() {}
+    function refreshStatsUI() {}
+    function showEmote(emoji, msg) {}
+    function addFeedLog(msg) {}
+    function gainXP(amount) { state.xp += amount; }
+    function showEventBanner(icon, title, desc, btnTxt, action, showSecBtn) {}
+    function spawnParticle(x, y, z, color) {}
+    function sayBubble(msg) {}
+    function startRedTaxiEvent() {}
+
+    // 攔截未知錯誤防止畫面卡死
     window.addEventListener('error', (e) => {
-      console.warn('忽略未實作的方法: ', e.message);
+      console.warn('忽略未實作功能引發的錯誤: ', e.message);
       e.preventDefault();
     });
 
-    // 啟動入職大廳預覽動畫
+    // 啟動入職大廳預覽動畫迴圈
     requestAnimationFrame(renderPreviewLoop);
   </script>
 </body>
