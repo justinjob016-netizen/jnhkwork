@@ -240,6 +240,161 @@
             state.clockMinutes = 540; // 重置為翌日 09:00
         }
     }, 60000);
+// =========================================================================
+    // 🌟 全新擴充機制：找卡數、宿醉、遲到、Endgame
+    // =========================================================================
+    
+    // 1. 擴充全域狀態
+    Object.assign(state, {
+      day: 1,            // 星期一至五 (1=一, 5=五)
+      dayCount: 1,       // 總生存日數
+      kpiHistory: [],    // 記錄每週 KPI
+      pipWarnings: 0,    // 警告信數量
+      hangover: false,   // 宿醉狀態
+      isLate: false      // 遲到狀態
+    });
+
+    // 2. 修復煙 Break Bug：轉場前強制熄煙
+    function stopSmoking() {
+      state.isSmoking = false;
+      state.isLitCig = false;
+      const buff = document.getElementById('hud-smoke-buff');
+      if (buff) buff.classList.add('hidden');
+      if (typeof previewModel !== 'undefined' && previewModel?.userData?.cigarette) {
+          previewModel.userData.cigarette.visible = false;
+      }
+    }
+
+    // 覆寫原本嘅 switchScene 來加入熄煙邏輯
+    const originalSwitchScene = window.switchScene;
+    window.switchScene = function(sceneId, bypass, callback) {
+      stopSmoking(); 
+      if(originalSwitchScene) originalSwitchScene(sceneId, bypass, callback);
+    };
+
+    // 3. 每日 23:59 結算：日期推進、找卡數與 Appraisal 季結算
+    window.endOfDayRoutine = function() {
+      state.kpiHistory.push(state.dailyKpi || 0);
+      
+      if (state.day === 5) {
+        const rentAndBills = 3500;
+        state.money -= rentAndBills;
+        if (state.money < 0) {
+          showEventBanner('💸', '破產警告！', '交唔出卡數同租金，今晚要瞓麥記，聽朝精神減半！', '慘烈接受', 'bankruptcy');
+          state.sleepDebuff = 'homeless';
+        } else {
+          // 假設你有 addFeedLog 函數
+          if(typeof addFeedLog === 'function') addFeedLog(`💸 星期五找卡數及交租，扣除 HK$${rentAndBills}`);
+        }
+        
+        const avgKpi = state.kpiHistory.reduce((a, b) => a + b, 0) / 5;
+        if (avgKpi >= 70) {
+          if(typeof addFeedLog === 'function') addFeedLog('🎉 Appraisal 達標！升職加薪！');
+          state.level += 1;
+          state.money += 500; // 獎金
+        } else if (avgKpi < 40) {
+          state.pipWarnings += 1;
+          showEventBanner('🚨', 'PIP 改善計劃警告！', '你呢個禮拜成日去煙Break同偷情，KPI太低！', '死死地氣簽名', 'pip');
+          if (state.pipWarnings >= 2) {
+             if(typeof addFeedLog === 'function') addFeedLog('💥 你被正式解僱！進入自由身模式！');
+             state.employmentMode = 'freelance';
+          }
+        }
+        
+        state.kpiHistory = [];
+        state.day = 1; // 循環回星期一
+      } else {
+        state.day += 1;
+      }
+      state.dayCount += 1;
+      state.dailyKpi = 0; // 重置每日 KPI
+    };
+
+    // 4. 每日 09:00 檢查：宿醉系統
+    window.checkHangover = function() {
+      if (state.hangover) {
+        state.caffeine = Math.max(0, state.caffeine - 30);
+        document.getElementById('game-body').classList.add('animate-slap');
+        setTimeout(() => document.getElementById('game-body').classList.remove('animate-slap'), 1000);
+        showEventBanner('🤢', '嚴重宿醉', '尋晚蘭桂坊飲大咗，精神消耗速度加倍，快啲去買杯 $35 Starbucks 續命！', '頂硬上', 'close');
+        state.hangover = false; // 提示後解除，但精神已扣減
+      }
+    };
+
+    // 5. 迫地鐵連鎖反應 (遲到機制)
+    // 覆寫原本的 commuteGameEnd
+    window.commuteGameEnd = function(success) {
+      if (!success) {
+        state.isLate = true;
+        if(typeof addFeedLog === 'function') addFeedLog('⏰ 上唔到車！你今日遲到咗 15 分鐘！');
+      }
+      window.switchScene('office');
+      
+      if (state.isLate) {
+        state.secrecyAlert = 50; // 老細警戒值起步極高
+        if(typeof showEmote === 'function') showEmote('👔', '老細 Mr. Chan 啤住你：「又遲到？今日盯實你！」');
+        state.isLate = false;
+      }
+    };
+
+    // 6. 交通工具視覺與營業時間
+    window.applyVehicleVisuals = function(type) {
+      const container = document.getElementById('modal-commute-rush');
+      const badge = document.getElementById('fp-commute-badge');
+      if (!container || !badge) return;
+      if (type === 'mtr') {
+        badge.textContent = '🚇 港鐵車廂 · 沙甸魚視覺';
+        container.style.backgroundColor = 'rgba(15, 23, 42, 0.95)';
+      } else if (type === 'bus') {
+        badge.textContent = '🚌 九巴上層 · 搖晃視覺';
+        container.style.backgroundColor = 'rgba(69, 26, 3, 0.95)';
+      } else if (type === 'redvan') {
+        badge.textContent = '🚐 亡命紅 VAN · 推背視覺';
+        container.style.backgroundColor = 'rgba(69, 10, 10, 0.95)';
+      }
+    };
+    
+    const originalSelectCommuteVehicle = window.selectCommuteVehicle;
+    window.selectCommuteVehicle = function(type) {
+      applyVehicleVisuals(type);
+      if(originalSelectCommuteVehicle) originalSelectCommuteVehicle(type);
+    };
+
+    // 7. 終局機制 (Endgame) 覆寫遞信邏輯
+    window.executeResignationChoice = function(choice) {
+      if (choice === 'quit') {
+        closeModal('modal-resign');
+        if(typeof triggerSfx === 'function') triggerSfx('bell'); 
+        
+        const repTitle = document.getElementById('report-title');
+        const repSub = document.getElementById('report-subtitle');
+        const repComment = document.getElementById('report-comment');
+        
+        if (repTitle) repTitle.textContent = '🎉 逃出生天：辭職成功！';
+        if (repSub) repSub.textContent = `經歷咗 ${state.dayCount || 1} 日嘅折磨，你終於重獲自由！`;
+        if (repComment) repComment.textContent = '你霸氣將辭職信掟喺老細枱面，轉身離開 IFC。從此解鎖「自由身/老闆模式」，中環再困你唔住！';
+        
+        const reportModal = document.getElementById('modal-report');
+        if (reportModal) reportModal.classList.remove('hidden');
+        
+        state.employmentMode = 'freelance'; // 永久切換模式
+      } else if (choice === 'counter') {
+        state.money += 1500;
+        closeModal('modal-resign');
+        showEventBanner('💰', '接受 Counter-Offer', '老細加薪挽留，你選擇繼續留喺地獄...', '繼續返工', 'close');
+      }
+    };
+
+    // 8. 綁定遊戲時間推進 (模擬時鐘)
+    setInterval(() => {
+        // 假設原本遊戲有 state.clockMinutes 負責記錄時間 (以分鐘計，540 = 09:00)
+        if (state.clockMinutes === 540) window.checkHangover();
+        
+        if (state.clockMinutes >= 1439) { // 23:59
+            window.endOfDayRoutine();
+            state.clockMinutes = 540; // 重置為翌日 09:00
+        }
+    }, 60000); // 這裡設定現實 1 分鐘檢查一次，可依你遊戲的時鐘速度調整
 
   </script>
 </body>
