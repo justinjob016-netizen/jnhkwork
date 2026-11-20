@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>香港社畜實錄 · 3D數位藝術 MMO 跨裝置聯機版 v6.0</title>
+  <title>香港社畜實錄 · 3D數位藝術 MMO 跨裝置聯機版 v6.1</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
@@ -15,14 +15,22 @@
       overflow: hidden;
       user-select: none;
       -webkit-user-select: none;
-      touch-action: none;
       background-color: #050811;
       padding-bottom: env(safe-area-inset-bottom);
+    }
+    /* 僅在 3D 畫布鎖定原生手勢，確保手機版菜單與彈窗可以順暢上下滑動 */
+    #webgl-viewport {
+      touch-action: none;
+    }
+    .mobile-scroll-area {
+      touch-action: pan-y !important;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
     }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     .glass-hud {
-      background: rgba(9, 14, 28, 0.88);
+      background: rgba(9, 14, 28, 0.90);
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
       border: 1px solid rgba(255, 255, 255, 0.16);
@@ -70,26 +78,26 @@
 <body id="game-body" class="h-screen w-screen relative text-slate-100">
 
   <!-- =========================================================
-1. 入職登記大廳 (跨裝置房號聯機 + 角色訂製)
+1. 入職登記大廳
   ========================================================== -->
-  <div id="creation-screen" class="fixed inset-0 z-50 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-[#050811] to-black flex items-center justify-center p-2.5 sm:p-5 overflow-y-auto">
+  <div id="creation-screen" class="fixed inset-0 z-50 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-[#050811] to-black flex items-center justify-center p-2.5 sm:p-5 overflow-y-auto mobile-scroll-area">
     <div class="bg-slate-900/95 backdrop-blur-2xl rounded-3xl max-w-5xl w-full p-4 sm:p-6 shadow-[0_25px_80px_rgba(0,0,0,0.95)] border border-slate-700/80 animate-pop my-auto">
       
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-800">
         <div>
           <div class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 text-[11px] font-bold mb-1 border border-emerald-400/30">
-            🌐 v6.0 跨手機/電腦真聯機 · 雙人一齊煙Break · 大視野摺疊菜單
+            🌐 v6.1 跨裝置聯機 · 手機內建 WhatsApp 私聊約人 · 手機版滑動菜單
           </div>
           <h1 class="text-xl sm:text-3xl font-black text-white tracking-tight">
             香港社畜實錄 <span class="bg-gradient-to-r from-amber-400 via-orange-400 to-red-500 bg-clip-text text-transparent">· 3D線上職場修羅場</span>
           </h1>
         </div>
         <p class="text-[11px] text-slate-400 max-w-xs leading-relaxed">
-          同朋友輸入相同「4位數公司房號」即可跨裝置同場！可邀朋友一齊落後樓梯煙 Break、請飲咖啡、3點3下午茶夾單！
+          同朋友輸入相同「房號」即可跨裝置同場！打開手機「💬 WhatsApp」可直接私聊傾計、預約放工蘭桂坊或一齊落後樓梯煙 Break！
         </p>
       </div>
 
-      <!-- STEP A: 選擇或輸入與朋友同場的公司房號 -->
+      <!-- STEP A: 聯機房號 -->
       <div class="mt-3 bg-emerald-950/35 border border-emerald-500/40 rounded-2xl p-3">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
@@ -249,12 +257,11 @@
   <div id="floating-ui-layer" class="fixed inset-0 pointer-events-none overflow-hidden z-10"></div>
 
   <!-- =========================================================
-3. 極簡大視野頂部 HUD + 一鍵展開全功能菜單 (Desktop / Mobile 通用)
+3. 極簡大視野頂部 HUD + 可順暢上下滑動的全功能菜單
   ========================================================== -->
   <header id="hud-top" class="hidden fixed top-0 left-0 right-0 z-30 p-2 pointer-events-none">
     <div class="max-w-7xl mx-auto flex flex-col gap-1.5 pointer-events-auto">
       
-      <!-- 精簡單行主狀態列：釋放 40%+ 3D 遊戲大畫面 -->
       <div class="glass-hud rounded-2xl px-2.5 py-2 shadow-2xl flex items-center justify-between gap-1.5">
         <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
           <button onclick="openCreatorLobby()" title="更換造型/房號" class="shrink-0 w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-base hover:bg-amber-500/30 transition">
@@ -274,29 +281,29 @@
             <span id="hud-offergod-buff" class="hidden text-[10px] px-1.5 py-0.5 rounded-md bg-gradient-to-r from-amber-400 to-red-600 text-slate-950 font-black">
               🧧 靈符護體
             </span>
-            <!-- 線上人數 & 房號按鈕 -->
             <button onclick="openOnlinePeersModal()" class="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md bg-emerald-500/30 hover:bg-emerald-500/50 text-emerald-200 border border-emerald-400/60 font-black shadow transition">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-              <span id="hud-room-badge">👥 IFC88 · 1人</span>
+              <span id="hud-room-badge">👥 IFC88 · 3人</span>
             </button>
           </div>
         </div>
 
-        <!-- 右側精簡操作區：存款 + 手機 + 總菜單展開按鈕 -->
         <div class="flex items-center gap-1.5 shrink-0">
           <div class="px-2 py-1 rounded-lg bg-emerald-950/90 border border-emerald-400/40 text-emerald-300 text-[11px] font-black">
             💵 <span id="hud-money-txt">HK$500</span>
           </div>
 
-          <button id="btn-smartphone" onclick="openSmartphoneModal()" class="relative px-2 py-1 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-[11px] font-black border border-sky-300/50">
-            📱<span id="phone-unread-dot" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 ring-2 ring-slate-900 animate-ping"></span>
+          <!-- 手機按鈕（內含 WhatsApp 私聊與預約放工） -->
+          <button id="btn-smartphone" onclick="openSmartphoneModal('whatsapp')" class="relative px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-black border border-emerald-300/60 flex items-center gap-1 shadow">
+            <span>📱</span>
+            <span class="hidden sm:inline">WhatsApp/手機</span>
+            <span id="phone-unread-dot" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 ring-2 ring-slate-900 animate-ping"></span>
           </button>
 
           <button id="btn-grand-resign" onclick="goToBossForResign()" class="hidden px-2 py-1 rounded-lg bg-gradient-to-r from-yellow-400 to-red-600 text-slate-950 text-[10px] font-black animate-pulse">
             ✉️ 遞信
           </button>
 
-          <!-- 核心大視野菜單切換按鈕 -->
           <button id="btn-master-menu" onclick="toggleMasterMenu()" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-slate-950 text-xs font-black shadow-lg flex items-center gap-1 transition">
             <span id="master-menu-icon">🧭</span>
             <span id="master-menu-label">菜單/地圖</span>
@@ -304,7 +311,7 @@
         </div>
       </div>
 
-      <!-- 動態狀態提醒條（僅在有同行夥伴/預約約會/警戒時顯示） -->
+      <!-- 動態狀態提醒條 -->
       <div id="pending-date-bar" class="hidden flex items-center justify-between gap-2 bg-gradient-to-r from-purple-900/90 via-pink-900/90 to-rose-900/90 border border-pink-400/70 rounded-xl px-2.5 py-1.5 animate-pop">
         <div class="flex items-center gap-1.5 min-w-0">
           <span class="text-sm animate-pulse">🍸</span>
@@ -338,9 +345,9 @@
       </div>
 
       <!-- =========================================================
-           可收合的全功能總菜單抽屜 (預設收起，保持大視野！)
+           可順暢上下滑動的全功能總菜單抽屜 (mobile-scroll-area 修復手機滑動)
       ========================================================== -->
-      <div id="master-menu-drawer" class="hidden glass-hud rounded-2xl p-3 shadow-2xl border border-amber-400/40 space-y-3 animate-pop max-h-[75vh] overflow-y-auto">
+      <div id="master-menu-drawer" class="hidden glass-hud rounded-2xl p-3 shadow-2xl border border-amber-400/40 space-y-3 animate-pop max-h-[68vh] overflow-y-auto mobile-scroll-area">
         
         <!-- 1. 四大角色狀態數值條 -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
@@ -385,26 +392,26 @@
           </div>
         </div>
 
-        <!-- 2. 六大香港地區導航（自選交通工具前往） -->
+        <!-- 2. 六大香港地區導航 -->
         <div>
           <div class="text-[11px] font-black text-amber-300 mb-1.5">🚇 香港六大地區交通導航（點擊選擇港鐵 / 隧巴 / 紅VAN / 小輪 / 的士）：</div>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-            <button onclick="closeMasterMenu(); requestTravelToScene('office')" id="tab-scene-office" class="text-left text-xs font-black px-3 py-2 rounded-xl bg-sky-600 text-white border border-sky-300/60 transition">
+            <button onclick="closeMasterMenu(); requestTravelToScene('office')" id="tab-scene-office" class="text-left text-xs font-black px-3 py-2.5 rounded-xl bg-sky-600 text-white border border-sky-300/60 transition">
               🏢 1. 中環寫字樓 (返工)
             </button>
-            <button onclick="closeMasterMenu(); requestTravelToScene('commute')" id="tab-scene-commute" class="text-left text-xs font-black px-3 py-2 rounded-xl bg-slate-800 hover:bg-rose-700 text-slate-200 border border-white/15 transition">
+            <button onclick="closeMasterMenu(); requestTravelToScene('commute')" id="tab-scene-commute" class="text-left text-xs font-black px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-rose-700 text-slate-200 border border-white/15 transition">
               🚇 2. 金鐘轉車站/巴士站
             </button>
-            <button onclick="closeMasterMenu(); requestTravelToScene('wanchai')" id="tab-scene-wanchai" class="text-left text-xs font-black px-3 py-2 rounded-xl bg-slate-800 hover:bg-orange-600 text-slate-200 border border-white/15 transition">
+            <button onclick="closeMasterMenu(); requestTravelToScene('wanchai')" id="tab-scene-wanchai" class="text-left text-xs font-black px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-orange-600 text-slate-200 border border-white/15 transition">
               🌉 3. 灣仔鵝頸橋打小人
             </button>
-            <button onclick="closeMasterMenu(); requestTravelToScene('sheungwan')" id="tab-scene-sheungwan" class="text-left text-xs font-black px-3 py-2 rounded-xl bg-slate-800 hover:bg-red-700 text-slate-200 border border-white/15 transition">
+            <button onclick="closeMasterMenu(); requestTravelToScene('sheungwan')" id="tab-scene-sheungwan" class="text-left text-xs font-black px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-red-700 text-slate-200 border border-white/15 transition">
               🏮 4. 上環文武廟 (求籤)
             </button>
-            <button onclick="closeMasterMenu(); requestTravelToScene('lkf')" id="tab-scene-lkf" class="text-left text-xs font-black px-3 py-2 rounded-xl bg-slate-800 hover:bg-purple-700 text-slate-200 border border-white/15 transition">
+            <button onclick="closeMasterMenu(); requestTravelToScene('lkf')" id="tab-scene-lkf" class="text-left text-xs font-black px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-purple-700 text-slate-200 border border-white/15 transition">
               🍸 5. 中環蘭桂坊 (舞池)
             </button>
-            <button onclick="closeMasterMenu(); requestTravelToScene('home')" id="tab-scene-home" class="text-left text-xs font-black px-3 py-2 rounded-xl bg-slate-800 hover:bg-teal-700 text-slate-200 border border-white/15 transition">
+            <button onclick="closeMasterMenu(); requestTravelToScene('home')" id="tab-scene-home" class="text-left text-xs font-black px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-teal-700 text-slate-200 border border-white/15 transition">
               🏠 6. 歸家蝸居 (Me Time)
             </button>
           </div>
@@ -414,45 +421,45 @@
         <div>
           <div class="text-[11px] font-black text-emerald-300 mb-1.5">⚡ 職場聯機互動 & 社畜技能：</div>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-            <button onclick="closeMasterMenu(); openOnlinePeersModal()" class="px-2.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black text-left">
-              👥 線上朋友 / 一齊煙Break
+            <button onclick="closeMasterMenu(); openSmartphoneModal('whatsapp')" class="px-2.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black text-left shadow">
+              💬 WhatsApp 私聊/約人
             </button>
-            <button onclick="closeMasterMenu(); openJobTaskModal()" class="px-2.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-black text-left">
+            <button onclick="closeMasterMenu(); openOnlinePeersModal()" class="px-2.5 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-black text-left">
+              🚬 邀朋友一齊煙Break
+            </button>
+            <button onclick="closeMasterMenu(); openJobTaskModal()" class="px-2.5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-black text-left">
               💼 崗位任務 (+KPI)
             </button>
-            <button onclick="closeMasterMenu(); openLunchBattleModal()" class="px-2.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black text-left">
+            <button onclick="closeMasterMenu(); openLunchBattleModal()" class="px-2.5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black text-left">
               🍱 12:30 午飯修羅場
             </button>
-            <button onclick="closeMasterMenu(); openTeaTimeModal()" class="px-2.5 py-2 rounded-xl bg-orange-500 hover:bg-orange-400 text-slate-950 text-xs font-black text-left">
+            <button onclick="closeMasterMenu(); openTeaTimeModal()" class="px-2.5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-400 text-slate-950 text-xs font-black text-left">
               🧋 3點3 下午茶夾單
             </button>
-            <button onclick="closeMasterMenu(); openSecretTeamsModal()" class="px-2.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-black text-left">
+            <button onclick="closeMasterMenu(); openSecretTeamsModal()" class="px-2.5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-black text-left">
               💌 Teams 秘密傳情
             </button>
-            <button onclick="closeMasterMenu(); openInviteCompanionModal()" class="px-2.5 py-2 rounded-xl bg-pink-600 hover:bg-pink-500 text-white text-xs font-black text-left">
-              🤝 預約放工 / 同行
-            </button>
-            <button onclick="closeMasterMenu(); openGossipWallModal()" class="px-2.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-black text-left">
+            <button onclick="closeMasterMenu(); openGossipWallModal()" class="px-2.5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-black text-left">
               🗣️ 後樓梯八卦牆
             </button>
-            <button onclick="closeMasterMenu(); openShopModal()" class="px-2.5 py-2 rounded-xl bg-amber-700 hover:bg-amber-600 text-white text-xs font-black text-left">
+            <button onclick="closeMasterMenu(); openShopModal()" class="px-2.5 py-2.5 rounded-xl bg-amber-700 hover:bg-amber-600 text-white text-xs font-black text-left">
               🛍️ 職場神裝 / 置業
             </button>
           </div>
         </div>
 
         <!-- 4. 鏡頭視角 & 虛擬方向鍵 -->
-        <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-white/10">
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-white/10 pb-2">
           <div class="flex items-center gap-1.5">
             <span class="text-[10px] font-bold text-slate-400">鏡頭視角：</span>
-            <button onclick="setCameraPreset('iso')" id="cam-btn-iso" class="cam-preset-btn px-2.5 py-1 rounded-lg bg-amber-500 text-slate-950 text-[10px] font-black">📐 等軸</button>
-            <button onclick="setCameraPreset('street')" id="cam-btn-street" class="cam-preset-btn px-2.5 py-1 rounded-lg bg-white/10 text-slate-200 text-[10px] font-bold">👁️ 近景</button>
-            <button onclick="setCameraPreset('showcase')" id="cam-btn-showcase" class="cam-preset-btn px-2.5 py-1 rounded-lg bg-white/10 text-slate-200 text-[10px] font-bold">🏛️ 特寫</button>
+            <button onclick="setCameraPreset('iso')" id="cam-btn-iso" class="cam-preset-btn px-2.5 py-1.5 rounded-lg bg-amber-500 text-slate-950 text-[10px] font-black">📐 等軸</button>
+            <button onclick="setCameraPreset('street')" id="cam-btn-street" class="cam-preset-btn px-2.5 py-1.5 rounded-lg bg-white/10 text-slate-200 text-[10px] font-bold">👁️ 近景</button>
+            <button onclick="setCameraPreset('showcase')" id="cam-btn-showcase" class="cam-preset-btn px-2.5 py-1.5 rounded-lg bg-white/10 text-slate-200 text-[10px] font-bold">🏛️ 特寫</button>
           </div>
           <div class="flex items-center gap-1.5">
-            <button onclick="toggleDpad()" class="px-2.5 py-1 rounded-lg bg-white/10 text-slate-200 text-[10px] font-bold">🕹️ 方向鍵</button>
-            <button onclick="closeMasterMenu(); openCareerReportModal()" class="px-2.5 py-1 rounded-lg bg-slate-700 text-amber-200 text-[10px] font-black">📊 年度結算</button>
-            <button onclick="closeMasterMenu()" class="px-3 py-1 rounded-lg bg-red-600/80 text-white text-[10px] font-black">收起菜單 ▲</button>
+            <button onclick="toggleDpad()" class="px-2.5 py-1.5 rounded-lg bg-white/10 text-slate-200 text-[10px] font-bold">🕹️ 方向鍵</button>
+            <button onclick="closeMasterMenu(); openCareerReportModal()" class="px-2.5 py-1.5 rounded-lg bg-slate-700 text-amber-200 text-[10px] font-black">📊 結算</button>
+            <button onclick="closeMasterMenu()" class="px-3 py-1.5 rounded-lg bg-red-600/80 text-white text-[10px] font-black">收起菜單 ▲</button>
           </div>
         </div>
 
@@ -536,19 +543,177 @@
   </footer>
 
   <!-- =========================================================
-6. 👥 跨裝置朋友聯機大廳 & 雙人一齊煙 Break 面板 Modal
+6. 📱 隨身社畜智能手機（内置 WhatsApp 私聊/預約放工/同行 + 天文台 + 港鐵通 + 自由身 + 靈符）
+  ========================================================== -->
+  <div id="modal-smartphone" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-2.5 sm:p-4" onclick="closeModal('modal-smartphone', event)">
+    <div class="bg-slate-950 text-white rounded-[2.2rem] max-w-md w-full p-4 shadow-[0_20px_70px_rgba(0,0,0,0.95)] border-4 border-slate-700 animate-pop relative overflow-hidden" onclick="event.stopPropagation()">
+      <!-- 手機頂部狀態欄 -->
+      <div class="flex items-center justify-between text-[11px] font-bold text-slate-300 px-2 pb-2 border-b border-slate-800">
+        <span id="phone-time-display">09:00</span>
+        <div class="w-20 h-4 bg-black rounded-full border border-slate-800 flex items-center justify-center">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        </div>
+        <span>5G 🔋94%</span>
+      </div>
+
+      <!-- 5大手機 App 分頁 -->
+      <div class="grid grid-cols-5 gap-1 my-2 bg-slate-900 p-1 rounded-2xl border border-slate-800">
+        <button onclick="switchPhoneApp('whatsapp')" id="phone-tab-whatsapp" class="py-1.5 rounded-xl bg-emerald-600 text-white text-[10px] font-black transition">💬 WhatsApp</button>
+        <button onclick="switchPhoneApp('hko')" id="phone-tab-hko" class="py-1.5 rounded-xl text-slate-300 hover:bg-slate-800 text-[10px] font-black transition">🌪️ 天文台</button>
+        <button onclick="switchPhoneApp('mtr')" id="phone-tab-mtr" class="py-1.5 rounded-xl text-slate-300 hover:bg-slate-800 text-[10px] font-black transition">🚇 港鐵通</button>
+        <button onclick="switchPhoneApp('freelance')" id="phone-tab-freelance" class="py-1.5 rounded-xl text-slate-300 hover:bg-slate-800 text-[10px] font-black transition">💼 自由身</button>
+        <button onclick="switchPhoneApp('wallet')" id="phone-tab-wallet" class="py-1.5 rounded-xl text-slate-300 hover:bg-slate-800 text-[10px] font-black transition">🧧 靈符</button>
+      </div>
+
+      <!-- APP 1: 💬 WhatsApp 社畜私聊 & 預約放工同行 -->
+      <div id="phone-app-whatsapp" class="space-y-2">
+        <!-- 聯絡人快速切換列 -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar" id="wa-contacts-strip"></div>
+
+        <!-- 聊天室頂部聯絡人資料與一鍵預約放工/同行操作 -->
+        <div class="p-2.5 rounded-2xl bg-[#075e54] text-white space-y-2 shadow">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2 min-w-0">
+              <span id="wa-chat-avatar" class="text-xl">💘</span>
+              <div class="min-w-0">
+                <div id="wa-chat-name" class="text-xs font-black truncate">Vivienne (Marketing女神)</div>
+                <div id="wa-chat-status" class="text-[9px] text-emerald-200 truncate">🟢 線上 · 好感度 25%</div>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded bg-black/30 text-[9px] font-bold shrink-0">端對端加密</span>
+          </div>
+
+          <!-- WhatsApp 專屬：一鍵預約放工 / 同行快捷列 -->
+          <div class="grid grid-cols-3 gap-1 pt-1 border-t border-white/15">
+            <button type="button" onclick="triggerWhatsappInvite('lkf')" class="py-1.5 px-1 rounded-lg bg-pink-600 hover:bg-pink-500 text-white text-[10px] font-black text-center shadow">
+              🍸 約18:00蘭桂坊
+            </button>
+            <button type="button" onclick="triggerWhatsappInvite('smoke')" class="py-1.5 px-1 rounded-lg bg-orange-500 hover:bg-orange-400 text-slate-950 text-[10px] font-black text-center shadow">
+              🚬 一齊煙Break
+            </button>
+            <button type="button" onclick="triggerWhatsappInvite('commute')" class="py-1.5 px-1 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 text-[10px] font-black text-center shadow">
+              🚇 放工一齊走
+            </button>
+          </div>
+        </div>
+
+        <!-- WhatsApp 對話紀錄視窗（支援手機手指流暢滑動） -->
+        <div id="wa-messages-box" class="h-44 overflow-y-auto mobile-scroll-area p-2.5 rounded-2xl bg-[#0b141a] border border-slate-800 space-y-2 text-xs"></div>
+
+        <!-- 快捷回覆語句 -->
+        <div class="flex gap-1 overflow-x-auto no-scrollbar">
+          <button type="button" onclick="sendWhatsappQuick('放工一齊去飲杯嘢放鬆下？🍸')" class="shrink-0 px-2 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-[10px] text-emerald-300 border border-slate-700">🍸 放工飲杯？</button>
+          <button type="button" onclick="sendWhatsappQuick('頂唔順啦，落後樓梯煙Break吹陣水？🚬')" class="shrink-0 px-2 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-[10px] text-orange-300 border border-slate-700">🚬 煙Break？</button>
+          <button type="button" onclick="sendWhatsappQuick('老細行緊過嚟，快啲扮工！🚨')" class="shrink-0 px-2 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-[10px] text-amber-300 border border-slate-700">🚨 老細巡房！</button>
+        </div>
+
+        <!-- WhatsApp 打字輸入框 -->
+        <form onsubmit="submitWhatsappChat(event)" class="flex gap-1.5">
+          <input id="wa-chat-input" type="text" maxlength="60" placeholder="輸入 WhatsApp 訊息傾計..."
+            class="flex-1 text-xs px-3 py-2 rounded-full bg-slate-800 text-white border border-slate-600 focus:border-emerald-400 focus:outline-none" />
+          <button type="submit" class="px-3.5 py-2 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black shrink-0">
+            發送 ➤
+          </button>
+        </form>
+      </div>
+
+      <!-- APP 2: 天文台 -->
+      <div id="phone-app-hko" class="hidden space-y-2.5 min-h-[280px]">
+        <div class="p-3.5 rounded-2xl bg-gradient-to-br from-sky-900 to-slate-900 border border-sky-500/40">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black text-sky-300">🇭🇰 香港天文台熱帶氣旋警告</span>
+            <span id="hko-signal-badge" class="px-2 py-0.5 rounded-full bg-emerald-500/25 text-emerald-300 text-[10px] font-black border border-emerald-400/40">1號戒備信號</span>
+          </div>
+          <div class="flex items-center gap-3 my-3">
+            <div id="hko-signal-icon" class="text-4xl">🌤️</div>
+            <div>
+              <div id="hko-headline" class="text-sm font-black text-white">天色晴朗，如常返工</div>
+              <div id="hko-subtext" class="text-[11px] text-slate-300 mt-0.5 leading-snug">熱帶氣旋距離香港 600 公里，暫時無得提早放工。</div>
+            </div>
+          </div>
+          <div id="hko-countdown-box" class="hidden p-2 rounded-xl bg-red-950/80 border border-red-400/50 text-center">
+            <div class="text-[11px] font-black text-yellow-300">⚠️ 預警：即將改發八號烈風或暴風信號！</div>
+            <div class="text-xs font-bold text-white mt-0.5">極限逃生倒數：<span id="hko-countdown-sec" class="text-red-400 font-black">20</span> 秒</div>
+          </div>
+        </div>
+        <button onclick="simulateTyphoonWarning()" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 text-[11px] font-bold border border-slate-700">
+          📡 刷新天文台最新風暴路徑雷達
+        </button>
+      </div>
+
+      <!-- APP 3: 港鐵通 -->
+      <div id="phone-app-mtr" class="hidden space-y-2.5 min-h-[280px]">
+        <div class="p-3.5 rounded-2xl bg-slate-900 border border-slate-700 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black text-amber-300">🚇 MTR Mobile 車務狀況</span>
+            <span id="mtr-status-pill" class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-black">全線服務正常</span>
+          </div>
+          <div id="mtr-alert-card" class="p-3 rounded-xl bg-black/40 border border-slate-800 text-xs text-slate-200 leading-relaxed">
+            港島線及荃灣線（金鐘轉車站）列車服務維持正常，放工時段人流極多。
+          </div>
+        </div>
+      </div>
+
+      <!-- APP 4: 自由身 -->
+      <div id="phone-app-freelance" class="hidden space-y-2.5 min-h-[280px]">
+        <div id="freelance-locked-view" class="p-4 rounded-2xl bg-slate-900 border border-slate-700 text-center space-y-2">
+          <div class="text-3xl">🔒</div>
+          <div class="text-xs font-black text-amber-300">目前身份：全職受薪社畜</div>
+          <p class="text-[11px] text-slate-300 leading-relaxed">
+            去<strong>上環文武廟</strong>取得 Offer God 靈符並向老細遞信，即可解鎖「無業遊民／自由身模式」！
+          </p>
+        </div>
+
+        <div id="freelance-unlocked-view" class="hidden space-y-2">
+          <div class="p-2.5 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-[11px] text-emerald-200 font-bold">
+            😎 已進入「無業遊民／自由身模式」！無視返工鐘、老細管唔到！
+          </div>
+          <button onclick="doFreelanceGig('ppt')" class="w-full text-left p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 flex items-center justify-between">
+            <div>
+              <div class="text-xs font-black text-white">📊 幫前同事代寫救命 PPT</div>
+              <div class="text-[10px] text-slate-400">遠端秘撈 · 零脫髮風險</div>
+            </div>
+            <span class="px-2 py-1 rounded-lg bg-emerald-500 text-slate-950 font-black text-xs">+HK$180</span>
+          </button>
+          <button onclick="doFreelanceGig('debug')" class="w-full text-left p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 flex items-center justify-between">
+            <div>
+              <div class="text-xs font-black text-white">💻 幫外資公司緊急 Debug</div>
+              <div class="text-[10px] text-slate-400">自由身顧問時薪</div>
+            </div>
+            <span class="px-2 py-1 rounded-lg bg-emerald-500 text-slate-950 font-black text-xs">+HK$260</span>
+          </button>
+          <button onclick="acceptHeadhunterRehire()" class="w-full py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-300 text-[11px] font-black">
+            👔 接受獵頭高薪挖角（重出江湖 Lv.3 起跳）
+          </button>
+        </div>
+      </div>
+
+      <!-- APP 5: 靈符銀包 -->
+      <div id="phone-app-wallet" class="hidden space-y-2.5 min-h-[280px]">
+        <div id="phone-wallet-content" class="text-xs text-slate-300">
+          銀包暫時未有過完火嘅許願卡～去「上環文武廟」參拜 Offer God 啦！
+        </div>
+      </div>
+
+      <button onclick="closeModal('modal-smartphone')" class="mt-2.5 w-full py-2 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-black">
+        收起手機
+      </button>
+    </div>
+  </div>
+
+  <!-- =========================================================
+7. 👥 跨裝置朋友聯機大廳 & 雙人一齊煙 Break 面板 Modal
   ========================================================== -->
   <div id="modal-online-peers" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4" onclick="closeModal('modal-online-peers', event)">
     <div class="bg-slate-900 text-white rounded-3xl max-w-lg w-full p-5 shadow-2xl border-2 border-emerald-400 animate-pop" onclick="event.stopPropagation()">
       <div class="flex items-center justify-between pb-3 border-b border-slate-700">
         <div>
           <h2 class="font-black text-base text-emerald-300">🌐 跨裝置朋友聯機大廳 · 房號【<span id="peers-modal-room">IFC88</span>】</h2>
-          <p class="text-[11px] text-slate-300">同朋友輸入相同房號即刻連線！可邀朋友一齊煙 Break、請飲咖啡或瞬移會合！</p>
+          <p class="text-[11px] text-slate-300">同朋友輸入相同房號即刻連線！可邀朋友一齊煙 Break、請飲咖啡或打開 WhatsApp 私聊！</p>
         </div>
         <button onclick="closeModal('modal-online-peers')" class="w-8 h-8 rounded-lg bg-slate-800 font-black">✕</button>
       </div>
 
-      <!-- 直接輸入朋友房號切換連線 -->
       <div class="my-3 p-3 rounded-2xl bg-emerald-950/60 border border-emerald-500/40 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
         <div class="flex-1">
           <div class="text-[10px] font-black text-emerald-300">🔑 輸入朋友嘅房號即時連線加入：</div>
@@ -565,11 +730,11 @@
       </div>
 
       <div class="text-[11px] font-black text-amber-300 mb-1.5">👥 目前同房在線玩家 / 模擬同事：</div>
-      <div id="online-peers-list" class="space-y-2 max-h-64 overflow-y-auto"></div>
+      <div id="online-peers-list" class="space-y-2 max-h-64 overflow-y-auto mobile-scroll-area"></div>
     </div>
   </div>
 
-  <!-- 真人線上玩家雙向互動視窗（新增：🚬 邀去後樓梯一齊煙 Break！） -->
+  <!-- 真人線上玩家雙向互動視窗 -->
   <div id="modal-peer-action" class="hidden fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-4" onclick="closeModal('modal-peer-action', event)">
     <div class="bg-slate-900 text-white rounded-3xl max-w-md w-full p-5 shadow-2xl border-2 border-emerald-400 animate-pop text-center" onclick="event.stopPropagation()">
       <div class="flex items-center justify-between pb-2 border-b border-slate-700">
@@ -581,17 +746,17 @@
       <div class="grid grid-cols-2 gap-2 text-left">
         <button onclick="sendPeerSocialAction('smoke_invite')" class="p-2.5 rounded-xl bg-gradient-to-r from-orange-600/50 to-amber-600/50 hover:brightness-110 border-2 border-orange-400 transition col-span-2">
           <div class="text-xs font-black text-orange-200">🚬 邀去後樓梯 EXIT 一齊煙 Break！（雙人同步點煙）</div>
-          <div class="text-[10px] text-amber-100 mt-0.5">兩人並肩企喺煙灰缸旁齊齊點煙吹水，獲得雙倍理智回血 +25%！</div>
+          <div class="text-[10px] text-amber-100 mt-0.5">兩人並肩企喺煙灰缸旁齊齊點煙吹水，理智回血 +28%！</div>
+        </button>
+
+        <button onclick="openWhatsappWithTarget(selectedTargetPeerId)" class="p-2.5 rounded-xl bg-emerald-600/40 hover:bg-emerald-600/60 border border-emerald-400 transition">
+          <div class="text-xs font-black text-emerald-200">💬 打開 WhatsApp 私聊/約人</div>
+          <div class="text-[10px] text-slate-200 mt-0.5">傾計、預約放工或同行</div>
         </button>
 
         <button onclick="sendPeerSocialAction('coffee')" class="p-2.5 rounded-xl bg-amber-600/30 hover:bg-amber-600/50 border border-amber-400/50 transition">
           <div class="text-xs font-black text-amber-200">☕ 請飲 Starbucks ($35)</div>
           <div class="text-[10px] text-slate-300 mt-0.5">幫對方回復 +30% 精神</div>
-        </button>
-
-        <button onclick="sendPeerSocialAction('cover')" class="p-2.5 rounded-xl bg-sky-600/30 hover:bg-sky-600/50 border border-sky-400/50 transition">
-          <div class="text-xs font-black text-sky-200">🛡️ 幫手把風掩護摸魚</div>
-          <div class="text-[10px] text-slate-300 mt-0.5">幫對方擋住老細視線 +20 XP</div>
         </button>
 
         <button onclick="sendPeerSocialAction('dance_invite')" class="p-2.5 rounded-xl bg-pink-600/35 hover:bg-pink-600/55 border border-pink-400/50 transition">
@@ -603,27 +768,12 @@
           <div class="text-xs font-black text-teal-200">🚀 瞬移去佢身邊會合</div>
           <div class="text-[10px] text-slate-300 mt-0.5">立即前往對方所在位置</div>
         </button>
-
-        <button onclick="passBombToTargetPeer()" class="p-2.5 rounded-xl bg-red-600/70 hover:bg-red-600 text-white transition">
-          <div class="text-xs font-black">🍳 卸膊飛鍋甩俾佢！</div>
-          <div class="text-[10px] text-amber-100 mt-0.5">將地獄級 PPT 甩俾對方</div>
-        </button>
-
-        <button onclick="goCurseTargetPeer()" class="p-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 transition">
-          <div class="text-xs font-black">👟 去鵝頸橋打佢小人！</div>
-          <div class="text-[10px] text-red-950 font-bold mt-0.5">跨房震動對方螢幕</div>
-        </button>
-      </div>
-
-      <div class="mt-2.5 flex gap-1.5">
-        <input id="peer-dm-input" type="text" maxlength="40" placeholder="💬 發送私人密語俾呢位朋友..." class="flex-1 text-xs px-3 py-2 rounded-xl bg-slate-800 text-white border border-slate-600 focus:border-emerald-400 focus:outline-none" />
-        <button onclick="sendDirectMessageToPeer()" class="px-3.5 py-2 rounded-xl bg-emerald-500 text-slate-950 text-xs font-black">私聊</button>
       </div>
     </div>
   </div>
 
   <!-- =========================================================
-7. 🧭 香港真實交通工具決策器 Modal
+8. 🧭 香港真實交通工具決策器 & 第一身乘車 & 午飯/下午茶/任務/糧單/文武廟/打小人/蘭桂坊
   ========================================================== -->
   <div id="modal-transport-picker" class="hidden fixed inset-0 bg-black/85 backdrop-blur-md z-[65] flex items-center justify-center p-4" onclick="closeModal('modal-transport-picker', event)">
     <div class="bg-slate-900 text-white rounded-3xl max-w-lg w-full p-5 shadow-2xl border-2 border-amber-400 animate-pop" onclick="event.stopPropagation()">
@@ -636,13 +786,10 @@
         <button onclick="closeModal('modal-transport-picker')" class="w-8 h-8 rounded-lg bg-slate-800 font-black">✕</button>
       </div>
 
-      <div id="transport-options-list" class="my-3 space-y-2 max-h-[62vh] overflow-y-auto pr-0.5"></div>
+      <div id="transport-options-list" class="my-3 space-y-2 max-h-[62vh] overflow-y-auto mobile-scroll-area pr-0.5"></div>
     </div>
   </div>
 
-  <!-- =========================================================
-8. 🚇 第一身逼真動態乘車視角 HUD
-  ========================================================== -->
   <div id="modal-commute-rush" class="hidden fixed inset-0 z-50 flex flex-col justify-between p-3 sm:p-5 pointer-events-none">
     <div class="mt-16 sm:mt-20 mx-auto max-w-lg w-full pointer-events-auto">
       <div class="bg-zinc-950/95 border-2 border-slate-600 rounded-2xl p-2.5 shadow-2xl">
@@ -708,9 +855,6 @@
     </div>
   </div>
 
-  <!-- =========================================================
-9. 🧋 3點3 下午茶夾單 / 🍱 午飯 / 💼 崗位任務 / 🧾 電子糧單
-  ========================================================== -->
   <div id="modal-teatime" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4" onclick="closeModal('modal-teatime', event)">
     <div class="bg-slate-900 text-white rounded-3xl max-w-md w-full p-5 shadow-2xl border-2 border-orange-400 animate-pop text-center" onclick="event.stopPropagation()">
       <div class="flex items-center justify-between pb-2.5 border-b border-slate-700">
@@ -731,7 +875,7 @@
         <button onclick="orderAfternoonTea('treat_all', 98)" class="w-full p-3 rounded-2xl bg-emerald-950/50 hover:bg-emerald-900/70 border border-emerald-400/50 flex items-center justify-between">
           <div>
             <div class="text-xs font-black text-emerald-200">🧁 請全房線上朋友食新鮮出爐蛋撻 + 珍珠奶茶</div>
-            <div class="text-[10px] text-slate-300 mt-0.5">全房線上朋友即時獲得 +20% 精神，你獲得 +35 XP 與全員好感 +10%！</div>
+            <div class="text-[10px] text-slate-300 mt-0.5">全房線上朋友即時獲得 +25% 精神，你獲得 +35 XP 與全員好感 +10%！</div>
           </div>
           <span class="px-2.5 py-1 rounded-lg bg-emerald-400 text-slate-950 text-xs font-black">HK$98</span>
         </button>
@@ -806,9 +950,6 @@
     </div>
   </div>
 
-  <!-- =========================================================
-10. 💌 Teams 秘密傳情 + 🔥 打火機點煙 (支援雙人一起煙Break)
-  ========================================================== -->
   <div id="modal-secret-teams" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4" onclick="closeModal('modal-secret-teams', event)">
     <div id="teams-window-box" class="bg-slate-900 text-white rounded-3xl max-w-md w-full p-5 shadow-2xl border-2 border-pink-500 animate-pop" onclick="event.stopPropagation()">
       <div class="flex items-center justify-between pb-2.5 border-b border-slate-700">
@@ -843,7 +984,7 @@
           </button>
         </div>
 
-        <div id="teams-msg-log" class="h-32 overflow-y-auto p-3 rounded-xl bg-black/50 border border-slate-800 text-xs space-y-2">
+        <div id="teams-msg-log" class="h-32 overflow-y-auto mobile-scroll-area p-3 rounded-xl bg-black/50 border border-slate-800 text-xs space-y-2">
           <div class="text-pink-300"><strong>Vivienne：</strong>你喺工位做緊嘢呀？一陣 18:00 放工約喺蘭桂坊 D2 出口等好唔好？🤫</div>
         </div>
 
@@ -936,169 +1077,6 @@
     </div>
   </div>
 
-  <!-- =========================================================
-11. 📱 隨身社畜智能手機 & 其他彈窗
-  ========================================================== -->
-  <div id="modal-smartphone" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-4" onclick="closeModal('modal-smartphone', event)">
-    <div class="bg-slate-950 text-white rounded-[2.2rem] max-w-sm w-full p-4 shadow-[0_20px_70px_rgba(0,0,0,0.95)] border-4 border-slate-700 animate-pop relative overflow-hidden" onclick="event.stopPropagation()">
-      <div class="flex items-center justify-between text-[11px] font-bold text-slate-300 px-2 pb-2 border-b border-slate-800">
-        <span id="phone-time-display">09:00</span>
-        <div class="w-20 h-4 bg-black rounded-full border border-slate-800 flex items-center justify-center">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-        </div>
-        <span>5G 🔋92%</span>
-      </div>
-
-      <div class="grid grid-cols-4 gap-1 my-2.5 bg-slate-900 p-1 rounded-2xl border border-slate-800">
-        <button onclick="switchPhoneApp('hko')" id="phone-tab-hko" class="py-1.5 rounded-xl bg-sky-600 text-white text-[10px] font-black transition">🌪️ 天文台</button>
-        <button onclick="switchPhoneApp('mtr')" id="phone-tab-mtr" class="py-1.5 rounded-xl text-slate-300 hover:bg-slate-800 text-[10px] font-black transition">🚇 港鐵通</button>
-        <button onclick="switchPhoneApp('freelance')" id="phone-tab-freelance" class="py-1.5 rounded-xl text-slate-300 hover:bg-slate-800 text-[10px] font-black transition">💼 自由身</button>
-        <button onclick="switchPhoneApp('wallet')" id="phone-tab-wallet" class="py-1.5 rounded-xl text-slate-300 hover:bg-slate-800 text-[10px] font-black transition">🧧 靈符</button>
-      </div>
-
-      <div id="phone-app-hko" class="space-y-2.5 min-h-[240px]">
-        <div class="p-3.5 rounded-2xl bg-gradient-to-br from-sky-900 to-slate-900 border border-sky-500/40">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-black text-sky-300">🇭🇰 香港天文台熱帶氣旋警告</span>
-            <span id="hko-signal-badge" class="px-2 py-0.5 rounded-full bg-emerald-500/25 text-emerald-300 text-[10px] font-black border border-emerald-400/40">1號戒備信號</span>
-          </div>
-          <div class="flex items-center gap-3 my-3">
-            <div id="hko-signal-icon" class="text-4xl">🌤️</div>
-            <div>
-              <div id="hko-headline" class="text-sm font-black text-white">天色晴朗，如常返工</div>
-              <div id="hko-subtext" class="text-[11px] text-slate-300 mt-0.5 leading-snug">熱帶氣旋距離香港 600 公里，暫時無得提早放工。</div>
-            </div>
-          </div>
-          <div id="hko-countdown-box" class="hidden p-2 rounded-xl bg-red-950/80 border border-red-400/50 text-center">
-            <div class="text-[11px] font-black text-yellow-300">⚠️ 預警：即將改發八號烈風或暴風信號！</div>
-            <div class="text-xs font-bold text-white mt-0.5">極限逃生倒數：<span id="hko-countdown-sec" class="text-red-400 font-black">20</span> 秒</div>
-          </div>
-        </div>
-        <button onclick="simulateTyphoonWarning()" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 text-[11px] font-bold border border-slate-700">
-          📡 刷新天文台最新風暴路徑雷達
-        </button>
-      </div>
-
-      <div id="phone-app-mtr" class="hidden space-y-2.5 min-h-[240px]">
-        <div class="p-3.5 rounded-2xl bg-slate-900 border border-slate-700 space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-black text-amber-300">🚇 MTR Mobile 車務狀況</span>
-            <span id="mtr-status-pill" class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-black">全線服務正常</span>
-          </div>
-          <div id="mtr-alert-card" class="p-3 rounded-xl bg-black/40 border border-slate-800 text-xs text-slate-200 leading-relaxed">
-            港島線及荃灣線（金鐘轉車站）列車服務維持正常，放工時段人流極多。
-          </div>
-        </div>
-      </div>
-
-      <div id="phone-app-freelance" class="hidden space-y-2.5 min-h-[240px]">
-        <div id="freelance-locked-view" class="p-4 rounded-2xl bg-slate-900 border border-slate-700 text-center space-y-2">
-          <div class="text-3xl">🔒</div>
-          <div class="text-xs font-black text-amber-300">目前身份：全職受薪社畜</div>
-          <p class="text-[11px] text-slate-300 leading-relaxed">
-            去<strong>上環文武廟</strong>取得 Offer God 靈符並向老細遞信，即可解鎖「無業遊民／自由身模式」！
-          </p>
-        </div>
-
-        <div id="freelance-unlocked-view" class="hidden space-y-2">
-          <div class="p-2.5 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-[11px] text-emerald-200 font-bold">
-            😎 已進入「無業遊民／自由身模式」！無視返工鐘、老細管唔到！
-          </div>
-          <button onclick="doFreelanceGig('ppt')" class="w-full text-left p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 flex items-center justify-between">
-            <div>
-              <div class="text-xs font-black text-white">📊 幫前同事代寫救命 PPT</div>
-              <div class="text-[10px] text-slate-400">遠端秘撈 · 零脫髮風險</div>
-            </div>
-            <span class="px-2 py-1 rounded-lg bg-emerald-500 text-slate-950 font-black text-xs">+HK$180</span>
-          </button>
-          <button onclick="doFreelanceGig('debug')" class="w-full text-left p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 flex items-center justify-between">
-            <div>
-              <div class="text-xs font-black text-white">💻 幫外資公司緊急 Debug</div>
-              <div class="text-[10px] text-slate-400">自由身顧問時薪</div>
-            </div>
-            <span class="px-2 py-1 rounded-lg bg-emerald-500 text-slate-950 font-black text-xs">+HK$260</span>
-          </button>
-          <button onclick="acceptHeadhunterRehire()" class="w-full py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-300 text-[11px] font-black">
-            👔 接受獵頭高薪挖角（重出江湖 Lv.3 起跳）
-          </button>
-        </div>
-      </div>
-
-      <div id="phone-app-wallet" class="hidden space-y-2.5 min-h-[240px]">
-        <div id="phone-wallet-content" class="text-xs text-slate-300">
-          銀包暫時未有過完火嘅許願卡～去「上環文武廟」參拜 Offer God 啦！
-        </div>
-      </div>
-
-      <button onclick="closeModal('modal-smartphone')" class="mt-3 w-full py-2 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-black">
-        收起手機
-      </button>
-    </div>
-  </div>
-
-  <!-- 邀約組隊共遊 -->
-  <div id="modal-invite-coop" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4" onclick="closeModal('modal-invite-coop', event)">
-    <div class="bg-slate-900 text-white rounded-3xl max-w-md w-full p-5 shadow-2xl border-2 border-pink-400 animate-pop" onclick="event.stopPropagation()">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-700">
-        <div>
-          <h3 class="font-black text-base text-pink-300">🤝 邀約同事 / 預約 18:00 放工活動！</h3>
-          <p class="text-[11px] text-slate-300">返工預約蘭桂坊會鎖定 18:00 準時兩人同場赴約共舞！</p>
-        </div>
-        <button onclick="closeModal('modal-invite-coop')" class="w-8 h-8 rounded-lg bg-slate-800 font-black">✕</button>
-      </div>
-
-      <div class="my-3 space-y-3">
-        <div>
-          <label class="block text-xs font-bold text-amber-300 mb-1">1. 選擇你想約邊個：</label>
-          <select id="coop-npc-select" class="w-full text-xs sm:text-sm font-black px-3 py-2.5 rounded-xl bg-slate-800 text-white border border-slate-600 focus:border-pink-400 focus:outline-none">
-            <option value="npc_vivienne">💘 Vivienne (Marketing 女神)</option>
-            <option value="bot_sales">🕺 Sales Jason (陽光型男)</option>
-            <option value="bot_it">💻 IT部阿强 (純情工程師)</option>
-            <option value="bot_hr">👩‍💼 HR Chloe (知性姐姐)</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-amber-300 mb-1.5">2. 選擇一齊做咩活動？</label>
-          <div class="space-y-2">
-            <button type="button" onclick="startCoopActivity('lkf')" class="w-full text-left p-2.5 rounded-2xl bg-purple-950/75 hover:bg-purple-900/90 border-2 border-pink-400/70 transition flex items-center gap-3">
-              <span class="text-2xl">🍸</span>
-              <div>
-                <div class="text-xs font-black text-pink-300">約定 18:00 放工落蘭桂坊飲酒 + 雙人舞池共舞</div>
-                <div class="text-[10px] text-amber-200">返工預約後 18:00 準時兩人同場現身舞池！</div>
-              </div>
-            </button>
-
-            <button type="button" onclick="startCoopActivity('smoke')" class="w-full text-left p-2.5 rounded-2xl bg-emerald-950/60 hover:bg-emerald-900/80 border border-emerald-500/50 transition flex items-center gap-3">
-              <span class="text-2xl">🔥</span>
-              <div>
-                <div class="text-xs font-black text-emerald-300">即刻落後樓梯 EXIT 擦打火機一齊煙 Break</div>
-                <div class="text-[10px] text-slate-300">避開老細視線！兩人並排點煙吹水講公司是非</div>
-              </div>
-            </button>
-
-            <button type="button" onclick="startCoopActivity('commute')" class="w-full text-left p-2.5 rounded-2xl bg-rose-950/60 hover:bg-rose-900/80 border border-rose-500/50 transition flex items-center gap-3">
-              <span class="text-2xl">🚇</span>
-              <div>
-                <div class="text-xs font-black text-rose-300">一齊去金鐘站第一身迫地鐵 / 搭過海巴士</div>
-                <div class="text-[10px] text-slate-300">第一身車廂近距離護花壁咚！好感急升兼一齊返歸</div>
-              </div>
-            </button>
-
-            <button type="button" onclick="startCoopActivity('home_date')" class="w-full text-left p-2.5 rounded-2xl bg-teal-950/60 hover:bg-teal-900/80 border border-teal-400/50 transition flex items-center gap-3">
-              <span class="text-2xl">🏠</span>
-              <div>
-                <div class="text-xs font-black text-teal-300">帶返屋企 Me Time · 睇 Netflix 煮飯仔（需好感 ≥ 60%）</div>
-                <div class="text-[10px] text-slate-300">私人空間零警戒值！兩人攤喺梳化食外賣傾心事</div>
-              </div>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 點擊 NPC 自由對話 -->
   <div id="modal-npc-chat" class="hidden fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-4" onclick="closeModal('modal-npc-chat', event)">
     <div class="bg-slate-900 text-slate-100 rounded-2xl max-w-md w-full p-5 shadow-2xl border-2 border-amber-400/70 animate-pop" onclick="event.stopPropagation()">
       <div class="flex items-center justify-between pb-3 border-b border-slate-700">
@@ -1124,7 +1102,7 @@
         </button>
       </div>
 
-      <div id="npc-chat-history" class="my-2 h-36 overflow-y-auto space-y-2 p-3 rounded-xl bg-black/45 border border-slate-800 text-xs"></div>
+      <div id="npc-chat-history" class="my-2 h-36 overflow-y-auto mobile-scroll-area space-y-2 p-3 rounded-xl bg-black/45 border border-slate-800 text-xs"></div>
       <div id="npc-chat-quick-tags" class="flex flex-wrap gap-1.5 mb-2.5"></div>
       <form onsubmit="submitDirectNpcChat(event)" class="flex gap-2">
         <input id="npc-direct-input" type="text" placeholder="打字講情話、傾公事或吹水..."
@@ -1143,7 +1121,7 @@
         </div>
         <button onclick="closeModal('modal-gossip')" class="w-8 h-8 rounded-lg bg-slate-800 font-black">✕</button>
       </div>
-      <div id="gossip-wall-list" class="my-3 space-y-2 max-h-56 overflow-y-auto"></div>
+      <div id="gossip-wall-list" class="my-3 space-y-2 max-h-56 overflow-y-auto mobile-scroll-area"></div>
       <form onsubmit="postNewGossip(event)" class="flex gap-2">
         <input id="gossip-input" type="text" maxlength="45" placeholder="匿名爆料（例如：邊個成日偷飲維他奶？）"
           class="flex-1 text-xs px-3 py-2 rounded-xl bg-slate-800 text-white border border-slate-600 focus:border-purple-400 focus:outline-none" />
@@ -1202,7 +1180,7 @@
     </div>
   </div>
 
-  <div id="modal-offergod" class="hidden fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto" onclick="closeModal('modal-offergod', event)">
+  <div id="modal-offergod" class="hidden fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto mobile-scroll-area" onclick="closeModal('modal-offergod', event)">
     <div class="bg-gradient-to-b from-stone-50 via-amber-50 to-red-50 text-slate-900 rounded-2xl max-w-lg w-full p-5 shadow-2xl border-2 border-amber-500 animate-pop my-auto" onclick="event.stopPropagation()">
       <div class="flex items-center justify-between pb-2.5 border-b border-amber-200">
         <div class="flex items-center gap-2">
@@ -1476,7 +1454,7 @@
       isDancing: false,
       punishTimer: 0,
       drunkTimer: 0,
-      speech: '09:00 返工鐘響！點擊右上「🧭 菜單/地圖」展開導航，或點擊綠色名牌與朋友一齊煙Break！',
+      speech: '09:00 返工鐘響！點擊右上「📱 WhatsApp」可私聊約朋友放工或一齊煙Break！',
       speechTimer: 8.5,
       emote: '', emoteTimer: 0,
       caffeine: 80, hair: 85, xp: 20, level: 1, money: 500,
@@ -1515,7 +1493,6 @@
       try { if (navigator.vibrate) navigator.vibrate(ms); } catch (_) {}
     }
 
-    // 總菜單抽屜開關（讓桌面與手機都擁有極大 3D 遊戲視野）
     function toggleMasterMenu() {
       const drawer = document.getElementById('master-menu-drawer');
       const isHidden = drawer.classList.contains('hidden');
@@ -1623,7 +1600,7 @@
         outfitStyle: 2, hairColor: '#4a3222', outfitColor: '#be185d',
         accessories: { glasses: false, darkCircles: false, headphones: false, handbag: true },
         x: -7.5, z: -7.2, targetX: -7.5, targetZ: -7.2, rotY: 0.6, walkPhase: 0, isMoving: false, isSmoking: false,
-        speech: '用工位 Teams 秘密傳情約我 18:00 放工落蘭桂坊舞池見啦！💘', speechTimer: 999, emote: '💘', emoteTimer: 999
+        speech: '用手機 WhatsApp 約我 18:00 放工落蘭桂坊舞池見啦！💘', speechTimer: 999, emote: '💘', emoteTimer: 999
       },
       npc_boss: {
         id: 'npc_boss', gender: 'male', hairStyle: 0, homeScene: 'office', currentScene: 'office',
@@ -1696,7 +1673,7 @@
     };
 
     const remotePlayers = new Map();
-    const syncChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('hk_3d_mmo_v60') : null;
+    const syncChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('hk_3d_mmo_v61') : null;
 
     function seedSimulatedOnlinePeers() {
       const hasRealPeer = Array.from(remotePlayers.values()).some(p => !p.isSimulated);
@@ -1709,7 +1686,7 @@
           outfitStyle: 3, hairColor: '#1c1917', outfitColor: '#1d4ed8',
           accessories: { glasses: true, darkCircles: false, headphones: false, handbag: false },
           x: 2.2, z: 2.4, targetX: -1.8, targetZ: 3.2, rotY: 0.4, walkPhase: 0, isMoving: true, isSmoking: false,
-          speech: '好大壓力呀！邊個巴打絲打一齊落後樓梯煙 Break？🚬', speechTimer: 12, emote: '🚬', emoteTimer: 12,
+          speech: '好大壓力呀！WhatsApp 約我一齊落後樓梯煙 Break？🚬', speechTimer: 12, emote: '🚬', emoteTimer: 12,
           lastSeen: Date.now()
         },
         {
@@ -1719,7 +1696,7 @@
           outfitStyle: 2, hairColor: '#4a3222', outfitColor: '#0f766e',
           accessories: { glasses: false, darkCircles: true, headphones: true, handbag: true },
           x: -3.2, z: 1.8, targetX: 1.5, targetZ: -1.8, rotY: -0.5, walkPhase: 0, isMoving: true, isSmoking: false,
-          speech: '求救！個客又話要改第 8 版 Logo，一齊飲杯咖啡定煙 Break？😭', speechTimer: 12, emote: '☕', emoteTimer: 12,
+          speech: '求救！個客又話要改第 8 版 Logo，一齊飲杯咖啡定放工落LKF？😭', speechTimer: 12, emote: '☕', emoteTimer: 12,
           lastSeen: Date.now()
         }
       ];
@@ -1728,7 +1705,187 @@
     }
 
     // =========================================================================
-    // 2. Web Audio API 地道音效引擎
+    // 2. 💬 手機內建 WhatsApp 社畜聊天 & 預約放工同行系統
+    // =========================================================================
+    let activeWhatsappId = 'npc_vivienne';
+    const whatsappHistory = {
+      npc_vivienne: [
+        { sender: 'Vivienne (Marketing女神)', text: '你喺工位做緊嘢呀？一陣 18:00 放工約喺蘭桂坊 D2 出口等好唔好？🤫🍸', isMe: false, time: '09:05' }
+      ],
+      bot_sales: [
+        { sender: 'Sales Jason', text: '兄弟，今晚放工落唔落 LKF 猜返兩板？🔥', isMe: false, time: '09:10' }
+      ],
+      bot_it: [
+        { sender: 'IT部阿强', text: '我寫好咗個自動搶的士 Script，18:00 準時閃人！💻', isMe: false, time: '09:12' }
+      ],
+      bot_hr: [
+        { sender: 'HR Chloe', text: '溫馨提示：寫字樓內嚴禁公開談戀愛，有事放工先約呀！📋', isMe: false, time: '09:15' }
+      ]
+    };
+
+    function getWhatsappContacts() {
+      const contacts = [];
+      remotePlayers.forEach(rp => {
+        contacts.push({
+          id: rp.id,
+          name: rp.name,
+          avatar: rp.gender === 'female' ? '👩' : '👨',
+          sub: `${rp.isSimulated ? '🟢 在線同事' : '🟢 真人朋友'} · ${SCENE_LABELS[rp.currentScene] || ''}`,
+          isPeer: true
+        });
+      });
+      [
+        { id: 'npc_vivienne', name: 'Vivienne', avatar: '💘', sub: `好感 ${Math.round(state.affection.npc_vivienne)}%` },
+        { id: 'bot_sales', name: 'Sales Jason', avatar: '🕺', sub: `好感 ${Math.round(state.affection.bot_sales)}%` },
+        { id: 'bot_it', name: 'IT部阿强', avatar: '💻', sub: `好感 ${Math.round(state.affection.bot_it)}%` },
+        { id: 'bot_hr', name: 'HR Chloe', avatar: '👩‍💼', sub: `好感 ${Math.round(state.affection.bot_hr)}%` }
+      ].forEach(c => contacts.push({ ...c, isPeer: false }));
+      return contacts;
+    }
+
+    function openWhatsappWithTarget(targetId) {
+      closeModal('modal-peer-action');
+      if (targetId) activeWhatsappId = targetId;
+      openSmartphoneModal('whatsapp');
+    }
+
+    function renderWhatsappUI() {
+      const contacts = getWhatsappContacts();
+      if (!contacts.some(c => c.id === activeWhatsappId)) {
+        activeWhatsappId = contacts[0]?.id || 'npc_vivienne';
+      }
+      const current = contacts.find(c => c.id === activeWhatsappId) || contacts[0];
+
+      document.getElementById('wa-contacts-strip').innerHTML = contacts.map(c => {
+        const active = c.id === activeWhatsappId;
+        return `
+          <button type="button" onclick="selectWhatsappContact('${c.id}')" class="shrink-0 px-2.5 py-1.5 rounded-xl border text-[10px] font-black flex items-center gap-1 transition ${active ? 'bg-emerald-600 text-white border-emerald-300 shadow' : 'bg-slate-900 text-slate-300 border-slate-700 hover:bg-slate-800'}">
+            <span>${c.avatar}</span>
+            <span class="truncate max-w-[75px]">${c.name}</span>
+          </button>
+        `;
+      }).join('');
+
+      document.getElementById('wa-chat-avatar').textContent = current.avatar;
+      document.getElementById('wa-chat-name').textContent = current.name;
+      document.getElementById('wa-chat-status').textContent = current.sub;
+
+      if (!whatsappHistory[activeWhatsappId]) {
+        whatsappHistory[activeWhatsappId] = [
+          { sender: current.name, text: `Hello ${state.name}！有咩隨時 WhatsApp 我，放工一齊鬆一鬆！👋`, isMe: false, time: formatClockStr(state.clockMinutes) }
+        ];
+      }
+
+      const box = document.getElementById('wa-messages-box');
+      box.innerHTML = whatsappHistory[activeWhatsappId].map(m => `
+        <div class="flex flex-col ${m.isMe ? 'items-end' : 'items-start'}">
+          <div class="px-3 py-1.5 rounded-2xl max-w-[84%] shadow ${m.isMe ? 'bg-[#005c4b] text-white rounded-tr-none' : 'bg-[#202c33] text-slate-100 rounded-tl-none'}">
+            <div class="leading-relaxed">${m.text}</div>
+            <div class="text-[9px] text-slate-300/70 text-right mt-0.5">${m.time} ${m.isMe ? '✓✓' : ''}</div>
+          </div>
+        </div>
+      `).join('');
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function selectWhatsappContact(cid) {
+      activeWhatsappId = cid;
+      renderWhatsappUI();
+    }
+
+    function sendWhatsappQuick(txt) {
+      document.getElementById('wa-chat-input').value = txt;
+      submitWhatsappChat({ preventDefault: () => {} });
+    }
+
+    async function submitWhatsappChat(e) {
+      e.preventDefault();
+      const input = document.getElementById('wa-chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+
+      const timeStr = formatClockStr(state.clockMinutes);
+      if (!whatsappHistory[activeWhatsappId]) whatsappHistory[activeWhatsappId] = [];
+      whatsappHistory[activeWhatsappId].push({ sender: state.name, text, isMe: true, time: timeStr });
+      renderWhatsappUI();
+
+      // 1. 如果是真人玩家或模擬在線同事
+      const rp = remotePlayers.get(activeWhatsappId);
+      if (rp) {
+        addFeedLog(`💬 [WhatsApp ➔ ${rp.name}] ${text}`);
+        if (rp.isSimulated) {
+          setTimeout(() => {
+            const replies = [
+              `收到！${state.name} 講得好啱，一陣放工一齊閃人或者落後樓梯煙 Break！😂`,
+              `哈哈細聲啲呀，HR 喺附近望緊過嚟！一陣 18:00 蘭桂坊見！🤫🍸`,
+              `好呀！你隨時喺上面撳「🚬 一齊煙Break」或者「🍸 約18:00蘭桂坊」我就過嚟！`
+            ];
+            const rep = replies[Math.floor(Math.random() * replies.length)];
+            whatsappHistory[activeWhatsappId].push({ sender: rp.name, text: rep, isMe: false, time: formatClockStr(state.clockMinutes) });
+            rp.speech = rep; rp.speechTimer = 6;
+            if (!document.getElementById('modal-smartphone').classList.contains('hidden')) renderWhatsappUI();
+          }, 650);
+        } else {
+          broadcastNetworkPacket({
+            type: 'PEER_SOCIAL_INTERACT',
+            senderId: playerId,
+            fromName: state.name,
+            targetId: rp.id,
+            action: 'whatsapp_dm',
+            text
+          });
+        }
+        return;
+      }
+
+      // 2. 如果是 NPC 同事
+      const npc = masterNpcs[activeWhatsappId];
+      if (npc) {
+        const reply = await generateCantoneseNpcReply(npc, text);
+        setTimeout(() => {
+          whatsappHistory[activeWhatsappId].push({ sender: npc.name, text: reply, isMe: false, time: formatClockStr(state.clockMinutes) });
+          npc.speech = reply; npc.speechTimer = 6;
+          if (!document.getElementById('modal-smartphone').classList.contains('hidden')) renderWhatsappUI();
+        }, 500);
+      }
+    }
+
+    // WhatsApp 聊天室頂部：一鍵預約放工 / 同行
+    function triggerWhatsappInvite(activityType) {
+      const rp = remotePlayers.get(activeWhatsappId);
+      const timeStr = formatClockStr(state.clockMinutes);
+      const labelMap = {
+        lkf: '🍸 發出邀請：今晚 18:00 放工一齊去蘭桂坊舞池飲酒共舞！',
+        smoke: '🚬 發出邀請：即刻落後樓梯 EXIT 一齊煙 Break 減壓！',
+        commute: '🚇 發出邀請：放工一齊去金鐘站迫地鐵 / 搭過海巴士！'
+      };
+      if (!whatsappHistory[activeWhatsappId]) whatsappHistory[activeWhatsappId] = [];
+      whatsappHistory[activeWhatsappId].push({ sender: state.name, text: labelMap[activityType], isMe: true, time: timeStr });
+      renderWhatsappUI();
+
+      if (rp) {
+        selectedTargetPeerId = rp.id;
+        setTimeout(() => {
+          closeModal('modal-smartphone');
+          if (activityType === 'smoke') {
+            sendPeerSocialAction('smoke_invite');
+          } else if (activityType === 'lkf') {
+            sendPeerSocialAction('dance_invite');
+          } else {
+            teleportToTargetPeer();
+          }
+        }, 500);
+      } else {
+        setTimeout(() => {
+          closeModal('modal-smartphone');
+          startCoopActivity(activityType, activeWhatsappId);
+        }, 500);
+      }
+    }
+
+    // =========================================================================
+    // 3. Web Audio API 地道音效引擎
     // =========================================================================
     let audioContext = null;
     function triggerSfx(type) {
@@ -1816,7 +1973,7 @@
     }
 
     // =========================================================================
-    // 3. PeerJS 網狀房間真聯機引擎（支援跨手機/跨電腦同房號直連 + 雙人一起煙Break）
+    // 4. PeerJS 網狀房間真聯機引擎
     // =========================================================================
     let peerInstance = null;
     const peerConnections = new Map();
@@ -1853,7 +2010,6 @@
 
         peerInstance.on('error', (err) => {
           if (err.type === 'unavailable-id') {
-            // 房間已由朋友建立！以房客身份連線加入該房間
             try { peerInstance.destroy(); } catch (_) {}
             peerInstance = new Peer(peerConfig);
             peerInstance.on('open', () => {
@@ -1865,7 +2021,6 @@
         });
       } catch (_) {}
 
-      // 高頻 150ms 位置同步（僅在移動或狀態改變時發送，確保朋友畫面極度流暢）
       clearInterval(fastSyncInterval);
       fastSyncInterval = setInterval(() => {
         if (document.getElementById('creation-screen').classList.contains('hidden')) {
@@ -1924,7 +2079,6 @@
       if (!pkt || !pkt.type) return;
       if (pkt.senderId === playerId) return;
 
-      // Host 負責將封包轉發給房內其他所有朋友（實現多人 Mesh 互連）
       if (fromConn && peerInstance && peerInstance.id && peerInstance.id.endsWith('_host')) {
         peerConnections.forEach((c, pid) => {
           if (pid !== fromConn.peer && c.open) {
@@ -1943,7 +2097,6 @@
         const p = pkt.payload;
         if (!p || p.id === playerId) return;
 
-        // 一旦偵測到真實朋友連線，自動清除佔位的模擬同事
         ['sim_peer_chris', 'sim_peer_mandy'].forEach(simId => {
           if (remotePlayers.has(simId)) {
             remotePlayers.delete(simId);
@@ -1981,18 +2134,26 @@
         triggerSfx('bell');
         triggerHaptic(50);
 
-        if (pkt.action === 'smoke_invite') {
+        if (pkt.action === 'whatsapp_dm') {
+          if (!whatsappHistory[pkt.senderId]) whatsappHistory[pkt.senderId] = [];
+          whatsappHistory[pkt.senderId].push({ sender: pkt.fromName, text: pkt.text, isMe: false, time: formatClockStr(state.clockMinutes) });
+          document.getElementById('phone-unread-dot').classList.remove('hidden');
+          addFeedLog(`💬 【WhatsApp 新訊息】${pkt.fromName}：「${pkt.text}」`);
+          if (!document.getElementById('modal-smartphone').classList.contains('hidden')) {
+            activeWhatsappId = pkt.senderId;
+            renderWhatsappUI();
+          }
+        } else if (pkt.action === 'smoke_invite') {
           selectedTargetPeerId = pkt.senderId;
           showEventBanner(
             '🚬',
-            `【${pkt.fromName}】邀你一齊落後樓梯煙 Break！`,
-            '接受邀請即刻瞬移去中環寫字樓後樓梯 EXIT 並肩點煙減壓（雙倍理智回血 +25%）！',
+            `【${pkt.fromName}】WhatsApp 邀你一齊落後樓梯煙 Break！`,
+            '接受邀請即刻瞬移去中環寫字樓後樓梯 EXIT 並肩點煙減壓（雙倍理智回血 +28%）！',
             '🔥 接受！一齊落後樓梯點煙',
             'accept_peer_smoke',
             true
           );
         } else if (pkt.action === 'smoke_light_sync') {
-          // 朋友喺後樓梯點著煙，自己支煙亦同步點著！
           state.isLitCig = true;
           smokeBuffTimer = 28;
           document.getElementById('smoke-sec-txt').textContent = '28';
@@ -2000,19 +2161,16 @@
           state.hair = Math.min(100, state.hair + 25);
           refreshStatsUI();
           showEmote('🚬', `【${pkt.fromName}】幫你點著埋支煙！雙人煙Break 理智 +25%！`);
-          addFeedLog(`🔥 ${pkt.fromName} 同你喺後樓梯 EXIT 齊齊點煙吹水！`);
         } else if (pkt.action === 'tea_treat') {
           state.caffeine = Math.min(100, state.caffeine + 25);
           state.hair = Math.min(100, state.hair + 10);
           refreshStatsUI();
           showEmote('🧁', `收到【${pkt.fromName}】請食 3點3 蛋撻＋珍珠奶茶！精神 +25%！`);
-          addFeedLog(`🧋 【3點3下午茶】${pkt.fromName} 請全房食下午茶，精神 +25%！`);
         } else if (pkt.action === 'coffee') {
           state.caffeine = Math.min(100, state.caffeine + 30);
           state.hair = Math.min(100, state.hair + 10);
           refreshStatsUI();
           showEmote('☕', `收到【${pkt.fromName}】請飲 Starbucks！精神 +30%！`);
-          addFeedLog(`☕ ${pkt.fromName} 隔空請你飲咗杯 Starbucks 特濃咖啡！`);
         } else if (pkt.action === 'cover') {
           state.secrecyAlert = 0;
           gainXP(20);
@@ -2028,41 +2186,29 @@
             'accept_peer_dance',
             true
           );
-        } else if (pkt.action === 'dm') {
-          showEmote('💬', `[私聊] ${pkt.fromName}：${pkt.text}`);
-          addFeedLog(`💌 【朋友私聊】${pkt.fromName}：「${pkt.text}」`);
         }
       } else if (pkt.type === 'PASS_BOMB') {
         worldShared.bombHolderId = pkt.toId;
         worldShared.bombHolderName = pkt.toName;
         worldShared.bombTimer = pkt.timer || 18;
-        addFeedLog(`🍳 【卸膊警報】${pkt.fromName} 將地獄級 PPT 炸彈甩咗俾【${pkt.toName}】！`);
         if (pkt.toId === playerId) {
           triggerSfx('alarm');
           showEventBanner('🍳', '你中咗「卸膊飛鍋」！', `${pkt.fromName} 將地獄級 PPT 甩咗俾你！快啲甩走佢！`, '🍳 立即搵人卸膊！', 'pass_bomb');
         }
       } else if (pkt.type === 'CURSE_PLAYER') {
-        addFeedLog(`👟 【鵝頸橋詛咒】${pkt.fromName} 喺灣仔鵝頸橋打緊【${pkt.targetName}】個小人！`);
-        if (pkt.targetId === playerId) {
-          if (state.hasOfferCard) {
-            triggerSfx('bell');
-            showEmote('🧧', 'Offer God 護體！成功反彈打小人詛咒！');
-          } else {
-            triggerSfx('slap');
-            document.getElementById('game-body').classList.add('screen-curse-shake');
-            setTimeout(() => document.getElementById('game-body').classList.remove('screen-curse-shake'), 800);
-            state.hair = Math.max(5, state.hair - 12);
-            refreshStatsUI();
-          }
+        if (pkt.targetId === playerId && !state.hasOfferCard) {
+          triggerSfx('slap');
+          document.getElementById('game-body').classList.add('screen-curse-shake');
+          setTimeout(() => document.getElementById('game-body').classList.remove('screen-curse-shake'), 800);
+          state.hair = Math.max(5, state.hair - 12);
+          refreshStatsUI();
         }
       } else if (pkt.type === 'NEW_GOSSIP') {
         worldShared.gossips.unshift(pkt.gossip);
-        addFeedLog(`🗣️ 【後樓梯大字報】「${pkt.gossip.text}」`);
       } else if (pkt.type === 'TAXI_START') {
         startRedTaxiEvent(false);
       } else if (pkt.type === 'TAXI_CLAIM') {
         worldShared.taxiSeatsLeft = Math.max(0, worldShared.taxiSeatsLeft - 1);
-        addFeedLog(`🚕 ${pkt.winnerName} 搶到紅色的士座位！`);
       } else if (pkt.type === 'GLOBAL_CHAT') {
         addFeedLog(`💬 [${pkt.sceneLabel}] ${pkt.name}：${pkt.text}`);
       }
@@ -2110,11 +2256,11 @@
               <div class="text-[10px] text-amber-300 font-bold mt-0.5">📍 目前位置：${scLabel}</div>
             </div>
             <div class="flex flex-wrap gap-1 shrink-0">
+              <button onclick="closeModal('modal-online-peers'); openWhatsappWithTarget('${rp.id}')" class="px-2.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-[10px] font-black shadow">
+                💬 WhatsApp
+              </button>
               <button onclick="closeModal('modal-online-peers'); selectedTargetPeerId='${rp.id}'; sendPeerSocialAction('smoke_invite')" class="px-2.5 py-1.5 rounded-xl bg-orange-500 hover:bg-orange-400 text-slate-950 text-[10px] font-black shadow">
                 🚬 一齊煙Break
-              </button>
-              <button onclick="closeModal('modal-online-peers'); openPeerInteractionModalById('${rp.id}')" class="px-2.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-[10px] font-black shadow">
-                🤝 更多互動
               </button>
             </div>
           </div>
@@ -2133,7 +2279,6 @@
       if (!rp) { addFeedLog('⚠️ 該玩家已離線'); return; }
 
       if (actionType === 'smoke_invite') {
-        // 邀請朋友／同事一齊去寫字樓後樓梯煙 Break！
         const goSmokeTogether = () => {
           state.targetX = 7.4; state.targetZ = 5.6;
           clickTargetMarker.position.set(7.4, 0.08, 5.6); clickTargetMarker.visible = true;
@@ -2160,18 +2305,12 @@
         gainXP(15);
         refreshStatsUI();
         showEmote('☕', `請咗【${rp.name}】飲杯 Starbucks！`);
-        addFeedLog(`☕ 你花費 HK$35 請【${rp.name}】飲咖啡，對方精神大振！`);
         if (rp.isSimulated) {
           setTimeout(() => {
             rp.speech = `多謝 ${state.name} 請飲 Starbucks！即刻醒晒！☕❤️`;
             rp.speechTimer = 7;
           }, 700);
         }
-      } else if (actionType === 'cover') {
-        gainXP(20);
-        refreshStatsUI();
-        showEmote('🛡️', `你幫【${rp.name}】把風擋住老細視線！`);
-        addFeedLog(`🛡️ 你幫【${rp.name}】把風掩護摸魚，獲得戰友情 +20 XP！`);
       } else if (actionType === 'dance_invite') {
         showEmote('💃', `已向【${rp.name}】發出蘭桂坊舞池共舞邀請！`);
         if (rp.isSimulated) {
@@ -2190,34 +2329,6 @@
         fromName: state.name,
         targetId: rp.id,
         action: actionType
-      });
-    }
-
-    function sendDirectMessageToPeer() {
-      const input = document.getElementById('peer-dm-input');
-      const text = input.value.trim();
-      if (!text) return;
-      input.value = '';
-      const rp = remotePlayers.get(selectedTargetPeerId);
-      if (!rp) return;
-      closeModal('modal-peer-action');
-      sayBubble(`（私聊 ${rp.name}）${text}`);
-      addFeedLog(`💌 你私聊【${rp.name}】：${text}`);
-      if (rp.isSimulated) {
-        setTimeout(() => {
-          const rep = `收到！${state.name} 一陣放工一齊閃人或者落後樓梯吹水！😂`;
-          rp.speech = rep;
-          rp.speechTimer = 7;
-          addFeedLog(`💌 【${rp.name}】私聊回覆：「${rep}」`);
-        }, 700);
-      }
-      broadcastNetworkPacket({
-        type: 'PEER_SOCIAL_INTERACT',
-        senderId: playerId,
-        fromName: state.name,
-        targetId: rp.id,
-        action: 'dm',
-        text
       });
     }
 
@@ -2245,7 +2356,7 @@
     }
 
     // =========================================================================
-    // 4. 3點3 下午茶夾單系統
+    // 5. 3點3 下午茶夾單系統
     // =========================================================================
     function openTeaTimeModal() {
       document.getElementById('modal-teatime').classList.remove('hidden');
@@ -2261,14 +2372,12 @@
         state.caffeine = Math.min(100, state.caffeine + 30);
         state.hair = Math.min(100, state.hair + 15);
         showEmote('🍞', '3點3 歎返份花生醬西多士＋紅豆冰 (-HK$42)，滿血復活！');
-        addFeedLog(`🍞 ${state.name} 下午茶食咗份邪惡西多士，戰鬥力回升！`);
       } else {
         state.caffeine = Math.min(100, state.caffeine + 25);
         state.hair = Math.min(100, state.hair + 15);
         gainXP(35);
         Object.keys(state.affection).forEach(k => state.affection[k] = Math.min(100, state.affection[k] + 10));
         showEmote('🧁', '豪氣請全房朋友食 3點3 蛋撻＋珍珠奶茶 (-HK$98)，全員好感 +10%！');
-        addFeedLog(`🧋 【全房萬歲】${state.name} 請全房線上朋友食 3點3 下午茶，全員精神 +25%！`);
         remotePlayers.forEach(rp => {
           broadcastNetworkPacket({
             type: 'PEER_SOCIAL_INTERACT',
@@ -2283,7 +2392,7 @@
     }
 
     // =========================================================================
-    // 5. Stylized 1:7 寫實比例 3D 數位藝術角色工廠
+    // 6. Stylized 1:7 寫實比例 3D 數位藝術角色工廠
     // =========================================================================
     function createStylizedHuman3D(cfg) {
       const root = new THREE.Group();
@@ -2585,7 +2694,7 @@
     }
 
     // =========================================================================
-    // 6. 入職登記大廳 Three.js 預覽舞台
+    // 7. 入職登記大廳 Three.js 預覽舞台 & 主 3D 場景建構
     // =========================================================================
     const previewStage = document.getElementById('preview-3d-stage');
     const pScene = new THREE.Scene();
@@ -2684,9 +2793,6 @@
       requestAnimationFrame(renderPreviewLoop);
     }
 
-    // =========================================================================
-    // 7. 主 Three.js 3D 渲染引擎 & 六大場景建構
-    // =========================================================================
     const viewport = document.getElementById('webgl-viewport');
     const scene = new THREE.Scene();
     scene.background = new THREE.Color('#090e1a');
@@ -3719,9 +3825,8 @@
         if (latePenaltyTriggered) {
           triggerSfx('alarm');
           showEmote('😱', `遲到啦！${formatClockStr(state.clockMinutes)} 先返到公司，被老細扣 HK$100 勤工獎！`);
-          addFeedLog(`🚨 【返工遲到】${state.name} 揀錯交通工具遲到（${formatClockStr(state.clockMinutes)}），被扣 HK$100 勤工獎！`);
         } else if (destScene === 'office' && prevHour >= 7 && prevHour <= 9) {
-          showEmote('🪪', `${formatClockStr(state.clockMinutes)} 準時拍卡返到寫字樓！今日全力衝刺 KPI！`);
+          showEmote('🪪', `${formatClockStr(state.clockMinutes)} 準時拍卡返到寫字樓！`);
         }
       });
     }
@@ -3761,10 +3866,8 @@
       for (let i = 0; i < 5; i++) spawnParticle(7.8, 1.0, 5.4, '#94a3b8');
       if (auto) {
         showEmote('🚭', '支煙食完捽熄咗煙頭，精神爽利繼續搏殺！');
-        addFeedLog(`🚭 ${state.name} 食完支煙捽熄煙頭，結束煙 Break！`);
       } else {
         showEmote('🚭', '喺後樓梯煙灰缸親手捽熄煙頭，返回工作狀態！');
-        addFeedLog(`🚭 ${state.name} 喺後樓梯煙灰缸捽熄煙頭，結束煙 Break！`);
       }
       broadcastPlayerSync();
     }
@@ -3841,7 +3944,6 @@
       updateLighterUI();
       updateSceneTabsUI();
 
-      // 檢查後樓梯附近有無朋友／模擬同事，若有則同步幫對方點煙！
       let buddyName = null;
       remotePlayers.forEach(rp => {
         if (rp.currentScene === 'office' && Math.hypot(rp.x - state.x, rp.z - state.z) < 4.5) {
@@ -3876,10 +3978,8 @@
         for (let i = 0; i < 10; i++) spawnParticle(state.x + 0.18, 1.5, state.z + 0.18, '#f8fafc');
         if (buddyName) {
           showEmote('🚬', `同【${buddyName}】喺後樓梯並肩點煙吹水！理智 +28%！`);
-          addFeedLog(`🔥 ${state.name} 同【${buddyName}】喺後樓梯 EXIT 齊齊點煙減壓！`);
         } else {
-          showEmote('🚬', '「叮！」擦著打火機點煙深吸一口（25秒後或行出後樓梯自動捽熄）！');
-          addFeedLog(`🔥 ${state.name} 喺後樓梯 EXIT 點煙減壓（髮量/理智 +22%）！`);
+          showEmote('🚬', '「叮！」擦著打火機點煙深吸一口！');
         }
       }, 450);
     }
@@ -3999,7 +4099,6 @@
         if (accepted) {
           gainXP(20);
           showEmote('👵', '讓座俾阿婆獲全車廂讚賞 (+20 XP)！');
-          addFeedLog(`👵 ${state.name} 喺港鐵車廂主動讓座俾長者，獲得正能量 +20 XP！`);
         } else {
           state.hair = Math.max(5, state.hair - 8);
           showEmote('📱', '扮瞓覺唔讓座，感覺隔離有人偷拍放上連登（理智 -8%）！');
@@ -4082,11 +4181,9 @@
     }
 
     // =========================================================================
-    // 11. 🍱 12:30 午飯修羅場 & 💼 四大崗位工作任務 & 🧾 18:00 電子糧單
+    // 11. 午飯、工作任務、電子糧單、手機與其餘系統
     // =========================================================================
-    function openLunchBattleModal() {
-      document.getElementById('modal-lunch-battle').classList.remove('hidden');
-    }
+    function openLunchBattleModal() { document.getElementById('modal-lunch-battle').classList.remove('hidden'); }
 
     function executeLunchChoice(type) {
       closeModal('modal-lunch-battle');
@@ -4099,26 +4196,22 @@
         state.dailyKpi = Math.min(100, state.dailyKpi + 10);
         state.hair = Math.max(5, state.hair - 4);
         showEmote('🥡', '排完中環長龍食「兩餸飯加鹹蛋」(-HK$38)！精神 +25%、KPI +10%！');
-        addFeedLog(`🍱 ${state.name} 午飯時段成功搶到兩餸飯，下午戰鬥力滿血！`);
       } else if (type === 'cha_chaan_teng') {
         if (state.money < 68) { addFeedLog('⚠️ 餘額不足 HK$68 食茶餐廳！'); return; }
         state.money -= 68;
         state.caffeine = Math.min(100, state.caffeine + 35);
         state.hair = Math.min(100, state.hair + 15);
         Object.keys(state.affection).forEach(k => state.affection[k] = Math.min(100, state.affection[k] + 5));
-        showEmote('🍛', '同同事搭檯歎冰室「沙爹牛麵＋凍檸茶」(-HK$68)，全體好感 +5%！');
-        addFeedLog(`🍛 ${state.name} 同辦公室同事一齊去冰室食 Lunch 吹水，關係更進一步！`);
+        showEmote('🍛', '同同事搭檯歎冰室「沙爹牛肉麵＋凍檸茶」(-HK$68)，全體好感 +5%！');
       } else {
         if (Math.random() < 0.20) {
           state.hair = Math.max(5, state.hair - 12);
           triggerSfx('alarm');
           showEmote('😱', '慘劇！放喺 Pantry 雪櫃盒自家製愛心飯盒俾人偷食咗！（理智 -12%）');
-          addFeedLog(`😱 【茶水間懸案】${state.name} 嘅帶飯飯盒喺 Pantry 不翼而飛！`);
         } else {
           state.caffeine = Math.min(100, state.caffeine + 25);
           state.hair = Math.min(100, state.hair + 12);
           showEmote('🥡', '成功霸到 Pantry 微波爐叮熱愛心飯盒 ($0)，慳錢又健康！');
-          addFeedLog(`🥡 ${state.name} 喺茶水間叮飯食 Lunch，完美慳返一筆！`);
         }
       }
       refreshStatsUI();
@@ -4128,11 +4221,6 @@
       const goDesk = () => {
         state.targetX = 0; state.targetZ = -0.5;
         clickTargetMarker.position.set(0, 0.08, -0.5); clickTargetMarker.visible = true;
-
-        if (state.sleepDebuff === 'zombie' && state.caffeine < 15) {
-          showEmote('💤', '尋晚夜瞓爆肝，精神唔夠 15% 眼瞓到寫唔到嘢！快去 Pantry 飲齋啡！');
-          return;
-        }
 
         const body = document.getElementById('job-task-body');
         if (state.dept === 'IT 資訊科技部') {
@@ -4155,9 +4243,6 @@
           document.getElementById('job-task-title').textContent = '📣 Marketing 市場部 · 應付老細改稿地獄';
           document.getElementById('job-task-sub').textContent = '老細要求：「我要一隻五彩斑斕嘅黑，兼要夠晒 Viral！」';
           body.innerHTML = `
-            <div class="p-2.5 rounded-xl bg-amber-950/40 text-xs text-amber-200 border border-amber-500/40">
-              老細語音：「呢個 Campaign 唔夠接地氣，你打算點改？」
-            </div>
             <div class="space-y-2 pt-1">
               <button onclick="completeJobTask(true, '加入中環打工仔共鳴 Meme 圖 + KOL 限時優惠')" class="w-full p-2.5 rounded-xl bg-pink-600/30 hover:bg-pink-600/50 border border-pink-400/50 text-xs font-black text-pink-200 text-left">
                 ✅ 方案 A：加入中環打工仔共鳴 Meme + 限時優惠
@@ -4171,9 +4256,6 @@
           document.getElementById('job-task-title').textContent = '📈 Sales 營業部 · 大客 Cold Call 講數簽單';
           document.getElementById('job-task-sub').textContent = '上市公司採購部總監嫌貴，點樣成功促成交易賺高佣？';
           body.innerHTML = `
-            <div class="p-2.5 rounded-xl bg-emerald-950/40 text-xs text-emerald-200 border border-emerald-500/40">
-              陳總監：「隔離行家報價平你哋 15%，點解我要簽你？」
-            </div>
             <div class="space-y-2 pt-1">
               <button onclick="completeJobTask(true, '送上 24 小時 VIP 專人售後 + 蘭桂坊請飲酒')" class="w-full p-2.5 rounded-xl bg-emerald-600/30 hover:bg-emerald-600/50 border border-emerald-400/50 text-xs font-black text-emerald-200 text-left">
                 ✅ 話術 A：承諾 24 小時 VIP 專人跟進 + 今晚蘭桂坊請飲酒
@@ -4187,9 +4269,6 @@
           document.getElementById('job-task-title').textContent = '🎨 Design 設計部 · Final_v12_真係最後版.psd';
           document.getElementById('job-task-sub').textContent = '客仔臨出街前 10 分鐘話個主視覺唔夠高級感！';
           body.innerHTML = `
-            <div class="p-2.5 rounded-xl bg-purple-950/40 text-xs text-purple-200 border border-purple-500/40">
-              客戶：「可唔可以留白多啲，但同時擺晒 18 行產品介紹上去？」
-            </div>
             <div class="space-y-2 pt-1">
               <button onclick="completeJobTask(true, '改用極簡瑞士網格排版 + 燙金漸層主標題')" class="w-full p-2.5 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 border border-purple-400/50 text-xs font-black text-purple-200 text-left">
                 ✅ 改圖 A：極簡瑞士網格排版 + 燙金漸層主標題
@@ -4217,14 +4296,11 @@
         state.dailyKpi = Math.min(100, state.dailyKpi + kpiGain);
         gainXP(22);
         triggerSfx('bell');
-        showEmote('📈', `完成【${actionDesc}】！今日 KPI +${kpiGain}%（目前 ${state.dailyKpi}%），18:00 糧單花紅大增！`);
-        addFeedLog(`💼 ${state.name} 順利完成崗位任務，今日工作表現 KPI 升至 ${state.dailyKpi}%！`);
+        showEmote('📈', `完成【${actionDesc}】！今日 KPI +${kpiGain}%（目前 ${state.dailyKpi}%）！`);
       } else {
         state.dailyPenalty += 60;
         triggerSfx('slap');
-        triggerHaptic(50);
-        showEmote('💥', `搞砸咗項目！老細扣減今日表現花紅 HK$60（髮量 -${hairLoss}%）！`);
-        addFeedLog(`💥 ${state.name} 執行「${actionDesc}」引發災難，今日糧單被扣 HK$60！`);
+        showEmote('💥', `搞砸咗項目！老細扣減今日表現花紅 HK$60！`);
       }
       refreshStatsUI();
     }
@@ -4252,7 +4328,7 @@
           <div class="flex justify-between"><span>基本日薪 (Base Salary)：</span><span class="text-slate-800">+HK$${basePay}</span></div>
           <div class="flex justify-between"><span>今日 KPI 表現花紅 (${state.dailyKpi}%)：</span><span class="text-emerald-700">+HK$${kpiBonus}</span></div>
           <div class="flex justify-between"><span>無遲到無照肺勤工獎：</span><span class="text-emerald-700">+HK$${attendanceBonus}</span></div>
-          <div class="flex justify-between text-red-600"><span>遲到/老細扣薪/過量拉屎 (${state.dailyPoopCount}次)：</span><span>-HK$${state.dailyPenalty + poopDeduct}</span></div>
+          <div class="flex justify-between text-red-600"><span>遲到/老細扣薪/過量拉屎：</span><span>-HK$${state.dailyPenalty + poopDeduct}</span></div>
           <div class="flex justify-between text-slate-500"><span>強積金僱員供款 (MPF 5%)：</span><span>-HK$${mpfDeduct}</span></div>
         </div>
         <div class="p-3 rounded-xl bg-emerald-100 border-2 border-emerald-500 flex justify-between items-center text-sm font-black text-emerald-950">
@@ -4261,18 +4337,14 @@
         </div>
       `;
       document.getElementById('modal-payslip').classList.remove('hidden');
-      addFeedLog(`🧾 【18:00 派糧】${state.name} 收到今日電子日薪糧單，實收淨額 +HK$${netPay}！`);
     }
 
-    // =========================================================================
-    // 12. Teams 秘密傳情 + NPC 作息 + 預約放工
-    // =========================================================================
     let teamsBossCheckTimer = null;
     let teamsBossApproaching = false;
 
     function openSecretTeamsModal() {
       if (state.currentScene !== 'office') {
-        addFeedLog('💌 只有喺「中環寫字樓」返工時段先需要用公司 Teams 秘密偷情！放工可以直接約出街啦！');
+        addFeedLog('💌 只有喺「中環寫字樓」返工時段先需要用公司 Teams 秘密偷情！');
         return;
       }
       teamsBossApproaching = false;
@@ -4296,7 +4368,6 @@
         if (!teamsBossApproaching && Math.random() < 0.30 && state.employmentMode === 'employed') {
           teamsBossApproaching = true;
           triggerSfx('alarm');
-          triggerHaptic(70);
           document.getElementById('teams-boss-alert').classList.remove('hidden');
           setTimeout(() => {
             if (teamsBossApproaching && !document.getElementById('modal-secret-teams').classList.contains('hidden') && document.getElementById('teams-fake-excel').classList.contains('hidden')) {
@@ -4305,10 +4376,8 @@
               state.money = Math.max(0, state.money - 100);
               state.dailyPenalty += 100;
               triggerSfx('slap');
-              triggerHaptic(120);
               refreshStatsUI();
               showEmote('😱', '切畫面太慢！老細企喺你後面睇晒成段 Teams 調情對話，扣薪 HK$100！');
-              addFeedLog(`🚨 【職場社死】${state.name} 喺工位用 Teams 調情切畫面太慢，被老細捉個正著扣 HK$100！`);
             }
           }, 2600);
         }
@@ -4320,7 +4389,7 @@
       document.getElementById('teams-boss-alert').classList.add('hidden');
       document.getElementById('teams-chat-mode').classList.add('hidden');
       document.getElementById('teams-fake-excel').classList.remove('hidden');
-      showEmote('📊', '光速按老闆鍵切回 Excel 報表，完美瞞過老細法眼！');
+      showEmote('📊', '光速按老闆鍵切回 Excel 報表！');
     }
 
     function resumeSecretTeams() {
@@ -4341,11 +4410,7 @@
       refreshStatsUI();
 
       setTimeout(() => {
-        const replies = [
-          `收到暗號！好刺激呀，老細啱啱行過我隔離差啲嚇死～好感 +${gain}%！💓`,
-          `一陣 18:00 我準時放工喺蘭桂坊 D2 出口舞池等你呀，記得準時嚟！💘`
-        ];
-        log.innerHTML += `<div class="text-pink-300"><strong>${npc.name}：</strong>${replies[Math.floor(Math.random() * replies.length)]}</div>`;
+        log.innerHTML += `<div class="text-pink-300"><strong>${npc.name}：</strong>收到暗號！好感 +${gain}%！💓</div>`;
         log.scrollTop = log.scrollHeight;
       }, 450);
     }
@@ -4434,8 +4499,340 @@
       addFeedLog(`💔 你取消咗今晚 18:00 同【${name}】嘅蘭桂坊約會。`);
     }
 
+    function openSmartphoneModal(defaultApp = 'whatsapp') {
+      document.getElementById('phone-unread-dot').classList.add('hidden');
+      switchPhoneApp(defaultApp);
+      document.getElementById('modal-smartphone').classList.remove('hidden');
+    }
+
+    function switchPhoneApp(appKey) {
+      ['whatsapp', 'hko', 'mtr', 'freelance', 'wallet'].forEach(k => {
+        document.getElementById(`phone-app-${k}`).classList.toggle('hidden', k !== appKey);
+        const tab = document.getElementById(`phone-tab-${k}`);
+        if (tab) {
+          tab.className = (k === appKey)
+            ? (k === 'whatsapp' ? 'py-1.5 rounded-xl bg-emerald-600 text-white text-[10px] font-black transition' : 'py-1.5 rounded-xl bg-sky-600 text-white text-[10px] font-black transition')
+            : 'py-1.5 rounded-xl text-slate-300 hover:bg-slate-800 text-[10px] font-black transition';
+        }
+      });
+      if (appKey === 'whatsapp') renderWhatsappUI();
+      else updateSmartphoneViews();
+    }
+
+    function updateSmartphoneViews() {
+      const sigBadge = document.getElementById('hko-signal-badge');
+      const sigIcon = document.getElementById('hko-signal-icon');
+      const headline = document.getElementById('hko-headline');
+      const subtext = document.getElementById('hko-subtext');
+      const cdBox = document.getElementById('hko-countdown-box');
+
+      if (state.typhoonSignal === 3) {
+        sigBadge.className = 'px-2 py-0.5 rounded-full bg-amber-500/30 text-amber-300 text-[10px] font-black border border-amber-400/50 animate-pulse';
+        sigBadge.textContent = '3號強風信號';
+        sigIcon.textContent = '🌬️';
+        headline.textContent = '天文台：即將改發 8 號風球！';
+        subtext.textContent = '全港打工仔準備收拾細軟極限逃生！';
+        cdBox.classList.remove('hidden');
+        document.getElementById('hko-countdown-sec').textContent = Math.max(1, Math.ceil(state.typhoonCountdown));
+      } else if (state.typhoonSignal === 8) {
+        sigBadge.className = 'px-2 py-0.5 rounded-full bg-red-600/40 text-yellow-200 text-[10px] font-black border border-yellow-400/60';
+        sigBadge.textContent = '8號烈風或暴風信號';
+        sigIcon.textContent = '🌪️';
+        headline.textContent = '八號風球現正生效！全港提早放工';
+        subtext.textContent = '已解除曠工限制，隨時可返屋企 Me Time 或去蘭桂坊！';
+        cdBox.classList.add('hidden');
+      } else {
+        sigBadge.className = 'px-2 py-0.5 rounded-full bg-emerald-500/25 text-emerald-300 text-[10px] font-black border border-emerald-400/40';
+        sigBadge.textContent = '1號戒備信號';
+        sigIcon.textContent = '🌤️';
+        headline.textContent = '天色大致良好，社畜如常返工';
+        subtext.textContent = '熱帶氣旋距離香港 600 公里，暫未需改發更高信號。';
+        cdBox.classList.add('hidden');
+      }
+
+      const mtrPill = document.getElementById('mtr-status-pill');
+      const mtrCard = document.getElementById('mtr-alert-card');
+      if (state.mtrFault) {
+        mtrPill.className = 'px-2 py-0.5 rounded bg-red-600/40 text-red-300 text-[10px] font-black animate-pulse';
+        mtrPill.textContent = '⚠️ 訊號故障延誤';
+        mtrCard.innerHTML = `<strong class="text-red-400">【突發車務延誤】</strong>港島線及金鐘站附近發生訊號設備故障，搭港鐵預計延誤 25 分鐘！`;
+      } else {
+        mtrPill.className = 'px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-black';
+        mtrPill.textContent = '全線服務正常';
+        mtrCard.textContent = '港島線及荃灣線（金鐘轉車站）列車服務維持正常。';
+      }
+
+      const isFree = state.employmentMode === 'freelancer';
+      document.getElementById('freelance-locked-view').classList.toggle('hidden', isFree);
+      document.getElementById('freelance-unlocked-view').classList.toggle('hidden', !isFree);
+
+      const wBox = document.getElementById('phone-wallet-content');
+      if (!state.hasOfferCard || !state.savedCard) {
+        wBox.innerHTML = `<p class="text-xs text-slate-400 py-6 text-center">銀包暫時未有過完火嘅許願卡～去「上環文武廟」拜 Offer God 啦！</p>`;
+      } else {
+        const c = state.savedCard;
+        wBox.innerHTML = `
+          <div class="p-3.5 rounded-2xl bg-gradient-to-br from-red-700 via-red-800 to-amber-800 text-white border-2 border-yellow-300 shadow-lg space-y-1.5">
+            <div class="flex justify-between items-center"><span class="text-xs font-black text-yellow-200">🏮 文武廟 · 已過火靈符</span><span class="text-[10px] px-2 py-0.5 rounded bg-yellow-300 text-red-950 font-black">豐薪厚祿</span></div>
+            <div class="text-xs font-black text-yellow-100">善信：${c.name}（${c.addr}）</div>
+            <div class="p-2 rounded-lg bg-black/30 text-[11px] font-bold text-white border border-yellow-300/40">🎯 心願：${c.goal}</div>
+          </div>`;
+      }
+    }
+
+    function triggerTyphoon3PreAlert() {
+      if (state.typhoonSignal !== 1) return;
+      state.typhoonSignal = 3;
+      state.typhoonCountdown = 20;
+      state.eventCooldown = 180;
+      document.getElementById('phone-unread-dot').classList.remove('hidden');
+      triggerSfx('alarm');
+      showEventBanner(
+        '🌪️',
+        '天文台手機推送：即將改發 8 號風球！',
+        '距離掛 8 號波仲有 20 秒！快衝去寫字樓門口搶紅色的士或趕搭交通工具返屋企逃生！',
+        '📱 打開手機睇風暴雷達',
+        'open_phone_hko',
+        true
+      );
+      updateClockHUD();
+    }
+
+    function simulateTyphoonWarning() {
+      if (state.typhoonSignal === 1) {
+        triggerTyphoon3PreAlert();
+        updateSmartphoneViews();
+      } else {
+        addFeedLog('📡 天文台雷達顯示暴風圈正橫過珠江口！');
+      }
+    }
+
+    function doFreelanceGig(type) {
+      if (state.employmentMode !== 'freelancer') return;
+      const pay = type === 'ppt' ? 180 : 260;
+      state.money += pay;
+      gainXP(20);
+      refreshStatsUI();
+      closeModal('modal-smartphone');
+      showEmote('😎', `自由身遠端接單完成！輕鬆袋落 +HK$${pay}！`);
+    }
+
+    function acceptHeadhunterRehire() {
+      closeModal('modal-smartphone');
+      state.employmentMode = 'employed';
+      state.resignedStatus = null;
+      state.level = Math.max(3, state.level);
+      state.money += 500;
+      updateClockHUD();
+      updateSceneTabsUI();
+      refreshStatsUI();
+      showEmote('👔', '接受獵頭高薪挖角重出江湖！簽約獎金 +HK$500！');
+    }
+
+    function throwFarewellCakes() {
+      if (state.money < 120) { addFeedLog('⚠️ 餘額不足 HK$120 買豪華散水餅！'); return; }
+      state.money -= 120;
+      Object.keys(state.affection).forEach(k => {
+        state.affection[k] = Math.min(100, state.affection[k] + 15);
+      });
+      refreshStatsUI();
+      showEmote('🧁', '「各位前同事，請大家食豪華散水餅呀！」');
+    }
+
+    function getHighestRomanceScore() {
+      return Math.max(...Object.values(state.affection));
+    }
+
+    function toggleDanceAction() {
+      if (state.currentScene !== 'lkf') {
+        addFeedLog('💃 要去到「中環蘭桂坊」雷射舞池先可以盡情跳舞呀！');
+        return;
+      }
+      state.isDancing = !state.isDancing;
+      if (state.isDancing) {
+        triggerSfx('clink');
+        if (state.companion && masterNpcs[state.companion.id]) {
+          const comp = masterNpcs[state.companion.id];
+          comp.currentScene = 'lkf';
+          comp.x = state.x + 1.05;
+          comp.z = state.z;
+          comp.isDancing = true;
+          showEmote('💘', `「同【${comp.name}】喺蘭桂坊舞池面對面同步狂舞！」`);
+        } else {
+          showEmote('🕺', '「跟住蘭桂坊節拍一齊跳！放工徹底釋放壓力！🎵」');
+        }
+      } else {
+        if (state.companion && masterNpcs[state.companion.id]) {
+          masterNpcs[state.companion.id].isDancing = false;
+        }
+      }
+      updateSceneTabsUI();
+    }
+
+    function inviteCurrentNpcTo(activityType) {
+      closeModal('modal-npc-chat');
+      if (activeDirectChatNpcId === 'npc_boss') {
+        addFeedLog('👔 老細 Mr. Chan：「我仲要留喺公司睇住盤數，你自己去啦！」');
+        return;
+      }
+      startCoopActivity(activityType, activeDirectChatNpcId);
+    }
+
+    function startCoopActivity(activityType, forcedNpcId = null) {
+      const npcId = forcedNpcId || 'npc_vivienne';
+      const npc = masterNpcs[npcId];
+      if (!npc) return;
+
+      if (activityType === 'home_date' && (state.affection[npcId] || 0) < 60) {
+        addFeedLog(`⚠️ 需要同【${npc.name}】好感度達到 60% 先可以邀請對方上屋企呀！`);
+        return;
+      }
+
+      const curH = Math.floor(state.clockMinutes / 60);
+      const isOffWorkNow = (curH >= 18 || curH < 6 || state.employmentMode === 'freelancer' || state.typhoonSignal === 8);
+
+      if (activityType === 'lkf' && !isOffWorkNow) {
+        state.pendingDate = { npcId, npcName: npc.name, scene: 'lkf', hour: 18, lateWarned: false };
+        const gain = state.gear.watch ? 16 : 12;
+        if (state.affection[npcId] !== undefined) state.affection[npcId] = Math.min(100, state.affection[npcId] + gain);
+        refreshStatsUI();
+        updatePendingDateHUD();
+        triggerSfx('bell');
+
+        npc.speech = `一言為定！18:00 放工鐘一響，我準時喺蘭桂坊舞池等你！🍸💘`;
+        npc.speechTimer = 9;
+        showEmote('💘', `已透過 WhatsApp 預約 18:00 放工同【${npc.name}】落蘭桂坊！`);
+        return;
+      }
+
+      if (state.companion && state.companion.id !== npcId) {
+        const oldNpc = masterNpcs[state.companion.id];
+        if (oldNpc) {
+          oldNpc.currentScene = oldNpc.homeScene;
+          oldNpc.isSmoking = false;
+          oldNpc.isDancing = false;
+        }
+      }
+
+      state.pendingDate = null;
+      updatePendingDateHUD();
+      state.companion = { id: npcId, name: npc.name, activity: activityType, chatStep: 0 };
+
+      const actMeta = {
+        smoke: {
+          scene: 'office', destX: 7.4, destZ: 5.6, icon: '🔥',
+          label: '一齊落後樓梯 EXIT 擦打火機煙 Break',
+          npcAccept: '走呀！避開老細同 HR，一齊落後樓梯擦打火機點煙細聲傾！🔥'
+        },
+        commute: {
+          scene: 'commute', destX: -7.5, destZ: 0, icon: '🚇',
+          label: '放工一齊去金鐘站第一身迫地鐵 / 搭過海巴士',
+          npcAccept: '好呀！18:00 金鐘站超多人，一陣你要幫我擋住啲背囊撚呀！🚇'
+        },
+        lkf: {
+          scene: 'lkf', destX: 0, destZ: 0.5, icon: '🍸',
+          label: '放工準時赴約！蘭桂坊雙人飲酒 + 舞池共舞',
+          npcAccept: '我準時到咗啦！一齊落舞池跳舞飲 Cocktail！🍸💘'
+        },
+        home_date: {
+          scene: 'home', destX: 3.2, destZ: 1.2, icon: '🏠',
+          label: '放工一齊返屋企 Me Time · 睇 Netflix 煮飯仔',
+          npcAccept: '好呀～上你屋企食外賣睇 Netflix 最舒服！💕'
+        }
+      }[activityType];
+
+      npc.speech = actMeta.npcAccept;
+      npc.speechTimer = 8;
+      npc.emote = actMeta.icon;
+      npc.emoteTimer = 15;
+
+      updateCompanionHUD();
+      addFeedLog(`🤝 你與【${npc.name}】正式會合進行「${actMeta.label}」！`);
+
+      if (state.currentScene !== actMeta.scene) {
+        switchScene(actMeta.scene, true, () => {
+          npc.currentScene = actMeta.scene;
+          npc.x = state.x + 1.05; npc.z = state.z + 0.2;
+          state.targetX = actMeta.destX; state.targetZ = actMeta.destZ;
+          if (activityType === 'smoke') setTimeout(() => openLighterModal(npc.name), 550);
+        });
+      } else {
+        npc.currentScene = actMeta.scene;
+        npc.x = state.x + 1.05; npc.z = state.z + 0.2;
+        state.targetX = actMeta.destX; state.targetZ = actMeta.destZ;
+        if (activityType === 'smoke') setTimeout(() => openLighterModal(npc.name), 550);
+      }
+    }
+
+    function updateCompanionHUD() {
+      const bar = document.getElementById('companion-status-bar');
+      if (!state.companion) { bar.classList.add('hidden'); return; }
+      const map = {
+        smoke: { icon: '🔥', sub: '後樓梯死角一齊煙 Break 中', btn: '🔥 幫佢點煙吹水' },
+        commute: { icon: '🚇', sub: '金鐘站第一身迫地鐵同行中', btn: '👁️ 第一身迫入車廂' },
+        lkf: { icon: '🍸', sub: '蘭桂坊雙人舞池熱舞中', btn: '🥂 雙人乾杯共舞' },
+        home_date: { icon: '🏠', sub: '屋企私人空間煮飯仔煲劇', btn: '💕 梳化甜密互動' }
+      }[state.companion.activity] || { icon: '🤝', sub: '組隊同行中', btn: '💬 互動' };
+
+      bar.classList.remove('hidden');
+      document.getElementById('companion-bar-icon').textContent = map.icon;
+      document.getElementById('companion-bar-title').textContent = `正與 ${state.companion.name} 雙人同場同行`;
+      document.getElementById('companion-bar-sub').textContent = map.sub;
+      document.getElementById('companion-coop-btn').textContent = map.btn;
+    }
+
+    function triggerCompanionCoopAction() {
+      if (!state.companion) return;
+      const npc = masterNpcs[state.companion.id];
+      if (!npc) return;
+
+      const bonus = state.gear.watch ? 16 : 11;
+
+      if (state.companion.activity === 'commute') {
+        if (state.currentScene !== 'commute') switchScene('commute', true);
+        openCommuteRushModal('mtr');
+      } else if (state.companion.activity === 'home_date') {
+        if (state.currentScene !== 'home') switchScene('home', true);
+        state.targetX = 3.2; state.targetZ = 1.2;
+        state.hair = Math.min(100, state.hair + 22);
+        if (state.affection[npc.id] !== undefined) state.affection[npc.id] = Math.min(100, state.affection[npc.id] + bonus + 6);
+        sayBubble('喺屋企一齊攤喺梳化食外賣睇 Netflix～💕');
+      } else if (state.companion.activity === 'smoke') {
+        if (state.currentScene !== 'office') switchScene('office', true);
+        openLighterModal(npc.name);
+      } else if (state.companion.activity === 'lkf') {
+        if (state.currentScene !== 'lkf') switchScene('lkf', true);
+        state.targetX = 0; state.targetZ = 0.5;
+        state.isDancing = true;
+        npc.currentScene = 'lkf';
+        npc.x = state.x + 1.05;
+        npc.z = state.z;
+        npc.isDancing = true;
+        triggerSfx('clink');
+        state.drunkTimer = 14;
+        state.hair = Math.min(100, state.hair + 18);
+        if (state.affection[npc.id] !== undefined) state.affection[npc.id] = Math.min(100, state.affection[npc.id] + bonus + 6);
+        gainXP(20);
+        sayBubble('Cheers！蘭桂坊舞池不醉無歸！🥂💃');
+        updateSceneTabsUI();
+      }
+      refreshStatsUI();
+    }
+
+    function dismissCompanion() {
+      if (!state.companion) return;
+      const npc = masterNpcs[state.companion.id];
+      if (npc) {
+        npc.currentScene = npc.homeScene;
+        npc.isSmoking = false;
+        npc.isDancing = false;
+      }
+      state.companion = null;
+      updateCompanionHUD();
+    }
+
     // =========================================================================
-    // 13. 玩家、老細巡房、NPC 與粒子管理
+    // 12. 場景切換、攝影機、玩家管理與定時迴圈
     // =========================================================================
     let playerRig = createStylizedHuman3D(state);
     scene.add(playerRig);
@@ -4500,9 +4897,6 @@
       particlePool.push({ mesh, life: 1.4, vy: 0.72 + Math.random() * 0.4 });
     }
 
-    // =========================================================================
-    // 14. 時間軸、屋企 Me Time 與睡眠醒來
-    // =========================================================================
     function formatClockStr(mins) {
       const h = Math.floor(mins / 60) % 24;
       const m = Math.floor(mins % 60);
@@ -4673,359 +5067,15 @@
       boss.speech = `捉正你【${state.name}】！上班時間唔做嘢，罰企照肺扣 HK$150！`;
       boss.speechTimer = 6;
       showEmote('😭', '慘遭老細當場捉正摸魚！罰企照肺 6 秒（勤工獎 -HK$150）');
-      addFeedLog(`🚨 【照肺警報】${state.name} 喺老細巡房期間摸魚被撞正，扣薪 HK$150！`);
     }
 
-    // =========================================================================
-    // 15. 隨身社畜智能手機 & 地下情與組隊活動
-    // =========================================================================
-    function openSmartphoneModal() {
-      document.getElementById('phone-unread-dot').classList.add('hidden');
-      updateSmartphoneViews();
-      document.getElementById('modal-smartphone').classList.remove('hidden');
-    }
-
-    function switchPhoneApp(appKey) {
-      ['hko', 'mtr', 'freelance', 'wallet'].forEach(k => {
-        document.getElementById(`phone-app-${k}`).classList.toggle('hidden', k !== appKey);
-        const tab = document.getElementById(`phone-tab-${k}`);
-        tab.className = (k === appKey)
-          ? 'py-1.5 rounded-xl bg-sky-600 text-white text-[10px] font-black transition'
-          : 'py-1.5 rounded-xl text-slate-300 hover:bg-slate-800 text-[10px] font-black transition';
-      });
-      updateSmartphoneViews();
-    }
-
-    function updateSmartphoneViews() {
-      const sigBadge = document.getElementById('hko-signal-badge');
-      const sigIcon = document.getElementById('hko-signal-icon');
-      const headline = document.getElementById('hko-headline');
-      const subtext = document.getElementById('hko-subtext');
-      const cdBox = document.getElementById('hko-countdown-box');
-
-      if (state.typhoonSignal === 3) {
-        sigBadge.className = 'px-2 py-0.5 rounded-full bg-amber-500/30 text-amber-300 text-[10px] font-black border border-amber-400/50 animate-pulse';
-        sigBadge.textContent = '3號強風信號';
-        sigIcon.textContent = '🌬️';
-        headline.textContent = '天文台：即將改發 8 號風球！';
-        subtext.textContent = '全港打工仔準備收拾細軟極限逃生！';
-        cdBox.classList.remove('hidden');
-        document.getElementById('hko-countdown-sec').textContent = Math.max(1, Math.ceil(state.typhoonCountdown));
-      } else if (state.typhoonSignal === 8) {
-        sigBadge.className = 'px-2 py-0.5 rounded-full bg-red-600/40 text-yellow-200 text-[10px] font-black border border-yellow-400/60';
-        sigBadge.textContent = '8號烈風或暴風信號';
-        sigIcon.textContent = '🌪️';
-        headline.textContent = '八號風球現正生效！全港提早放工';
-        subtext.textContent = '已解除曠工限制，隨時可返屋企 Me Time 或去蘭桂坊！';
-        cdBox.classList.add('hidden');
-      } else {
-        sigBadge.className = 'px-2 py-0.5 rounded-full bg-emerald-500/25 text-emerald-300 text-[10px] font-black border border-emerald-400/40';
-        sigBadge.textContent = '1號戒備信號';
-        sigIcon.textContent = '🌤️';
-        headline.textContent = '天色大致良好，社畜如常返工';
-        subtext.textContent = '熱帶氣旋距離香港 600 公里，暫未需改發更高信號。';
-        cdBox.classList.add('hidden');
-      }
-
-      const mtrPill = document.getElementById('mtr-status-pill');
-      const mtrCard = document.getElementById('mtr-alert-card');
-      if (state.mtrFault) {
-        mtrPill.className = 'px-2 py-0.5 rounded bg-red-600/40 text-red-300 text-[10px] font-black animate-pulse';
-        mtrPill.textContent = '⚠️ 訊號故障延誤';
-        mtrCard.innerHTML = `<strong class="text-red-400">【突發車務延誤】</strong>港島線及金鐘站附近發生訊號設備故障，搭港鐵預計延誤 25 分鐘！`;
-      } else {
-        mtrPill.className = 'px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-black';
-        mtrPill.textContent = '全線服務正常';
-        mtrCard.textContent = '港島線及荃灣線（金鐘轉車站）列車服務維持正常。';
-      }
-
-      const isFree = state.employmentMode === 'freelancer';
-      document.getElementById('freelance-locked-view').classList.toggle('hidden', isFree);
-      document.getElementById('freelance-unlocked-view').classList.toggle('hidden', !isFree);
-
-      const wBox = document.getElementById('phone-wallet-content');
-      if (!state.hasOfferCard || !state.savedCard) {
-        wBox.innerHTML = `<p class="text-xs text-slate-400 py-6 text-center">銀包暫時未有過完火嘅許願卡～去「上環文武廟」拜 Offer God 啦！</p>`;
-      } else {
-        const c = state.savedCard;
-        wBox.innerHTML = `
-          <div class="p-3.5 rounded-2xl bg-gradient-to-br from-red-700 via-red-800 to-amber-800 text-white border-2 border-yellow-300 shadow-lg space-y-1.5">
-            <div class="flex justify-between items-center"><span class="text-xs font-black text-yellow-200">🏮 文武廟 · 已過火靈符</span><span class="text-[10px] px-2 py-0.5 rounded bg-yellow-300 text-red-950 font-black">豐薪厚祿</span></div>
-            <div class="text-xs font-black text-yellow-100">善信：${c.name}（${c.addr}）</div>
-            <div class="p-2 rounded-lg bg-black/30 text-[11px] font-bold text-white border border-yellow-300/40">🎯 心願：${c.goal}</div>
-          </div>`;
-      }
-    }
-
-    function triggerTyphoon3PreAlert() {
-      if (state.typhoonSignal !== 1) return;
-      state.typhoonSignal = 3;
-      state.typhoonCountdown = 20;
-      state.eventCooldown = 180;
-      document.getElementById('phone-unread-dot').classList.remove('hidden');
-      triggerSfx('alarm');
-      addFeedLog('📱 【天文台手機推送】3號強風信號生效！20秒後改發 8 號風球！');
-      showEventBanner(
-        '🌪️',
-        '天文台手機推送：即將改發 8 號風球！',
-        '距離掛 8 號波仲有 20 秒！快衝去寫字樓門口搶紅色的士或趕搭交通工具返屋企逃生！',
-        '📱 打開手機睇風暴雷達',
-        'open_phone_hko',
-        true
-      );
-      updateClockHUD();
-    }
-
-    function simulateTyphoonWarning() {
-      if (state.typhoonSignal === 1) {
-        triggerTyphoon3PreAlert();
-        updateSmartphoneViews();
-      } else {
-        addFeedLog('📡 天文台雷達顯示暴風圈正橫過珠江口！');
-      }
-    }
-
-    function doFreelanceGig(type) {
-      if (state.employmentMode !== 'freelancer') return;
-      const pay = type === 'ppt' ? 180 : 260;
-      state.money += pay;
-      gainXP(20);
-      refreshStatsUI();
-      closeModal('modal-smartphone');
-      showEmote('😎', `自由身遠端接單完成！輕鬆袋落 +HK$${pay}！`);
-    }
-
-    function acceptHeadhunterRehire() {
-      closeModal('modal-smartphone');
-      state.employmentMode = 'employed';
-      state.resignedStatus = null;
-      state.level = Math.max(3, state.level);
-      state.money += 500;
-      updateClockHUD();
-      updateSceneTabsUI();
-      refreshStatsUI();
-      showEmote('👔', '接受獵頭高薪挖角重出江湖！簽約獎金 +HK$500！');
-    }
-
-    function throwFarewellCakes() {
-      if (state.money < 120) { addFeedLog('⚠️ 餘額不足 HK$120 買豪華散水餅！'); return; }
-      state.money -= 120;
-      Object.keys(state.affection).forEach(k => {
-        state.affection[k] = Math.min(100, state.affection[k] + 15);
-      });
-      refreshStatsUI();
-      showEmote('🧁', '「各位前同事，請大家食豪華散水餅呀！」');
-    }
-
-    function getHighestRomanceScore() {
-      return Math.max(...Object.values(state.affection));
-    }
-
-    function toggleDanceAction() {
-      if (state.currentScene !== 'lkf') {
-        addFeedLog('💃 要去到「中環蘭桂坊」雷射舞池先可以盡情跳舞呀！');
-        return;
-      }
-      state.isDancing = !state.isDancing;
-      if (state.isDancing) {
-        triggerSfx('clink');
-        if (state.companion && masterNpcs[state.companion.id]) {
-          const comp = masterNpcs[state.companion.id];
-          comp.currentScene = 'lkf';
-          comp.x = state.x + 1.05;
-          comp.z = state.z;
-          comp.isDancing = true;
-          showEmote('💘', `「同【${comp.name}】喺蘭桂坊舞池面對面同步狂舞！」`);
-        } else {
-          showEmote('🕺', '「跟住蘭桂坊節拍一齊跳！放工徹底釋放壓力！🎵」');
-        }
-      } else {
-        if (state.companion && masterNpcs[state.companion.id]) {
-          masterNpcs[state.companion.id].isDancing = false;
-        }
-      }
-      updateSceneTabsUI();
-    }
-
-    function openInviteCompanionModal() {
-      document.getElementById('modal-invite-coop').classList.remove('hidden');
-    }
-
-    function inviteCurrentNpcTo(activityType) {
-      closeModal('modal-npc-chat');
-      if (activeDirectChatNpcId === 'npc_boss') {
-        addFeedLog('👔 老細 Mr. Chan：「我仲要留喺公司睇住盤數，你自己去啦！」');
-        return;
-      }
-      startCoopActivity(activityType, activeDirectChatNpcId);
-    }
-
-    function startCoopActivity(activityType, forcedNpcId = null) {
-      closeModal('modal-invite-coop');
-      const npcId = forcedNpcId || document.getElementById('coop-npc-select').value;
-      const npc = masterNpcs[npcId];
-      if (!npc) return;
-
-      if (activityType === 'home_date' && (state.affection[npcId] || 0) < 60) {
-        addFeedLog(`⚠️ 需要同【${npc.name}】好感度達到 60%（目前 ${Math.round(state.affection[npcId] || 0)}%）先可以邀請對方上屋企呀！`);
-        return;
-      }
-
-      const curH = Math.floor(state.clockMinutes / 60);
-      const isOffWorkNow = (curH >= 18 || curH < 6 || state.employmentMode === 'freelancer' || state.typhoonSignal === 8);
-
-      if (activityType === 'lkf' && !isOffWorkNow) {
-        state.pendingDate = { npcId, npcName: npc.name, scene: 'lkf', hour: 18, lateWarned: false };
-        const gain = state.gear.watch ? 16 : 12;
-        if (state.affection[npcId] !== undefined) state.affection[npcId] = Math.min(100, state.affection[npcId] + gain);
-        refreshStatsUI();
-        updatePendingDateHUD();
-        triggerSfx('bell');
-
-        npc.speech = `一言為定！18:00 放工鐘一響，我準時喺蘭桂坊舞池等你！🍸💘`;
-        npc.speechTimer = 9;
-        showEmote('💘', `成功預約 18:00 放工同【${npc.name}】落蘭桂坊！`);
-        return;
-      }
-
-      if (state.companion && state.companion.id !== npcId) {
-        const oldNpc = masterNpcs[state.companion.id];
-        if (oldNpc) {
-          oldNpc.currentScene = oldNpc.homeScene;
-          oldNpc.isSmoking = false;
-          oldNpc.isDancing = false;
-        }
-      }
-
-      state.pendingDate = null;
-      updatePendingDateHUD();
-      state.companion = { id: npcId, name: npc.name, activity: activityType, chatStep: 0 };
-
-      const actMeta = {
-        smoke: {
-          scene: 'office', destX: 7.4, destZ: 5.6, icon: '🔥',
-          label: '一齊落後樓梯 EXIT 擦打火機煙 Break',
-          npcAccept: '走呀！避開老細同 HR，一齊落後樓梯擦打火機點煙細聲傾！🔥'
-        },
-        commute: {
-          scene: 'commute', destX: -7.5, destZ: 0, icon: '🚇',
-          label: '放工一齊去金鐘站第一身迫地鐵 / 搭過海巴士',
-          npcAccept: '好呀！18:00 金鐘站超多人，一陣你要幫我擋住啲背囊撚呀！🚇'
-        },
-        lkf: {
-          scene: 'lkf', destX: 0, destZ: 0.5, icon: '🍸',
-          label: '放工準時赴約！蘭桂坊雙人飲酒 + 舞池共舞',
-          npcAccept: '我準時到咗啦！一齊落舞池跳舞飲 Cocktail！🍸💘'
-        },
-        home_date: {
-          scene: 'home', destX: 3.2, destZ: 1.2, icon: '🏠',
-          label: '放工一齊返屋企 Me Time · 睇 Netflix 煮飯仔',
-          npcAccept: '好呀～上你屋企食外賣睇 Netflix 最舒服！💕'
-        }
-      }[activityType];
-
-      npc.speech = actMeta.npcAccept;
-      npc.speechTimer = 8;
-      npc.emote = actMeta.icon;
-      npc.emoteTimer = 15;
-
-      updateCompanionHUD();
-      addFeedLog(`🤝 你與【${npc.name}】正式會合進行「${actMeta.label}」！`);
-
-      if (state.currentScene !== actMeta.scene) {
-        switchScene(actMeta.scene, true, () => {
-          npc.currentScene = actMeta.scene;
-          npc.x = state.x + 1.05; npc.z = state.z + 0.2;
-          state.targetX = actMeta.destX; state.targetZ = actMeta.destZ;
-          if (activityType === 'smoke') setTimeout(() => openLighterModal(npc.name), 550);
-        });
-      } else {
-        npc.currentScene = actMeta.scene;
-        npc.x = state.x + 1.05; npc.z = state.z + 0.2;
-        state.targetX = actMeta.destX; state.targetZ = actMeta.destZ;
-        if (activityType === 'smoke') setTimeout(() => openLighterModal(npc.name), 550);
-      }
-    }
-
-    function updateCompanionHUD() {
-      const bar = document.getElementById('companion-status-bar');
-      if (!state.companion) { bar.classList.add('hidden'); return; }
-      const map = {
-        smoke: { icon: '🔥', sub: '後樓梯死角一齊煙 Break 中', btn: '🔥 幫佢點煙吹水' },
-        commute: { icon: '🚇', sub: '金鐘站第一身迫地鐵同行中', btn: '👁️ 第一身迫入車廂' },
-        lkf: { icon: '🍸', sub: '蘭桂坊雙人舞池熱舞中', btn: '🥂 雙人乾杯共舞' },
-        home_date: { icon: '🏠', sub: '屋企私人空間煮飯仔煲劇', btn: '💕 梳化甜密互動' }
-      }[state.companion.activity] || { icon: '🤝', sub: '組隊同行中', btn: '💬 互動' };
-
-      bar.classList.remove('hidden');
-      document.getElementById('companion-bar-icon').textContent = map.icon;
-      document.getElementById('companion-bar-title').textContent = `正與 ${state.companion.name} 雙人同場同行`;
-      document.getElementById('companion-bar-sub').textContent = map.sub;
-      document.getElementById('companion-coop-btn').textContent = map.btn;
-    }
-
-    function triggerCompanionCoopAction() {
-      if (!state.companion) return;
-      const npc = masterNpcs[state.companion.id];
-      if (!npc) return;
-
-      const bonus = state.gear.watch ? 16 : 11;
-
-      if (state.companion.activity === 'commute') {
-        if (state.currentScene !== 'commute') switchScene('commute', true);
-        openCommuteRushModal('mtr');
-      } else if (state.companion.activity === 'home_date') {
-        if (state.currentScene !== 'home') switchScene('home', true);
-        state.targetX = 3.2; state.targetZ = 1.2;
-        state.hair = Math.min(100, state.hair + 22);
-        if (state.affection[npc.id] !== undefined) state.affection[npc.id] = Math.min(100, state.affection[npc.id] + bonus + 6);
-        sayBubble('喺屋企一齊攤喺梳化食外賣睇 Netflix～💕');
-      } else if (state.companion.activity === 'smoke') {
-        if (state.currentScene !== 'office') switchScene('office', true);
-        openLighterModal(npc.name);
-        npc.speech = '借你個 Zippo 打火機幫我點埋支煙呀！🔥';
-        npc.speechTimer = 7;
-      } else if (state.companion.activity === 'lkf') {
-        if (state.currentScene !== 'lkf') switchScene('lkf', true);
-        state.targetX = 0; state.targetZ = 0.5;
-        state.isDancing = true;
-        npc.currentScene = 'lkf';
-        npc.x = state.x + 1.05;
-        npc.z = state.z;
-        npc.isDancing = true;
-        triggerSfx('clink');
-        state.drunkTimer = 14;
-        state.hair = Math.min(100, state.hair + 18);
-        if (state.affection[npc.id] !== undefined) state.affection[npc.id] = Math.min(100, state.affection[npc.id] + bonus + 6);
-        gainXP(20);
-        sayBubble('Cheers！蘭桂坊舞池不醉無歸！🥂💃');
-        updateSceneTabsUI();
-      }
-      refreshStatsUI();
-    }
-
-    function dismissCompanion() {
-      if (!state.companion) return;
-      const npc = masterNpcs[state.companion.id];
-      if (npc) {
-        npc.currentScene = npc.homeScene;
-        npc.isSmoking = false;
-        npc.isDancing = false;
-      }
-      state.companion = null;
-      updateCompanionHUD();
-    }
-
-    // =========================================================================
-    // 16. 六大獨立場景轉場底層引擎
-    // =========================================================================
     function setCameraPreset(preset) {
       if (cameraRig.fpMode) deactivateCommuteFirstPerson();
       document.querySelectorAll('.cam-preset-btn').forEach(btn => {
-        btn.className = 'cam-preset-btn px-2.5 py-1 rounded-lg bg-white/10 text-slate-200 text-[10px] font-bold transition';
+        btn.className = 'cam-preset-btn px-2.5 py-1.5 rounded-lg bg-white/10 text-slate-200 text-[10px] font-bold transition';
       });
       const activeBtn = document.getElementById(`cam-btn-${preset}`);
-      if (activeBtn) activeBtn.className = 'cam-preset-btn px-2.5 py-1 rounded-lg bg-amber-500 text-slate-950 text-[10px] font-black transition';
+      if (activeBtn) activeBtn.className = 'cam-preset-btn px-2.5 py-1.5 rounded-lg bg-amber-500 text-slate-950 text-[10px] font-black transition';
 
       if (preset === 'iso') {
         cameraRig.followPlayer = true; cameraRig.yaw = Math.PI / 4; cameraRig.pitch = 0.62; cameraRig.distance = 17.5;
@@ -5051,7 +5101,6 @@
             state.money = Math.max(0, state.money - 80);
             state.dailyPenalty += 80;
             addFeedLog('⚠️ 【曠工警告】未夠 18:00 放工鐘擅自離開寫字樓，被 HR 扣減 HK$80 曠工費！');
-            showEmote('💸', '未夠 18:00 放工偷走！被 HR 扣咗 HK$80 曠工費！');
           }
         }
         refreshStatsUI();
@@ -5145,8 +5194,8 @@
         const btn = document.getElementById(cfg.id);
         if (!btn) return;
         btn.className = (key === state.currentScene)
-          ? `text-left text-xs font-black px-3 py-2 rounded-xl shadow-md border transition ${cfg.activeCls}`
-          : 'text-left text-xs font-black px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-white/15 transition';
+          ? `text-left text-xs font-black px-3 py-2.5 rounded-xl shadow-md border transition ${cfg.activeCls}`
+          : 'text-left text-xs font-black px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-white/15 transition';
       });
 
       const bar = document.getElementById('context-action-bar');
@@ -5162,8 +5211,8 @@
         bar.innerHTML = `
           <div class="flex items-center gap-1.5">
             ${freeCakeBtn}
-            <button onclick="openOnlinePeersModal()" class="shrink-0 px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-xs font-black shadow">🚬 邀朋友一齊煙Break</button>
-            <button onclick="openTeaTimeModal()" class="shrink-0 px-2.5 py-1 rounded-lg bg-amber-500 text-slate-950 text-xs font-black shadow">🧋 3點3下午茶</button>
+            <button onclick="openSmartphoneModal('whatsapp')" class="shrink-0 px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-xs font-black shadow">💬 WhatsApp約人</button>
+            <button onclick="openOnlinePeersModal()" class="shrink-0 px-2.5 py-1 rounded-lg bg-orange-500 text-slate-950 text-xs font-black shadow">🚬 邀朋友一齊煙Break</button>
             ${smokeBtn}
             <button onclick="drinkDoubleEspresso()" class="shrink-0 px-2.5 py-1 rounded-lg bg-amber-600/30 text-amber-200 text-xs font-bold border border-amber-400/40">☕ 齋啡($20)</button>
             <button onclick="triggerPaidPoopSkill()" class="shrink-0 px-2.5 py-1 rounded-lg bg-indigo-500/25 text-indigo-200 text-xs font-bold border border-indigo-400/40">🚽 帶薪拉屎</button>
@@ -5183,7 +5232,7 @@
           <div class="flex items-center gap-1.5">
             <button onclick="openVillainModal()" class="shrink-0 px-3 py-1 rounded-lg bg-orange-600 text-white text-xs font-black">👟 打線上玩家/老細小人 ($50)</button>
             <button onclick="drinkStreetTea()" class="shrink-0 px-2.5 py-1 rounded-lg bg-amber-500/25 text-amber-200 text-xs font-bold border border-amber-400/30">🧋 飲凍檸茶 ($25)</button>
-            <button onclick="openInviteCompanionModal()" class="shrink-0 px-2.5 py-1 rounded-lg bg-pink-600/80 text-white text-xs font-black">🤝 約人助威</button>
+            <button onclick="openSmartphoneModal('whatsapp')" class="shrink-0 px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-xs font-black">💬 WhatsApp約人</button>
           </div>
         `;
       } else if (state.currentScene === 'sheungwan') {
@@ -5201,7 +5250,7 @@
             </button>
             <button onclick="openLkfModal()" class="shrink-0 px-2.5 py-1 rounded-lg bg-purple-700 text-white text-xs font-black">🍻 十五二十猜枚</button>
             <button onclick="eatWontonNoodles()" class="shrink-0 px-2.5 py-1 rounded-lg bg-amber-500/25 text-amber-200 text-xs font-bold border border-amber-400/40">🍜 細蓉雲吞麵 ($45)</button>
-            <button onclick="openOnlinePeersModal()" class="shrink-0 px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-xs font-black">👥 邀朋友共舞</button>
+            <button onclick="openSmartphoneModal('whatsapp')" class="shrink-0 px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-xs font-black">💬 WhatsApp約朋友</button>
           </div>
         `;
       } else if (state.currentScene === 'home') {
@@ -5216,9 +5265,6 @@
       }
     }
 
-    // =========================================================================
-    // 17. 360° 自由環繞攝影機 + 點擊移動
-    // =========================================================================
     const raycaster = new THREE.Raycaster();
     const pointerVec = new THREE.Vector2();
     const walkPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
@@ -5376,9 +5422,6 @@
     }
     function toggleDpad() { document.getElementById('mobile-dpad').classList.toggle('hidden'); }
 
-    // =========================================================================
-    // 18. 主世界 60fps 模擬迴圈
-    // =========================================================================
     function renderFloatingTag(id, worldVec, label, speech, emote, theme) {
       let el = labelElementPool.get(id);
       if (!el) {
@@ -5679,45 +5722,6 @@
         bossVisionCone.visible = false;
       }
 
-      const secrecyBar = document.getElementById('secrecy-alert-bar');
-      if (state.currentScene === 'office' && state.employmentMode === 'employed' && isWorkHours() && !inStairwell) {
-        const hr = masterNpcs.bot_hr;
-        const distWatcher = Math.min(Math.hypot(hr.x - state.x, hr.z - state.z), Math.hypot(boss.x - state.x, boss.z - state.z));
-        let nearLoveTarget = false;
-        ['npc_vivienne', 'bot_sales', 'bot_it', 'bot_hr'].forEach(nid => {
-          const n = masterNpcs[nid];
-          if (n && n.currentScene === 'office' && (state.affection[nid] || 0) >= 35) {
-            if (Math.hypot(n.x - state.x, n.z - state.z) < 2.6) nearLoveTarget = true;
-          }
-        });
-
-        if (nearLoveTarget && distWatcher < 6.0) {
-          state.secrecyAlert = Math.min(100, state.secrecyAlert + dt * 18);
-          secrecyBar.classList.remove('hidden');
-          document.getElementById('secrecy-pct-txt').textContent = `${Math.round(state.secrecyAlert)}%`;
-          document.getElementById('secrecy-fill-bar').style.width = `${state.secrecyAlert}%`;
-          if (state.secrecyAlert >= 100) {
-            state.secrecyAlert = 0;
-            state.money = Math.max(0, state.money - 100);
-            state.dailyPenalty += 100;
-            Object.keys(state.affection).forEach(k => state.affection[k] = Math.max(10, state.affection[k] - 10));
-            triggerSfx('alarm');
-            showEmote('📋', '遭 HR 撞破辦公室地下情！罰款 HK$100！');
-            refreshStatsUI();
-          }
-        } else {
-          state.secrecyAlert = Math.max(0, state.secrecyAlert - dt * 10);
-          if (state.secrecyAlert <= 0) secrecyBar.classList.add('hidden');
-          else {
-            document.getElementById('secrecy-pct-txt').textContent = `${Math.round(state.secrecyAlert)}%`;
-            document.getElementById('secrecy-fill-bar').style.width = `${state.secrecyAlert}%`;
-          }
-        }
-      } else {
-        state.secrecyAlert = Math.max(0, state.secrecyAlert - dt * 15);
-        secrecyBar.classList.add('hidden');
-      }
-
       remotePlayers.forEach((rp, pid) => {
         if (!rp.isSimulated && rp.lastSeen && Date.now() - rp.lastSeen > 12000) {
           remotePlayers.delete(pid);
@@ -5897,9 +5901,6 @@
       requestAnimationFrame(mainAnimationLoop);
     }
 
-    // =========================================================================
-    // 19. MMO 核心玩法與定期事件排程
-    // =========================================================================
     function startGameWorld() {
       syncPreviewMeta();
       scene.remove(playerRig);
@@ -5914,14 +5915,13 @@
       document.getElementById('world-feed').classList.remove('hidden');
       if (window.innerWidth < 640) document.getElementById('mobile-dpad').classList.remove('hidden');
 
-      const dInfo = DEPT_CONFIG[state.dept] || DEPT_CONFIG['IT 資訊科技部'];
       const gIcon = state.gender === 'female' ? '👩' : '👨';
       document.getElementById('hud-player-name').textContent = `${gIcon} ${state.name}`;
       seedSimulatedOnlinePeers();
       switchScene('office', true);
       initPeerMultiplayer();
       updateClockHUD();
-      addFeedLog(`🪪 ${state.name} 已登入聯機房間【${state.roomCode}】！點擊「🧭 菜單/地圖」可展開地區導航！`);
+      addFeedLog(`🪪 ${state.name} 已登入房間【${state.roomCode}】！撳「📱 WhatsApp」可私聊約人放工或一齊煙Break！`);
       refreshStatsUI();
     }
 
@@ -5930,30 +5930,13 @@
     function gossipWithCurrentNpc() {
       closeModal('modal-npc-chat');
       const npc = masterNpcs[activeDirectChatNpcId];
-      if (!npc) return;
-      if (npc.id === 'npc_boss') {
-        addFeedLog('👔 你唔會想同老細 Mr. Chan 講公司八卦吧！');
-        return;
-      }
-
-      const boss = masterNpcs.npc_boss;
-      const distBoss = Math.hypot(boss.x - state.x, boss.z - state.z);
-      if (state.currentScene === 'office' && distBoss < 6.0 && state.employmentMode === 'employed') {
-        state.money = Math.max(0, state.money - 80);
-        state.dailyPenalty += 80;
-        triggerSfx('alarm');
-        refreshStatsUI();
-        boss.speech = '隔牆有耳！唔使做呀喺度講是非？扣你 HK$80！';
-        boss.speechTimer = 6;
-        showEmote('😱', '慘啦！講八卦時老細企喺 6 米內聽到晒，扣薪 HK$80！');
-      } else {
-        state.hair = Math.min(100, state.hair + 10);
-        if (state.affection[npc.id] !== undefined) state.affection[npc.id] = Math.min(100, state.affection[npc.id] + 10);
-        refreshStatsUI();
-        npc.speech = '偷偷話你知，下個月老細個姪仔會空降做 Marketing Manager！🤫';
-        npc.speechTimer = 7;
-        showEmote('🍉', `成功同 ${npc.name} 秘密交換職場八卦（好感 +10%）`);
-      }
+      if (!npc || npc.id === 'npc_boss') return;
+      state.hair = Math.min(100, state.hair + 10);
+      if (state.affection[npc.id] !== undefined) state.affection[npc.id] = Math.min(100, state.affection[npc.id] + 10);
+      refreshStatsUI();
+      npc.speech = '偷偷話你知，下個月老細個姪仔會空降做 Marketing Manager！🤫';
+      npc.speechTimer = 7;
+      showEmote('🍉', `成功同 ${npc.name} 秘密交換職場八卦（好感 +10%）`);
     }
 
     function openGossipWallModal() {
@@ -5990,7 +5973,6 @@
       if (state.currentScene !== 'office') requestTravelToScene('office');
       state.targetX = 6.5; state.targetZ = -6.5;
       clickTargetMarker.position.set(6.5, 0.08, -6.5); clickTargetMarker.visible = true;
-      sayBubble('手持 Offer God 靈符，行去老細玻璃房攤牌遞信！✉️');
       setTimeout(() => checkBossOfficeInteract(), 900);
     }
 
@@ -6017,7 +5999,6 @@
         state.employmentMode = 'freelancer';
         state.resignedStatus = '瀟灑遞信·無業遊民自由身';
         document.getElementById('btn-grand-resign').classList.add('hidden');
-        document.getElementById('phone-unread-dot').classList.remove('hidden');
         updateClockHUD();
         updateSceneTabsUI();
         showEmote('😎', '「Mr. Chan 我唔撈喇！」正式進入【無業遊民／自由身模式】！');
@@ -6029,12 +6010,6 @@
       const isCard = tab === 'card';
       document.getElementById('temple-panel-card').classList.toggle('hidden', !isCard);
       document.getElementById('temple-panel-divine').classList.toggle('hidden', isCard);
-      document.getElementById('temple-tab-card').className = isCard
-        ? 'py-2 rounded-xl bg-red-700 text-white text-xs font-black shadow'
-        : 'py-2 rounded-xl bg-amber-200/80 text-amber-950 text-xs font-black';
-      document.getElementById('temple-tab-divine').className = !isCard
-        ? 'py-2 rounded-xl bg-red-700 text-white text-xs font-black shadow'
-        : 'py-2 rounded-xl bg-amber-200/80 text-amber-950 text-xs font-black';
     }
 
     function castTempleFortune() {
@@ -6048,40 +6023,10 @@
       refreshStatsUI();
       triggerSfx('bell');
 
-      const lots = [
-        {
-          rank: '第十八籤【上上籤】',
-          poem: '「雲開見月照中環，貴人相助莫心煩；順風順水轉新局，豐薪厚祿在眼前。」',
-          advice: `批算【${birth}】八字五行得金水相生，針對你所問「${q}」（${cat}）：文武二帝指點你時機已到，宜先過火求得 Offer God 靈符再行動，必有貴人高薪相邀。`
-        },
-        {
-          rank: '第四十二籤【中吉籤】',
-          poem: '「潛龍勿用待春雷，謹言慎行莫貪杯；避開小人是非地，守得雲開見月明。」',
-          advice: `觀你【${birth}】命盤流年帶驛馬，針對「${q}」（${cat}）：切忌喺老細 6 米內講是非；宜多去後樓梯與戰友煙 Break 部署，下月即見轉機！`
-        }
-      ];
-      const pick = lots[(birth.length + q.length) % lots.length];
-
-      document.getElementById('divine-lot-title').textContent = `🎋 文武二帝靈籤 · ${pick.rank}`;
-      document.getElementById('divine-lot-poem').textContent = pick.poem;
-      document.getElementById('divine-lot-explain').textContent = pick.advice;
+      document.getElementById('divine-lot-title').textContent = `🎋 文武二帝靈籤 · 第十八籤【上上籤】`;
+      document.getElementById('divine-lot-poem').textContent = '「雲開見月照中環，貴人相助莫心煩；順風順水轉新局，豐薪厚祿在眼前。」';
+      document.getElementById('divine-lot-explain').textContent = `批算【${birth}】八字五行得金水相生，針對「${q}」（${cat}）：文武二帝指點你時機已到，宜先過火求得 Offer God 靈符再行動！`;
       document.getElementById('divine-result-box').classList.remove('hidden');
-    }
-
-    function triggerHotPotatoBomb(fromManual = false) {
-      if (fromManual && worldShared.bombHolderId && worldShared.bombHolderId !== playerId) {
-        addFeedLog(`🍳 【${worldShared.bombHolderName}】目前正持有地獄級 PPT 炸彈！`);
-        return;
-      }
-      worldShared.bombHolderId = playerId;
-      worldShared.bombHolderName = state.name;
-      worldShared.bombTimer = 18;
-      triggerSfx('alarm');
-      showEventBanner('🍳', '地獄級 PPT 卸膊炸彈喺你手上！', '18 秒內點擊任何線上玩家或按制，將份衰嘢卸膊甩俾對方！', '🍳 自動搵人卸膊！', 'pass_bomb');
-      broadcastNetworkPacket({
-        type: 'PASS_BOMB', senderId: playerId, fromName: '老細 Mr. Chan',
-        toId: playerId, toName: state.name, timer: 18
-      });
     }
 
     function openPeerInteractionModal(rp) {
@@ -6089,36 +6034,8 @@
       const gIcon = rp.gender === 'female' ? '👩' : '👨';
       const scLabel = SCENE_LABELS[rp.currentScene] || rp.currentScene;
       document.getElementById('peer-modal-title').textContent = `🌐 ${gIcon} ${rp.name} (${rp.dept})`;
-      document.getElementById('peer-modal-desc').textContent = `目前位置：${scLabel} · 可邀一齊煙 Break、請飲咖啡或私聊！`;
+      document.getElementById('peer-modal-desc').textContent = `目前位置：${scLabel} · 可打開 WhatsApp 私聊、邀一齊煙 Break 或請飲咖啡！`;
       document.getElementById('modal-peer-action').classList.remove('hidden');
-    }
-
-    function passBombToTargetPeer() {
-      closeModal('modal-peer-action');
-      const rp = remotePlayers.get(selectedTargetPeerId);
-      if (!rp) return;
-      executePassBomb(rp.id, rp.name);
-    }
-
-    function executePassBomb(targetId, targetName) {
-      worldShared.bombHolderId = targetId;
-      worldShared.bombHolderName = targetName;
-      worldShared.bombTimer = 15;
-      hideEventBanner();
-      gainXP(20);
-      showEmote('🍳', `「${targetName}，呢 Part 關你部門事喎，交俾你跟進啦！」成功卸膊！`);
-      broadcastNetworkPacket({
-        type: 'PASS_BOMB', senderId: playerId, fromName: state.name,
-        toId: targetId, toName: targetName, timer: 15
-      });
-      refreshStatsUI();
-    }
-
-    function goCurseTargetPeer() {
-      closeModal('modal-peer-action');
-      const rp = remotePlayers.get(selectedTargetPeerId);
-      if (!rp) return;
-      switchScene('wanchai', true, () => openVillainModal(rp.name, rp.id));
     }
 
     const npcChatLogs = {};
@@ -6133,25 +6050,13 @@
       if (!npcChatLogs[npcId]) npcChatLogs[npcId] = [{ sender: npc.name, text: npc.speech, isNpc: true }];
 
       const quickBox = document.getElementById('npc-chat-quick-tags');
-      if (npc.role === 'boss') {
-        quickBox.innerHTML = `
-          <button type="button" onclick="sendQuickNpcLine('Mr. Chan 你今日好有型，個 Deck 我今晚通宵幫你搞掂！')" class="text-[10px] px-2 py-1 rounded-lg bg-amber-600/30 border border-amber-400/40 text-amber-200">👔 擦鞋表忠</button>
-          <button type="button" onclick="sendQuickNpcLine('老細，我今日 KPI 表現咁好，係時候傾下加人工啦！')" class="text-[10px] px-2 py-1 rounded-lg bg-red-600/30 border border-red-400/40 text-red-200">💰 要求加薪</button>
-        `;
-      } else {
-        quickBox.innerHTML = `
-          <button type="button" onclick="inviteCurrentNpcTo('smoke')" class="text-[10px] px-2 py-1 rounded-lg bg-orange-600/40 border border-orange-400/60 text-orange-100 font-black">🚬 邀落後樓梯一齊煙Break！</button>
-          <button type="button" onclick="inviteCurrentNpcTo('lkf')" class="text-[10px] px-2 py-1 rounded-lg bg-pink-600/40 border border-pink-400/60 text-pink-100 font-black">🍸 約 18:00 蘭桂坊！</button>
-        `;
-      }
+      quickBox.innerHTML = `
+        <button type="button" onclick="inviteCurrentNpcTo('smoke')" class="text-[10px] px-2 py-1 rounded-lg bg-orange-600/40 border border-orange-400/60 text-orange-100 font-black">🚬 邀落後樓梯一齊煙Break！</button>
+        <button type="button" onclick="inviteCurrentNpcTo('lkf')" class="text-[10px] px-2 py-1 rounded-lg bg-pink-600/40 border border-pink-400/60 text-pink-100 font-black">🍸 約 18:00 蘭桂坊！</button>
+      `;
 
       renderNpcChatHistory();
       document.getElementById('modal-npc-chat').classList.remove('hidden');
-    }
-
-    function sendQuickNpcLine(txt) {
-      document.getElementById('npc-direct-input').value = txt;
-      submitDirectNpcChat({ preventDefault: () => {} });
     }
 
     function renderNpcChatHistory() {
@@ -6273,12 +6178,7 @@
         clickTargetMarker.position.set(0, 0.08, -0.5); clickTargetMarker.visible = true;
         sayBubble('光速衝返雙螢幕電腦位開 Excel 扮工！💻');
       } else if (act === 'open_phone_hko') {
-        openSmartphoneModal();
-        switchPhoneApp('hko');
-      } else if (act === 'pass_bomb') {
-        const firstPeer = Array.from(remotePlayers.values())[0];
-        if (firstPeer) executePassBomb(firstPeer.id, firstPeer.name);
-        else executePassBomb('bot_sales', 'Sales Jason');
+        openSmartphoneModal('hko');
       } else if (act === 'claim_taxi') {
         claimRedTaxiSeat();
       } else if (act === 'goto_lkf_date') {
@@ -6295,9 +6195,6 @@
           updateSceneTabsUI();
           showEmote('💃', '接受線上朋友邀請，到達蘭桂坊舞池狂歡熱舞！');
         });
-      } else if (act === 'counter_curse_peer') {
-        const rp = remotePlayers.get(selectedTargetPeerId);
-        switchScene('wanchai', true, () => openVillainModal(rp ? rp.name : '神秘小人', selectedTargetPeerId));
       }
     }
 
@@ -6375,9 +6272,7 @@
       }
     }
 
-    function openLkfModal() {
-      document.getElementById('modal-lkf').classList.remove('hidden');
-    }
+    function openLkfModal() { document.getElementById('modal-lkf').classList.remove('hidden'); }
 
     function playFifteenTwenty(myFingers, myCall) {
       const aiFingers = [0, 5, 10][Math.floor(Math.random() * 3)];
@@ -6492,7 +6387,7 @@
         <div class="p-2.5 rounded-xl bg-white/5 border border-white/10">📊 今日 KPI：<strong class="text-amber-300">${state.dailyKpi}%</strong></div>
         <div class="p-2.5 rounded-xl bg-white/5 border border-white/10">🏠 居所級別：<strong class="text-teal-300">${state.gear.homeUpgrade ? '太古城兩房' : '深水埗劏房'}</strong></div>
       `;
-      document.getElementById('report-comment').textContent = '評語：每日完成崗位任務提升 KPI，18:00 準時派發電子日薪糧單！仲可以同線上朋友一齊落後樓梯煙 Break、夾單食 3點3 下午茶！';
+      document.getElementById('report-comment').textContent = '評語：手機版菜單支援流暢上下滑動，隨身手機內建 WhatsApp 可隨時私聊約朋友放工或一齊煙 Break！';
       document.getElementById('modal-report').classList.remove('hidden');
     }
 
@@ -6603,12 +6498,6 @@
 
       if (prevHour !== curHour) {
         syncNpcDailySchedules(curHour);
-        if (curHour === 12 && !state.lunchEatenToday && state.employmentMode === 'employed') {
-          addFeedLog('🍱 【12:30 午飯鐘響】快打開「🧭 菜單/地圖」揀食兩餸飯定冰室！');
-        }
-        if (curHour === 15 && state.employmentMode === 'employed') {
-          addFeedLog('🧋 【3點3 下午茶時間】打開菜單發起下午茶夾單請朋友食蛋撻啦！');
-        }
       }
 
       if (prevHour === 8 && curHour === 9 && state.employmentMode === 'employed') {
@@ -6652,18 +6541,6 @@
       state.caffeine = Math.max(5, state.caffeine - 0.5);
       if (state.isSmoking || state.isPooping || state.isDancing) state.hair = Math.min(100, state.hair + 2.0);
       if (state.isPooping) state.money += 5;
-
-      if (worldShared.bombHolderId) {
-        worldShared.bombTimer -= 2.5;
-        if (worldShared.bombTimer <= 0) {
-          if (worldShared.bombHolderId === playerId) {
-            state.hair = Math.max(5, state.hair - 22);
-            hideEventBanner();
-            showEmote('💥', '嘭！地獄級 PPT 喺你手上爆煲！被迫加班髮量 -22%！');
-          }
-          worldShared.bombHolderId = null;
-        }
-      }
 
       if (tickCounter % 24 === 0 && !currentBannerAction && state.eventCooldown <= 0) {
         const roll = Math.random();
