@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>香港社畜實錄 · 3D數位藝術 MMO 跨平台連線版 v5.2</title>
+  <title>香港社畜實錄 · 3D數位藝術 MMO 跨平台連線版 v5.3</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
@@ -78,14 +78,14 @@
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-800">
         <div>
           <div class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-amber-500/15 text-amber-300 text-[11px] font-bold mb-1 border border-amber-400/30">
-            📱💻 跨平台 3D MMO v5.2 · 返工/放工香港交通決策 · 第一身動態隧道列車 · 捽熄煙頭
+            📱💻 跨平台 3D MMO v5.3 · 線上玩家即時互動 · 返工/放工香港交通決策 · 第一身動態車廂
           </div>
           <h1 class="text-xl sm:text-3xl font-black text-white tracking-tight">
             香港社畜實錄 <span class="bg-gradient-to-r from-amber-400 via-orange-400 to-red-500 bg-clip-text text-transparent">· 3D線上職場修羅場</span>
           </h1>
         </div>
         <p class="text-[11px] text-slate-400 max-w-xs leading-relaxed">
-          自選男／女社畜體態髮型、返工／下班自選港鐵／隧巴／紅VAN／天星小輪／的士、第一身動態車廂 LED 報站與紅VAN超速「嗶嗶」聲！
+          點擊場內綠色名牌線上同事即時請飲咖啡／把風／舞池共舞、返工及放工自選港鐵／隧巴／紅VAN／小輪／的士、第一身動態車廂報站！
         </p>
       </div>
 
@@ -309,11 +309,11 @@
                 </span>
                 <button onclick="openOnlinePeersModal()" title="點擊查看同服線上真人同事並即時互動" class="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md bg-emerald-500/30 hover:bg-emerald-500/50 text-emerald-200 border border-emerald-400/60 font-black shadow transition">
                   <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-                  <span id="hud-room-badge">👥 IFC88 · 1人互動</span>
+                  <span id="hud-room-badge">👥 IFC88 · 3人互動</span>
                 </button>
               </div>
               <p class="hidden sm:block text-[10px] text-slate-300 mt-0.5">
-                💡 轉場會開啟<strong class="text-amber-300">「香港交通決策選單」</strong>（港鐵/過海隧巴/紅VAN/小輪/的士），返工遲到過 09:05 會扣勤工獎！
+                💡 直接點擊場內<strong class="text-emerald-300">「🌐 綠色名牌線上玩家」</strong>或按頂部<strong class="text-emerald-300">「👥 人數」</strong>可請飲咖啡、把風掩護、舞池共舞或私聊！
               </p>
             </div>
           </div>
@@ -413,7 +413,7 @@
         <div id="hud-toolbar-drawer" class="hidden sm:flex flex-wrap items-center justify-between gap-1.5 py-1.5 border-b border-white/10">
           <div class="flex flex-wrap items-center gap-1">
             <button onclick="openOnlinePeersModal()" class="px-2.5 py-1 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 hover:brightness-110 text-slate-950 text-[10px] font-black shadow">
-              👥 真人同事互動
+              👥 線上玩家互動
             </button>
             <button onclick="openJobTaskModal()" class="px-2.5 py-1 rounded-lg bg-gradient-to-r from-sky-500 to-cyan-500 hover:brightness-110 text-slate-950 text-[10px] font-black shadow">
               💼 崗位任務 (+KPI)
@@ -613,7 +613,6 @@
 7. 🚇 第一身逼真動態乘車視角 HUD (LED 報站燈牌 + 動態隧道/維港視差 + 突發事件)
   ========================================================== -->
   <div id="modal-commute-rush" class="hidden fixed inset-0 z-50 flex flex-col justify-between p-3 sm:p-5 pointer-events-none">
-    <!-- 頂部：逼真港鐵 / 巴士 LED 動態報站燈牌 -->
     <div class="mt-24 sm:mt-28 mx-auto max-w-lg w-full pointer-events-auto">
       <div class="bg-zinc-950/95 border-2 border-slate-600 rounded-2xl p-2.5 shadow-2xl">
         <div class="flex items-center justify-between text-[10px] font-bold text-slate-400 mb-1">
@@ -628,7 +627,6 @@
       </div>
     </div>
 
-    <!-- 底部：第一身乘車互動控制面板 -->
     <div class="pointer-events-auto mx-auto bg-slate-900/92 backdrop-blur-xl text-white rounded-3xl max-w-lg w-full p-4 shadow-[0_20px_60px_rgba(0,0,0,0.95)] border-2 border-rose-500 animate-pop text-center">
       <div class="flex items-center justify-between pb-2 border-b border-slate-700/80">
         <div class="text-left">
@@ -649,7 +647,6 @@
         <button onclick="selectCommuteVehicle('redvan')" id="comm-tab-redvan" class="py-1.5 rounded-xl bg-slate-800 text-slate-300 text-[11px] font-black">🚐 亡命紅VAN ($20)</button>
       </div>
 
-      <!-- 車廂內突發小事件卡片 -->
       <div id="commute-event-card" class="hidden my-2 p-2.5 rounded-xl bg-amber-950/85 border border-amber-400 text-left flex items-center justify-between gap-2 animate-pop">
         <div id="commute-event-text" class="text-[11px] font-bold text-amber-100 leading-snug">
           👵 前方有位阿婆上車望住你個位，讓唔讓座？
@@ -687,7 +684,7 @@
     <div class="bg-slate-900 text-white rounded-3xl max-w-lg w-full p-5 shadow-2xl border-2 border-emerald-400 animate-pop" onclick="event.stopPropagation()">
       <div class="flex items-center justify-between pb-3 border-b border-slate-700">
         <div>
-          <h2 class="font-black text-base text-emerald-300">👥 伺服器【<span id="peers-modal-room">IFC88</span>】線上真人同事</h2>
+          <h2 class="font-black text-base text-emerald-300">👥 伺服器【<span id="peers-modal-room">IFC88</span>】線上同事名單</h2>
           <p class="text-[11px] text-slate-300">隨時請飲咖啡、把風掩護、邀請蘭桂坊共舞或直接傳送過去會合！</p>
         </div>
         <div class="flex items-center gap-1.5">
@@ -705,10 +702,10 @@
   <div id="modal-peer-action" class="hidden fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-4" onclick="closeModal('modal-peer-action', event)">
     <div class="bg-slate-900 text-white rounded-3xl max-w-md w-full p-5 shadow-2xl border-2 border-emerald-400 animate-pop text-center" onclick="event.stopPropagation()">
       <div class="flex items-center justify-between pb-2 border-b border-slate-700">
-        <h3 id="peer-modal-title" class="font-black text-base text-emerald-300">🌐 真人線上同事</h3>
+        <h3 id="peer-modal-title" class="font-black text-base text-emerald-300">🌐 線上同事互動</h3>
         <button onclick="closeModal('modal-peer-action')" class="w-8 h-8 rounded-lg bg-slate-800 font-black">✕</button>
       </div>
-      <p id="peer-modal-desc" class="text-xs text-slate-300 my-2.5">同一個伺服器房間內嘅真實玩家！對方螢幕會即時彈出互動通知與特效！</p>
+      <p id="peer-modal-desc" class="text-xs text-slate-300 my-2.5">同一個伺服器房間內嘅線上玩家！對方會即時收到你嘅互動與特效！</p>
       
       <div class="grid grid-cols-2 gap-2 text-left">
         <button onclick="sendPeerSocialAction('coffee')" class="p-2.5 rounded-xl bg-amber-600/30 hover:bg-amber-600/50 border border-amber-400/50 transition">
@@ -1397,7 +1394,7 @@
           <span class="text-2xl">👵👟</span>
           <div>
             <h2 class="font-black text-base text-slate-900">灣仔鵝頸橋 · 跨服打小人 ($50)</h2>
-            <p class="text-[11px] text-orange-700 font-bold">可直接打線上真實玩家，對方螢幕會即時震動！</p>
+            <p class="text-[11px] text-orange-700 font-bold">可直接打線上玩家，對方螢幕會即時震動！</p>
           </div>
         </div>
         <button onclick="closeModal('modal-villain')" class="w-8 h-8 rounded-lg bg-stone-200 font-black">✕</button>
@@ -1518,7 +1515,7 @@
       isDancing: false,
       punishTimer: 0,
       drunkTimer: 0,
-      speech: '09:00 返工鐘響！轉場可自選港鐵/隧巴/紅VAN/小輪/的士，第一身車廂有動態報站燈牌！',
+      speech: '09:00 返工鐘響！點擊任何綠色名牌線上玩家或頂部「👥 人數」即可即時互動！',
       speechTimer: 8.5,
       emote: '', emoteTimer: 0,
       caffeine: 80, hair: 85, xp: 20, level: 1, money: 500,
@@ -1546,6 +1543,7 @@
       typhoonSignal: 1,
       typhoonCountdown: 0,
       mtrFault: false,
+      eventCooldown: 60, // 開局前 60 秒不彈全螢幕緊急警報
       companion: null,
       pendingDate: null
     };
@@ -1735,8 +1733,35 @@
     const remotePlayers = new Map();
     const syncChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('hk_3d_mmo_v12') : null;
 
+    function seedSimulatedOnlinePeers() {
+      const simPeers = [
+        {
+          id: 'sim_peer_chris', isSimulated: true, isRemote: true, role: 'peer',
+          gender: 'male', hairStyle: 0, currentScene: 'office',
+          name: '尖沙咀 Chris', dept: 'Sales 營業部',
+          outfitStyle: 3, hairColor: '#1c1917', outfitColor: '#1d4ed8',
+          accessories: { glasses: true, darkCircles: false, headphones: false, handbag: false },
+          x: 2.2, z: 2.4, targetX: -1.8, targetZ: 3.2, rotY: 0.4, walkPhase: 0, isMoving: true,
+          speech: '今日好多嘢做呀！有冇巴打絲打一齊飲杯咖啡？☕', speechTimer: 12, emote: '👋', emoteTimer: 12,
+          lastSeen: Date.now()
+        },
+        {
+          id: 'sim_peer_mandy', isSimulated: true, isRemote: true, role: 'peer',
+          gender: 'female', hairStyle: 1, currentScene: 'office',
+          name: '銅鑼灣 Mandy', dept: 'Design 設計部',
+          outfitStyle: 2, hairColor: '#4a3222', outfitColor: '#0f766e',
+          accessories: { glasses: false, darkCircles: true, headphones: true, handbag: true },
+          x: -3.2, z: 1.8, targetX: 1.5, targetZ: -1.8, rotY: -0.5, walkPhase: 0, isMoving: true,
+          speech: '求救！個客又話要改第 8 版 Logo，邊個幫我把風摸魚？😭', speechTimer: 12, emote: '💻', emoteTimer: 12,
+          lastSeen: Date.now()
+        }
+      ];
+      simPeers.forEach(sp => remotePlayers.set(sp.id, sp));
+      updateOnlineCountUI();
+    }
+
     // =========================================================================
-    // 2. Web Audio API 地道音效引擎（新增：紅VAN超速警報嗶嗶聲、八達通嘟聲）
+    // 2. Web Audio API 地道音效引擎
     // =========================================================================
     let audioContext = null;
     function triggerSfx(type) {
@@ -1861,7 +1886,7 @@
       peerConnections.clear();
       const room = (state.roomCode || 'IFC88').toUpperCase().replace(/[^A-Z0-9]/g, '') || 'IFC88';
       state.roomCode = room;
-      const hostPeerId = `hk_office_srv52_${room}_host`;
+      const hostPeerId = `hk_office_srv53_${room}_host`;
 
       const peerConfig = {
         config: {
@@ -1964,6 +1989,14 @@
       } else if (pkt.type === 'SYNC_PLAYER') {
         const p = pkt.payload;
         if (!p || p.id === playerId) return;
+        ['sim_peer_chris', 'sim_peer_mandy'].forEach(simId => {
+          if (remotePlayers.has(simId)) {
+            remotePlayers.delete(simId);
+            const r = npcRigPool.get(simId); if (r) { scene.remove(r); npcRigPool.delete(simId); }
+            const l = labelElementPool.get(simId); if (l) { l.remove(); labelElementPool.delete(simId); }
+          }
+        });
+
         const isNew = !remotePlayers.has(p.id);
         remotePlayers.set(p.id, {
           ...p, isRemote: true, role: 'peer', walkPhase: 0, lastSeen: Date.now(),
@@ -2080,19 +2113,6 @@
     function renderOnlinePeersList() {
       const box = document.getElementById('online-peers-list');
       const peers = Array.from(remotePlayers.values());
-      if (peers.length === 0) {
-        box.innerHTML = `
-          <div class="p-4 rounded-2xl bg-slate-800/80 border border-slate-700 text-center space-y-2">
-            <div class="text-2xl">🏢</div>
-            <div class="text-xs font-black text-amber-300">暫時未有其他真人玩家登入房號【${state.roomCode}】</div>
-            <p class="text-[11px] text-slate-400 leading-relaxed">
-              撳右上角「📋 複製邀請連結」傳俾朋友，或者開多一個瀏覽器分頁登入同一個房號【${state.roomCode}】，即可即時見面互動！
-            </p>
-          </div>
-        `;
-        return;
-      }
-
       box.innerHTML = peers.map(rp => {
         const gIcon = rp.gender === 'female' ? '👩' : '👨';
         const scLabel = SCENE_LABELS[rp.currentScene] || rp.currentScene;
@@ -2149,16 +2169,39 @@
         state.money -= 35;
         gainXP(15);
         refreshStatsUI();
-        showEmote('☕', `隔空請咗【${rp.name}】飲杯 Starbucks！`);
+        showEmote('☕', `請咗【${rp.name}】飲杯 Starbucks！`);
         addFeedLog(`☕ 你花費 HK$35 請【${rp.name}】飲咖啡，對方精神大振！`);
+        if (rp.isSimulated) {
+          setTimeout(() => {
+            rp.speech = `多謝 ${state.name} 請飲 Starbucks！即刻醒晒，下次輪到我請你！☕❤️`;
+            rp.speechTimer = 7;
+            rp.emote = '☕'; rp.emoteTimer = 7;
+            addFeedLog(`💬 【${rp.name}】回覆：「多謝 ${state.name} 請飲咖啡！真係人間有愛！」`);
+          }, 700);
+        }
       } else if (actionType === 'cover') {
         gainXP(20);
         refreshStatsUI();
         showEmote('🛡️', `你幫【${rp.name}】把風擋住老細視線！`);
         addFeedLog(`🛡️ 你幫【${rp.name}】把風掩護摸魚，獲得戰友情 +20 XP！`);
+        if (rp.isSimulated) {
+          setTimeout(() => {
+            rp.speech = `唔該晒 ${state.name} 幫我把風！差啲俾老細捉到我睇緊網購！🛡️😎`;
+            rp.speechTimer = 7;
+            rp.emote = '🛡️'; rp.emoteTimer = 7;
+            addFeedLog(`💬 【${rp.name}】回覆：「多謝戰友把風掩護！」`);
+          }, 700);
+        }
       } else if (actionType === 'dance_invite') {
         showEmote('💃', `已向【${rp.name}】發出蘭桂坊舞池共舞邀請！`);
         addFeedLog(`💃 你邀請【${rp.name}】前往中環蘭桂坊舞池共舞！`);
+        if (rp.isSimulated) {
+          rp.currentScene = 'lkf';
+          rp.x = 1.1; rp.z = 0.8;
+          rp.isDancing = true;
+          rp.speech = `我已經到咗蘭桂坊舞池等你啦 ${state.name}！快啲過嚟一齊跳！💃🍸`;
+          rp.speechTimer = 12;
+        }
         if (state.currentScene !== 'lkf') requestTravelToScene('lkf');
       }
 
@@ -2181,6 +2224,18 @@
       closeModal('modal-peer-action');
       sayBubble(`（私聊 ${rp.name}）${text}`);
       addFeedLog(`💌 你私聊【${rp.name}】：${text}`);
+      if (rp.isSimulated) {
+        setTimeout(() => {
+          const replies = [
+            `收到！${state.name} 你講得太啱啦，一陣放工一齊閃人！😂`,
+            `哈哈細聲啲呀，HR 喺附近望緊過嚟！一陣蘭桂坊見！🤫🍸`
+          ];
+          const rep = replies[Math.floor(Math.random() * replies.length)];
+          rp.speech = rep;
+          rp.speechTimer = 7;
+          addFeedLog(`💌 【${rp.name}】私聊回覆：「${rep}」`);
+        }, 800);
+      }
       broadcastNetworkPacket({
         type: 'PEER_SOCIAL_INTERACT',
         senderId: playerId,
@@ -2973,7 +3028,6 @@
       stationSign.position.set(-4.5, 3.2, 0);
       activeSceneGroup.add(stationSign);
 
-      // 隧道壁柱子陣列（列車開出時高速向後移動營造逼真視差）
       const pillarMat = new THREE.MeshStandardMaterial({ color: '#334155', roughness: 0.6 });
       const lightStripMat = new THREE.MeshBasicMaterial({ color: '#fde047' });
       for (let pz = -18; pz <= 18; pz += 4.5) {
@@ -3006,7 +3060,6 @@
       const backWallZ = new THREE.Mesh(new THREE.BoxGeometry(0.16, 2.9, 7.8), mtrSilverMat);
       backWallZ.position.set(1.25, 1.5, -4.9);
 
-      // 3D 車門上方港鐵路線圖燈牌
       const routeMapTex = makeSimpleLabelTex('荃灣線：中環 ➔ 金鐘 ➔ 尖沙咀 ➔ 旺角', '#0f172a', '#ef4444', '#f8fafc', 360, 64);
       const routeMapBoard = new THREE.Mesh(new THREE.PlaneGeometry(1.9, 0.34), new THREE.MeshBasicMaterial({ map: routeMapTex }));
       routeMapBoard.rotation.y = -Math.PI / 2;
@@ -3055,7 +3108,6 @@
       road.position.set(7.0, -0.45, 0);
       activeSceneGroup.add(road);
 
-      // 公路白色虛線陣列（巴士/紅VAN行駛時向後高速移動）
       const dashMat = new THREE.MeshBasicMaterial({ color: '#f8fafc' });
       for (let dz = -14; dz <= 16; dz += 3.0) {
         const dash = new THREE.Mesh(new THREE.PlaneGeometry(0.22, 1.4), dashMat);
@@ -3626,7 +3678,6 @@
       const newMin = state.clockMinutes % 60;
       updateClockHUD();
 
-      // 檢查早晨返工是否遲到（超過 09:05 到達寫字樓）
       let latePenaltyTriggered = false;
       if (destScene === 'office' && state.employmentMode === 'employed' && prevHour >= 7 && prevHour <= 10) {
         if (newHour > 9 || (newHour === 9 && newMin > 5)) {
@@ -3639,7 +3690,6 @@
 
       refreshStatsUI();
 
-      // 若目的地是「2. 金鐘轉車站/巴士總站」且選了港鐵/巴士/紅VAN，直接進入第一身車廂視角體驗！
       if (destScene === 'commute' && ['mtr', 'bus', 'redvan'].includes(mode)) {
         switchScene('commute', true, () => {
           addFeedLog(`${statusSummary}（車費 -HK$${fare} · 抵達時間 ${formatClockStr(state.clockMinutes)}）`);
@@ -3669,7 +3719,7 @@
     }
 
     // =========================================================================
-    // 9. 🔥 後樓梯 EXIT · 打火機點煙與自動/手動捽熄煙頭（修復永遠食煙 Bug）
+    // 9. 🔥 後樓梯 EXIT · 打火機點煙與自動/手動捽熄煙頭
     // =========================================================================
     let lighterLidOpen = false;
     let lighterFlameLit = false;
@@ -3804,7 +3854,7 @@
     }
 
     // =========================================================================
-    // 10. 🚇 第一身逼真動態乘車視角（LED 報站燈牌 + 隧道柱子視差 + 突發小事件）
+    // 10. 🚇 第一身逼真動態乘車視角
     // =========================================================================
     let commutePushScore = 0;
     let commuteType = 'mtr';
@@ -4448,7 +4498,7 @@
     }
 
     // =========================================================================
-    // 14. 香港社畜時間軸、屋企 Me Time 與睡眠醒來（自選交通返工）
+    // 14. 香港社畜時間軸、屋企 Me Time 與睡眠醒來
     // =========================================================================
     function formatClockStr(mins) {
       const h = Math.floor(mins / 60) % 24;
@@ -4549,7 +4599,7 @@
       const isEarly = (h >= 19 || (h === 0 && state.clockMinutes % 60 < 30));
       const isMildLate = ((h === 0 && state.clockMinutes % 60 >= 30) || h === 1 || (h === 2 && state.clockMinutes % 60 < 30));
 
-      state.clockMinutes = 8 * 60 + 15; // 翌晨 08:15 醒來，預留時間揀交通工具返工！
+      state.clockMinutes = 8 * 60 + 15;
       state.dismissalNotifiedToday = false;
       state.sleepAlertNotified = false;
       state.dailyKpi = 0;
@@ -4581,7 +4631,6 @@
       updateClockHUD();
       refreshStatsUI();
 
-      // 醒來 0.7 秒後自動彈出「早晨返工交通工具決策器」
       if (state.employmentMode === 'employed') {
         setTimeout(() => requestTravelToScene('office'), 700);
       }
@@ -4738,6 +4787,7 @@
       if (state.typhoonSignal !== 1) return;
       state.typhoonSignal = 3;
       state.typhoonCountdown = 20;
+      state.eventCooldown = 180; // 觸發一次颱風後，至少 3 分鐘內唔會再重複觸發
       document.getElementById('phone-unread-dot').classList.remove('hidden');
       triggerSfx('alarm');
       addFeedLog('📱 【天文台手機推送】3號強風信號生效！20秒後改發 8 號風球，全體社畜準備極限逃生！');
@@ -4746,7 +4796,8 @@
         '天文台手機推送：即將改發 8 號風球！',
         '距離掛 8 號波仲有 20 秒！快衝去寫字樓門口搶紅色的士或趕搭交通工具返屋企逃生，慢一步困喺公司被迫無償 OT！',
         '📱 打開手機睇風暴雷達',
-        'open_phone_hko'
+        'open_phone_hko',
+        true
       );
       updateClockHUD();
     }
@@ -5117,6 +5168,14 @@
         clickTargetMarker.visible = false;
         cameraRig.followPlayer = true; cameraRig.targetX = meta.spawnX; cameraRig.targetZ = meta.spawnZ;
 
+        remotePlayers.forEach(rp => {
+          if (rp.isSimulated) {
+            rp.currentScene = targetSceneKey;
+            rp.x = meta.spawnX + (rp.id.endsWith('chris') ? 2.2 : -2.4);
+            rp.z = meta.spawnZ + 1.2;
+          }
+        });
+
         if (targetSceneKey === 'lkf' && state.pendingDate && state.pendingDate.scene === 'lkf') {
           const dNpc = masterNpcs[state.pendingDate.npcId];
           if (dNpc) {
@@ -5248,7 +5307,7 @@
     }
 
     // =========================================================================
-    // 18. 360° 自由環繞攝影機 + Pointer Events 雙指縮放防誤觸 + 點擊移動
+    // 18. 360° 自由環繞攝影機 + 優先檢測線上玩家點擊
     // =========================================================================
     const raycaster = new THREE.Raycaster();
     const pointerVec = new THREE.Vector2();
@@ -5325,6 +5384,26 @@
           pointerVec.y = -(e.clientY / window.innerHeight) * 2 + 1;
           raycaster.setFromCamera(pointerVec, camera);
 
+          const peerRigs = [];
+          remotePlayers.forEach((rp, pid) => {
+            if (rp.currentScene === state.currentScene && npcRigPool.has(pid)) {
+              const r = npcRigPool.get(pid);
+              r.userData.peerId = pid;
+              peerRigs.push(r);
+            }
+          });
+          if (peerRigs.length > 0) {
+            const hits = raycaster.intersectObjects(peerRigs, true);
+            if (hits.length > 0) {
+              let obj = hits[0].object;
+              while (obj && !obj.userData?.peerId) obj = obj.parent;
+              if (obj && obj.userData?.peerId) {
+                openPeerInteractionModalById(obj.userData.peerId);
+                return;
+              }
+            }
+          }
+
           const hit = new THREE.Vector3();
           if (raycaster.ray.intersectPlane(walkPlane, hit)) {
             const limit = state.currentScene === 'home' ? 6.5 : 10.5;
@@ -5332,7 +5411,7 @@
             const tz = Math.max(-limit, Math.min(limit, hit.z));
 
             for (const [pid, rp] of remotePlayers.entries()) {
-              if (rp.currentScene === state.currentScene && Math.hypot(rp.x - tx, rp.z - tz) < 1.55) {
+              if (rp.currentScene === state.currentScene && Math.hypot(rp.x - tx, rp.z - tz) < 2.2) {
                 openPeerInteractionModal(rp);
                 return;
               }
@@ -5410,16 +5489,16 @@
       const isClickablePeer = theme === 'peer';
       const pillCls = theme === 'romance' ? 'bg-pink-600/90 border-pink-300/40' :
                       (theme === 'boss' ? 'bg-amber-700/90 border-amber-300/40' :
-                      (theme === 'peer' ? 'bg-emerald-700/95 hover:bg-emerald-500 border-emerald-300/90 pointer-events-auto cursor-pointer' :
+                      (theme === 'peer' ? 'bg-emerald-600/95 hover:bg-emerald-400 hover:text-slate-950 border-emerald-200 pointer-events-auto cursor-pointer z-20' :
                       (theme === 'self' ? 'bg-slate-900/95 border-amber-400/70' : 'bg-slate-800/85 border-white/20')));
 
-      const clickAttr = isClickablePeer ? `onclick="openPeerInteractionModalById('${id}')"` : '';
-      const hintText = isClickablePeer ? ' (點擊互動)' : '';
+      const clickAttr = isClickablePeer ? `onpointerdown="event.stopPropagation(); openPeerInteractionModalById('${id}')"` : '';
+      const hintText = isClickablePeer ? ' · 點擊互動' : '';
 
       el.innerHTML = `
         ${speech ? `<div class="mb-1 max-w-[180px] sm:max-w-[210px] bg-white/95 text-slate-900 text-[10px] sm:text-[11px] font-bold px-2 py-1 rounded-xl shadow-lg border border-slate-300 text-center leading-snug">${speech}</div>` : ''}
         ${emote ? `<div class="text-sm sm:text-base mb-0.5 animate-bounce">${emote}</div>` : ''}
-        <div ${clickAttr} class="px-2 py-0.5 rounded-md ${pillCls} border text-white text-[10px] font-black shadow-md whitespace-nowrap transition">
+        <div ${clickAttr} class="px-2.5 py-0.5 rounded-md ${pillCls} border text-white text-[10px] font-black shadow-md whitespace-nowrap transition">
           ${label}${hintText}
         </div>
       `;
@@ -5507,7 +5586,8 @@
       const moveSpeed = 5.2 * speedMult * dt;
       let mx = 0, mz = 0;
 
-      // 煙 Break 計時器與自動捽熄邏輯（修復永遠食煙 Bug）
+      if (state.eventCooldown > 0) state.eventCooldown -= dt;
+
       if (smokeBuffTimer > 0) {
         smokeBuffTimer -= dt;
         const secEl = document.getElementById('smoke-sec-txt');
@@ -5559,7 +5639,6 @@
       const inToilet = (state.currentScene === 'office' && Math.hypot(state.x - (-7.8), state.z - 3.65) < 1.15);
       const atWorkDesk = (state.currentScene === 'office' && Math.abs(state.x) <= 3.6 && Math.abs(state.z + 0.6) <= 3.4);
 
-      // 離開後樓梯自動捽熄煙頭，唔會行返去電腦位仲舉住支煙！
       if (!inStairwell && state.isLitCig) {
         extinguishCigarette(true);
       }
@@ -5730,7 +5809,7 @@
       }
 
       remotePlayers.forEach((rp, pid) => {
-        if (rp.lastSeen && Date.now() - rp.lastSeen > 12000) {
+        if (!rp.isSimulated && rp.lastSeen && Date.now() - rp.lastSeen > 12000) {
           remotePlayers.delete(pid);
           const rig = npcRigPool.get(pid);
           if (rig) { scene.remove(rig); npcRigPool.delete(pid); }
@@ -5763,8 +5842,25 @@
           npcRigPool.set(npc.id, rig);
         }
 
-        if (!npc.isRemote) {
-          if (cameraRig.fpMode === 'mtr' && state.companion && state.companion.id === npc.id) {
+        if (!npc.isRemote || npc.isSimulated) {
+          if (npc.isSimulated) {
+            if (npc.speechTimer > 0) npc.speechTimer -= dt;
+            if (npc.emoteTimer > 0) npc.emoteTimer -= dt;
+            const dx = npc.targetX - npc.x; const dz = npc.targetZ - npc.z;
+            const dist = Math.hypot(dx, dz);
+            if (dist > 0.15) {
+              npc.x += (dx / dist) * 1.8 * dt;
+              npc.z += (dz / dist) * 1.8 * dt;
+              npc.isMoving = true;
+              npc.rotY = Math.atan2(dx, dz);
+            } else {
+              npc.isMoving = false;
+              if (Math.random() < 0.015) {
+                npc.targetX = Math.max(-7, Math.min(7, (Math.random() - 0.5) * 12));
+                npc.targetZ = Math.max(-7, Math.min(7, (Math.random() - 0.5) * 12));
+              }
+            }
+          } else if (cameraRig.fpMode === 'mtr' && state.companion && state.companion.id === npc.id) {
             npc.x = -10.55;
             npc.z = 0.12;
             npc.rotY = -Math.PI / 2;
@@ -5784,7 +5880,7 @@
             npc.isDancing = (state.currentScene === 'lkf' && npc.id === 'npc_bartender');
           }
 
-          if (!(cameraRig.fpMode === 'mtr' && state.companion && state.companion.id === npc.id)) {
+          if (!npc.isSimulated && !(cameraRig.fpMode === 'mtr' && state.companion && state.companion.id === npc.id)) {
             const dx = npc.targetX - npc.x; const dz = npc.targetZ - npc.z;
             const dist = Math.hypot(dx, dz);
             const spd = (npc.id === 'npc_boss' && worldShared.bossPatrolActive) ? 2.85 : ((state.companion && state.companion.id === npc.id) ? 4.8 : 2.0);
@@ -5839,7 +5935,6 @@
         `${selfModePrefix}${state.name}${selfBombSuffix}`, state.speechTimer > 0 ? state.speech : '',
         state.emoteTimer > 0 ? state.emote : '', 'self');
 
-      // 第一身乘車視角（加入行車過彎離心力鏡頭微傾與真實震動）
       const curveBank = cameraRig.fpRiding ? Math.sin(now * 0.003) * 0.055 : 0;
       if (cameraRig.fpMode === 'mtr') {
         const pushOffset = (commutePushScore / 100) * 0.45;
@@ -5908,6 +6003,7 @@
       const gIcon = state.gender === 'female' ? '👩' : '👨';
       document.getElementById('hud-player-name').textContent = `${gIcon} ${state.name}`;
       document.getElementById('hud-dept-badge').textContent = dInfo.short;
+      seedSimulatedOnlinePeers();
       switchScene('office', true);
       initPeerMultiplayer();
       updateClockHUD();
@@ -6105,7 +6201,7 @@
       const gIcon = rp.gender === 'female' ? '👩' : '👨';
       const scLabel = SCENE_LABELS[rp.currentScene] || rp.currentScene;
       document.getElementById('peer-modal-title').textContent = `🌐 ${gIcon} ${rp.name} (${rp.dept})`;
-      document.getElementById('peer-modal-desc').textContent = `目前位置：${scLabel} · 所有互動對方螢幕都會即時彈出通知與音效！`;
+      document.getElementById('peer-modal-desc').textContent = `目前位置：${scLabel} · 點擊下方按鈕可即時請飲咖啡、把風、共舞或私聊！`;
       document.getElementById('modal-peer-action').classList.remove('hidden');
     }
 
@@ -6240,8 +6336,9 @@
     function startRedTaxiEvent(broadcast = true) {
       worldShared.taxiActive = true;
       worldShared.taxiSeatsLeft = 2;
+      state.eventCooldown = 120;
       triggerSfx('alarm');
-      showEventBanner('🚕', '放工逃生！中環寫字樓門口停咗部紅色的士！', '全服僅限 2 個座位！搭的士可免車費秒速閃人，仲可以避開金鐘站迫地鐵！', '🚕 搶紅色的士！', 'claim_taxi');
+      showEventBanner('🚕', '18:00 放工逃生！中環寫字樓門口停咗部紅色的士！', '全服僅限 2 個座位！搭的士可免車費秒速閃人，仲可以避開金鐘站迫地鐵！', '🚕 搶紅色的士！', 'claim_taxi', true);
       if (broadcast) broadcastNetworkPacket({ type: 'TAXI_START', senderId: playerId });
     }
 
@@ -6691,7 +6788,9 @@
           addFeedLog('🌆 【18:00 放工鐘響】IT阿强、HR Chloe 已準時放工轉場去金鐘站；Vivienne、Jason 已轉場去蘭桂坊！');
         }
         issueDailyPayslip();
-        if (state.currentScene === 'office' && !state.pendingDate) startRedTaxiEvent(true);
+        if (state.currentScene === 'office' && !state.pendingDate && Math.random() < 0.55) {
+          startRedTaxiEvent(true);
+        }
       }
       updateClockHUD();
 
@@ -6734,19 +6833,19 @@
         }
       }
 
-      if (tickCounter % 15 === 0 && !currentBannerAction) {
+      if (tickCounter % 24 === 0 && !currentBannerAction && state.eventCooldown <= 0) {
         const roll = Math.random();
-        if (roll < 0.32 && state.currentScene === 'office' && isWorkHours() && state.employmentMode === 'employed') {
+        if (roll < 0.35 && state.currentScene === 'office' && isWorkHours() && state.employmentMode === 'employed') {
+          state.eventCooldown = 90;
           startBossSpatialPatrol();
-        } else if (roll < 0.56 && state.typhoonSignal === 1) {
+        } else if (roll < 0.45 && state.typhoonSignal === 1) {
           triggerTyphoon3PreAlert();
-        } else if (roll < 0.78 && !state.mtrFault) {
+        } else if (roll < 0.65 && !state.mtrFault) {
           state.mtrFault = true;
+          state.eventCooldown = 90;
           document.getElementById('phone-unread-dot').classList.remove('hidden');
           addFeedLog('📱 【港鐵即時通推送】港島線發生訊號故障，列車服務受阻，搭港鐵會延誤！');
           setTimeout(() => { state.mtrFault = false; addFeedLog('🚇 港鐵港島線訊號故障已修復，恢復正常行車。'); }, 28000);
-        } else if (state.currentScene === 'office') {
-          startRedTaxiEvent(true);
         }
       }
 
